@@ -59,6 +59,7 @@ export const useFretboardState = () => {
   }
 
   return {
+    /** keyのPitch Class */
     keyPc,
     selectedScale,
     highlightedPositions,

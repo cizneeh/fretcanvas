@@ -1,5 +1,14 @@
+// データ型定義、定数、ロジック
+
+/** number of 0~11. 0 is C, 1 is C#, 2 is D, 3 is Eb, 4 is E, 5 is F, 6 is F#, 7 is G, 8 is Ab, 9 is A, 10 is Bb, 11 is B. */
 export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
+/**
+ * 指板上の1マスごとのid
+ * 例: "1:3" は1弦3フレット
+ * ２次元配列ではんく文字数なのは、その方が一意idとして扱いやすく、setで高速にhas/add/deleteしやすいから。らしい。
+ * まぁそうかも？表示側でも、セルごとにidを持ってて、突き合わせてハイライトする
+ */
 export type PositionId = string
 
 export type StringInfo = {
@@ -25,6 +34,7 @@ export const DEGREE_LABELS = [
 ]
 export const NOTE_LABELS = ['C', 'C#/Db', 'D', 'Eb', 'E', 'F', 'F#/Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 
+// midiというのは音高のこと。半音上がるごとに +1される数字。絶対的な音の高さ。
 export const OPEN_STRINGS: StringInfo[] = [
   { id: '1', name: 'E', midi: 64 },
   { id: '2', name: 'B', midi: 59 },
@@ -34,6 +44,9 @@ export const OPEN_STRINGS: StringInfo[] = [
   { id: '6', name: 'E', midi: 40 },
 ]
 
+/**
+ * keyが0. keyからのInterval
+ */
 export const SCALE_INTERVALS: Record<ScaleId, number[]> = {
   major: [0, 2, 4, 5, 7, 9, 11],
   naturalMinor: [0, 2, 3, 5, 7, 8, 10],
@@ -48,9 +61,15 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
   pentatonicMinor: 'Pentatonic Minor',
 }
 
-export const POSITION_MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
+export const POSITION_MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24] as const
 export const FRET_NUMBERS = Array.from({ length: FRET_COUNT + 1 }, (_, index) => index)
 export const MARKER_FRETS = POSITION_MARKERS.filter((fret) => fret <= FRET_COUNT)
 
+/**
+ * PicthをPitch Classに正規化する
+ * %は負の数になりうる（そうなの？）ので、+12しているらしい
+ * @example
+ * normalizePc(69) // 9 (midi number 69 は A4の音高でありA)
+ */
 export const normalizePc = (value: number): PitchClass => ((value % 12) + 12) % 12
 export const getPositionId = (stringId: string, fret: number): PositionId => `${stringId}:${fret}`
