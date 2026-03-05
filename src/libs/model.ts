@@ -9,7 +9,20 @@ export type StringInfo = {
 }
 
 export const FRET_COUNT = 24
-export const DEGREE_LABELS = ['1', 'b2', '2', 'b3', '3', '4', '#4', '5', 'b6', '6', 'b7', '7']
+export const DEGREE_LABELS = [
+  'R',
+  'b9',
+  '9',
+  'm3',
+  'M3',
+  'P4',
+  '#11',
+  'P5',
+  'b13',
+  '13',
+  'm7',
+  'M7',
+]
 export const NOTE_LABELS = ['C', 'C#/Db', 'D', 'Eb', 'E', 'F', 'F#/Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 
 export const OPEN_STRINGS: StringInfo[] = [
