@@ -60,7 +60,7 @@ export const FretboardView = ({
                     <button
                       key={`${stringInfo.id}-${fret}`}
                       type="button"
-                      className="group relative flex h-12 items-center justify-center border-r border-slate-700 transition hover:bg-slate-800/60"
+                      className="group relative flex h-12 items-center justify-center border-r border-slate-700 focus-visible:outline-none"
                       onClick={() => {
                         onTogglePosition(positionId)
                       }}
