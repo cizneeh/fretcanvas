@@ -87,21 +87,21 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100 md:px-8">
+    <main className="min-h-screen bg-[#0b0f17] px-4 py-8 text-slate-100 md:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Fretmap</h1>
+          <h1 className="text-2xl font-medium tracking-tight">Fretmap</h1>
           <p className="text-sm text-slate-300">
             Key基準の度数でノートを表示します。クリックで手動追加、スケールは一括追加です。
           </p>
         </header>
 
-        <section className="rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-xl">
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
           <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto_auto] md:items-end">
             <label className="flex flex-col gap-2 text-sm">
               <span className="text-slate-300">Key</span>
               <select
-                className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 outline-none ring-sky-400 focus:ring-2"
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
                 value={keyPc}
                 onChange={(event) => {
                   setKeyPc(Number(event.target.value))
@@ -118,7 +118,7 @@ function App() {
             <label className="flex flex-col gap-2 text-sm">
               <span className="text-slate-300">Scale</span>
               <select
-                className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 outline-none ring-sky-400 focus:ring-2"
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
                 value={selectedScale ?? ''}
                 onChange={(event) => {
                   const value = event.target.value as ScaleId | ''
@@ -136,7 +136,7 @@ function App() {
 
             <button
               type="button"
-              className="rounded-md bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={addScaleNotes}
               disabled={selectedScale === undefined}
             >
@@ -145,7 +145,7 @@ function App() {
 
             <button
               type="button"
-              className="rounded-md border border-slate-500 px-4 py-2 text-sm font-medium transition hover:bg-slate-800"
+              className="rounded-md border border-slate-600 bg-slate-950 px-4 py-2 text-sm font-medium transition hover:bg-slate-800"
               onClick={clearHighlightedNotes}
             >
               Clear
@@ -153,14 +153,14 @@ function App() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-xl">
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
           <p className="mb-3 text-sm text-slate-300">
             Highlighted Notes:{' '}
             {highlightedPositions.size === 0 ? 'None' : highlightedPositions.size}
           </p>
 
           <div className="overflow-x-auto">
-            <div className="min-w-max rounded-lg bg-black/50 p-3">
+            <div className="min-w-max rounded-md border border-slate-800 bg-slate-950 p-3">
               <div
                 className="grid"
                 style={{
@@ -179,7 +179,7 @@ function App() {
 
                 {OPEN_STRINGS.map((stringInfo) => (
                   <Fragment key={stringInfo.id}>
-                    <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-200">
+                    <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
                       {stringInfo.name}
                     </div>
 
@@ -194,24 +194,26 @@ function App() {
                         <button
                           key={`${stringInfo.id}-${fret}`}
                           type="button"
-                          className="relative flex h-12 items-center justify-center border-r border-slate-500/70 transition hover:bg-slate-700/20"
+                          className="group relative flex h-12 items-center justify-center border-r border-slate-700 transition hover:bg-slate-800/60"
                           onClick={() => {
                             togglePosition(positionId)
                           }}
                         >
-                          <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-200/70" />
+                          <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-500/70" />
 
                           {isHighlighted ? (
                             <span
-                              className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-semibold text-white ${
+                              className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full border text-[13px] font-semibold transition-transform duration-150 group-hover:scale-110 ${
                                 isRoot
-                                  ? 'border-red-500 bg-emerald-500'
-                                  : 'border-slate-100 bg-emerald-500'
+                                  ? 'border-rose-200/80 bg-rose-500/75 text-white'
+                                  : 'border-cyan-100/70 bg-cyan-400/70 text-slate-950'
                               }`}
                             >
                               {DEGREE_LABELS[intervalFromKey]}
                             </span>
-                          ) : undefined}
+                          ) : (
+                            <span className="pointer-events-none absolute z-10 h-9 w-9 rounded-full border border-slate-300/25 bg-slate-300/15 opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
+                          )}
                         </button>
                       )
                     })}
@@ -230,9 +232,9 @@ function App() {
                     >
                       {showMarker ? (
                         <span className="flex items-center gap-1">
-                          <span className="h-2 w-2 rounded-full bg-slate-400/70" />
+                          <span className="h-2 w-2 rounded-full bg-slate-500" />
                           {isDoubleDot ? (
-                            <span className="h-2 w-2 rounded-full bg-slate-400/70" />
+                            <span className="h-2 w-2 rounded-full bg-slate-500" />
                           ) : undefined}
                         </span>
                       ) : undefined}
