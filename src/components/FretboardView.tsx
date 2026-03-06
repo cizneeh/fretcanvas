@@ -1,4 +1,4 @@
-import { type PointerEvent as ReactPointerEvent, useRef, useState } from 'react'
+import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react'
 import { FRET_NUMBERS, type PositionId } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ExportPanel } from './ExportPanel'
@@ -10,6 +10,7 @@ export const FretboardView = () => {
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const connectionsById = useFretboardStore((state) => state.connections)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
+  const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
   const removeConnection = useFretboardStore((state) => state.removeConnection)
   const exportFretStart = useFretboardStore((state) => state.exportFretStart)
@@ -26,6 +27,7 @@ export const FretboardView = () => {
 
   const trackRef = useRef<HTMLDivElement | undefined>(undefined)
   const boardRef = useRef<HTMLDivElement | undefined>(undefined)
+  const contextMenuRef = useRef<HTMLDivElement | undefined>(undefined)
   const suppressNextClickToggleForPositionRef = useRef<PositionId | undefined>(undefined)
 
   const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
@@ -37,6 +39,9 @@ export const FretboardView = () => {
   >(undefined)
   const [dragConnectFrom, setDragConnectFrom] = useState<PositionId | undefined>(undefined)
   const [dragPointer, setDragPointer] = useState<{ x: number; y: number } | undefined>(undefined)
+  const [noteContextMenu, setNoteContextMenu] = useState<
+    { positionId: PositionId; x: number; y: number } | undefined
+  >(undefined)
 
   const maxFret = FRET_NUMBERS.length - 1
   const fretCellCount = FRET_NUMBERS.length
@@ -73,6 +78,38 @@ export const FretboardView = () => {
     setDragConnectFrom(undefined)
     setDragPointer(undefined)
   }
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const menu = contextMenuRef.current
+      if (menu !== undefined && event.target instanceof Node && menu.contains(event.target)) {
+        return
+      }
+      setNoteContextMenu(undefined)
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setNoteContextMenu(undefined)
+      }
+    }
+
+    const handleClose = () => {
+      setNoteContextMenu(undefined)
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('keydown', handleEscape)
+    window.addEventListener('scroll', handleClose, true)
+    window.addEventListener('resize', handleClose)
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('keydown', handleEscape)
+      window.removeEventListener('scroll', handleClose, true)
+      window.removeEventListener('resize', handleClose)
+    }
+  }, [])
 
   const updateHandleFromClientX = (clientX: number, handle: 'start' | 'end') => {
     const nextFret = toFretFromClientX(clientX)
@@ -151,9 +188,14 @@ export const FretboardView = () => {
   const handleNotePointerDown = (
     positionId: PositionId,
     isHighlighted: boolean,
+    button: number,
     clientX: number,
     clientY: number,
   ) => {
+    if (button !== 0) {
+      return
+    }
+
     if (!isHighlighted) {
       togglePosition(positionId)
       suppressNextClickToggleForPositionRef.current = positionId
@@ -224,6 +266,23 @@ export const FretboardView = () => {
     togglePosition(positionId)
   }
 
+  const handleNoteContextMenu = (
+    positionId: PositionId,
+    isHighlighted: boolean,
+    clientX: number,
+    clientY: number,
+  ) => {
+    if (!isHighlighted) {
+      setNoteContextMenu(undefined)
+      return
+    }
+    setNoteContextMenu({
+      positionId,
+      x: clientX,
+      y: clientY,
+    })
+  }
+
   const exportStart = Math.min(exportFretStart, exportFretEnd)
   const exportEnd = Math.max(exportFretStart, exportFretEnd)
   const startHighlightFret = Math.max(0, exportFretStart - 1)
@@ -253,6 +312,7 @@ export const FretboardView = () => {
             onSelectClosestHandleToFret={setClosestHandleToFret}
             onRemoveConnection={removeConnection}
             onNotePointerDown={handleNotePointerDown}
+            onNoteContextMenu={handleNoteContextMenu}
             onNotePointerUp={handleNotePointerUp}
             onBoardPointerMove={handleBoardPointerMove}
             onBoardPointerUpOrCancel={handleBoardPointerUpOrCancel}
@@ -323,6 +383,33 @@ export const FretboardView = () => {
           />
         </div>
       </div>
+
+      {noteContextMenu !== undefined ? (
+        <div
+          ref={(node) => {
+            contextMenuRef.current = node ?? undefined
+          }}
+          className="fixed z-50 min-w-[170px] rounded-md border border-slate-700 bg-slate-900/95 p-1 shadow-2xl"
+          style={{
+            left: noteContextMenu.x,
+            top: noteContextMenu.y,
+          }}
+        >
+          <button
+            type="button"
+            className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800"
+            onClick={() => {
+              toggleNoteDimmed(noteContextMenu.positionId)
+              setNoteContextMenu(undefined)
+            }}
+          >
+            <span>Dim</span>
+            <span className="w-4 text-center text-sm text-slate-300">
+              {displayedNotes[noteContextMenu.positionId]?.isDimmed === true ? '✓' : ''}
+            </span>
+          </button>
+        </div>
+      ) : undefined}
 
       <ExportPanel
         exportStart={exportStart}

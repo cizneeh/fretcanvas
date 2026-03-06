@@ -39,6 +39,13 @@ type FretboardGridProps = {
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
+    button: number,
+    clientX: number,
+    clientY: number,
+  ) => void
+  onNoteContextMenu: (
+    positionId: PositionId,
+    isHighlighted: boolean,
     clientX: number,
     clientY: number,
   ) => void
@@ -61,6 +68,7 @@ export const FretboardGrid = ({
   onSelectClosestHandleToFret,
   onRemoveConnection,
   onNotePointerDown,
+  onNoteContextMenu,
   onNotePointerUp,
   onBoardPointerMove,
   onBoardPointerUpOrCancel,
@@ -205,7 +213,8 @@ export const FretboardGrid = ({
             {FRET_NUMBERS.map((fret) => {
               const positionId = toPositionId({ stringIndex, fret })
               const pitchClass = normalizePc(stringInfo.midi + fret)
-              const isHighlighted = displayedNotes[positionId] !== undefined
+              const displayedNote = displayedNotes[positionId]
+              const isHighlighted = displayedNote !== undefined
               const intervalFromKey = normalizePc(pitchClass - keyPc)
               const isRoot = intervalFromKey === 0
               const isStartFret = fret === startHighlightFret
@@ -221,7 +230,17 @@ export const FretboardGrid = ({
                     onTogglePosition(positionId)
                   }}
                   onPointerDown={(event) => {
-                    onNotePointerDown(positionId, isHighlighted, event.clientX, event.clientY)
+                    onNotePointerDown(
+                      positionId,
+                      isHighlighted,
+                      event.button,
+                      event.clientX,
+                      event.clientY,
+                    )
+                  }}
+                  onContextMenu={(event) => {
+                    event.preventDefault()
+                    onNoteContextMenu(positionId, isHighlighted, event.clientX, event.clientY)
                   }}
                   onPointerUp={() => {
                     onNotePointerUp(positionId)
@@ -246,6 +265,7 @@ export const FretboardGrid = ({
                   <NoteChip
                     isHighlighted={isHighlighted}
                     isRoot={isRoot}
+                    isDimmed={displayedNote?.isDimmed ?? false}
                     label={DEGREE_LABELS[intervalFromKey]}
                   />
                 </button>

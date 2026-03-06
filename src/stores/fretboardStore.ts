@@ -29,6 +29,7 @@ type FretboardStore = {
   addScaleNotes: () => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
+  toggleNoteDimmed: (positionId: PositionId) => void
   connectPositions: (from: PositionId, to: PositionId) => void
   removeConnection: (connectionId: ConnectionId) => void
   removeConnectionsByPosition: (positionId: PositionId) => void
@@ -110,6 +111,20 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
       }
     }
 
+    set({ displayedNotes: next })
+  },
+
+  toggleNoteDimmed: (positionId) => {
+    const currentNote = get().displayedNotes[positionId]
+    if (currentNote === undefined) {
+      return
+    }
+
+    const next: Record<PositionId, HighlightedNote> = { ...get().displayedNotes }
+    next[positionId] = {
+      ...currentNote,
+      isDimmed: !currentNote.isDimmed,
+    }
     set({ displayedNotes: next })
   },
 

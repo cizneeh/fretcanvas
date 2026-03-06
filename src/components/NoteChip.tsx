@@ -1,10 +1,11 @@
 type NoteChipProps = {
   isHighlighted: boolean
   isRoot: boolean
+  isDimmed: boolean
   label: string
 }
 
-export const NoteChip = ({ isHighlighted, isRoot, label }: NoteChipProps) => {
+export const NoteChip = ({ isHighlighted, isRoot, isDimmed, label }: NoteChipProps) => {
   if (!isHighlighted) {
     return (
       <span className="pointer-events-none absolute z-10 h-9 w-9 rounded-full border border-slate-300/25 bg-slate-300/15 opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
@@ -18,6 +19,9 @@ export const NoteChip = ({ isHighlighted, isRoot, label }: NoteChipProps) => {
           ? 'border-rose-200/80 bg-rose-500/75 text-white'
           : 'border-cyan-100/70 bg-cyan-400/70 text-slate-950'
       }`}
+      style={{
+        opacity: isDimmed ? 0.45 : 1,
+      }}
     >
       {label}
     </span>
