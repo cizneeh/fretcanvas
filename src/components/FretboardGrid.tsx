@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type ReactNode, useState } from 'react'
 import {
   type Connection,
   DEGREE_LABELS,
@@ -66,6 +66,7 @@ export const FretboardGrid = ({
   onBoardRefChange,
   rangeTrack,
 }: FretboardGridProps) => {
+  const [hoveredConnectionId, setHoveredConnectionId] = useState<string | undefined>(undefined)
   const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
   const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
 
@@ -115,22 +116,42 @@ export const FretboardGrid = ({
             return undefined
           }
 
+          const isHovered = hoveredConnectionId === connection.id
+
           return (
-            <line
-              key={connection.id}
-              className="pointer-events-auto cursor-pointer"
-              x1={fromPoint.x}
-              y1={fromPoint.y}
-              x2={toPoint.x}
-              y2={toPoint.y}
-              stroke="rgba(34, 211, 238, 0.9)"
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              onClick={(event) => {
-                event.stopPropagation()
-                onRemoveConnection(connection.id)
-              }}
-            />
+            <g key={connection.id}>
+              <line
+                className="pointer-events-auto cursor-pointer"
+                x1={fromPoint.x}
+                y1={fromPoint.y}
+                x2={toPoint.x}
+                y2={toPoint.y}
+                stroke="rgba(0, 0, 0, 0.001)"
+                strokeWidth={14}
+                strokeLinecap="round"
+                onPointerEnter={() => {
+                  setHoveredConnectionId(connection.id)
+                }}
+                onPointerLeave={() => {
+                  setHoveredConnectionId(undefined)
+                }}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onRemoveConnection(connection.id)
+                }}
+              />
+              <line
+                className="pointer-events-none"
+                x1={fromPoint.x}
+                y1={fromPoint.y}
+                x2={toPoint.x}
+                y2={toPoint.y}
+                stroke={isHovered ? 'rgba(34, 211, 238, 1)' : 'rgba(34, 211, 238, 0.9)'}
+                strokeWidth={isHovered ? 4 : 2.5}
+                strokeLinecap="round"
+                style={{ transition: 'stroke-width 140ms ease, stroke 140ms ease' }}
+              />
+            </g>
           )
         })}
 
