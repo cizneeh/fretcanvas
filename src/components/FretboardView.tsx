@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   DEGREE_LABELS,
   FRET_NUMBERS,
@@ -36,6 +36,53 @@ export const FretboardView = ({
   onBackgroundOpacityPercentChange,
   onExportTransparentPng,
 }: FretboardViewProps) => {
+  const trackRef = useRef<HTMLDivElement | undefined>(undefined)
+  const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
+
+  const maxFret = FRET_NUMBERS.length - 1
+  const clampFret = (value: number) => Math.max(0, Math.min(value, maxFret))
+
+  const updateHandleFromClientX = (clientX: number, handle: 'start' | 'end') => {
+    const track = trackRef.current
+    if (track === undefined) {
+      return
+    }
+
+    const rect = track.getBoundingClientRect()
+    const relativeX = clientX - rect.left
+    const ratio = rect.width > 0 ? relativeX / rect.width : 0
+    const nextFret = clampFret(Math.round(ratio * maxFret))
+
+    if (handle === 'start') {
+      onExportFretStartChange(nextFret)
+      return
+    }
+
+    onExportFretEndChange(nextFret)
+  }
+
+  const handleTrackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (draggingHandle === undefined) {
+      return
+    }
+
+    updateHandleFromClientX(event.clientX, draggingHandle)
+  }
+
+  const handleTrackPointerUp = () => {
+    setDraggingHandle(undefined)
+  }
+
+  const setClosestHandleToFret = (fret: number) => {
+    const startDistance = Math.abs(fret - exportFretStart)
+    const endDistance = Math.abs(fret - exportFretEnd)
+    if (startDistance <= endDistance) {
+      onExportFretStartChange(fret)
+      return
+    }
+    onExportFretEndChange(fret)
+  }
+
   const exportStart = Math.min(exportFretStart, exportFretEnd)
   const exportEnd = Math.max(exportFretStart, exportFretEnd)
 
@@ -68,6 +115,15 @@ export const FretboardView = ({
                   const isHighlighted = highlightedPositions.has(positionId)
                   const intervalFromKey = normalizePc(pitchClass - keyPc)
                   const isRoot = intervalFromKey === 0
+                  const isStartFret = fret === exportFretStart
+                  const isEndFret = fret === exportFretEnd
+                  const showExportMarker = isStartFret || isEndFret
+                  const exportMarkerColor =
+                    isStartFret && isEndFret
+                      ? 'bg-fuchsia-300'
+                      : isStartFret
+                        ? 'bg-cyan-300'
+                        : 'bg-emerald-300'
 
                   return (
                     <button
@@ -79,6 +135,11 @@ export const FretboardView = ({
                       }}
                     >
                       <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-500/70" />
+                      {showExportMarker ? (
+                        <span
+                          className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${exportMarkerColor}`}
+                        />
+                      ) : undefined}
                       <NoteChip
                         isHighlighted={isHighlighted}
                         isRoot={isRoot}
@@ -94,9 +155,26 @@ export const FretboardView = ({
             {FRET_NUMBERS.map((fret) => {
               const isDoubleDot = fret === 12 || fret === 24
               const showMarker = MARKER_FRETS.includes(fret)
+              const isStartFret = fret === exportFretStart
+              const isEndFret = fret === exportFretEnd
+              const showExportMarker = isStartFret || isEndFret
+              const exportMarkerColor =
+                isStartFret && isEndFret
+                  ? 'bg-fuchsia-300'
+                  : isStartFret
+                    ? 'bg-cyan-300'
+                    : 'bg-emerald-300'
 
               return (
-                <div key={`marker-${fret}`} className="flex h-6 items-center justify-center pt-2">
+                <button
+                  key={`marker-${fret}`}
+                  type="button"
+                  className="relative flex h-6 items-center justify-center pt-2 focus-visible:outline-none"
+                  data-testid={`fret-selector-${fret}`}
+                  onClick={() => {
+                    setClosestHandleToFret(fret)
+                  }}
+                >
                   {showMarker ? (
                     <span className="flex items-center gap-1">
                       <span className="h-2 w-2 rounded-full bg-slate-500" />
@@ -105,9 +183,93 @@ export const FretboardView = ({
                       ) : undefined}
                     </span>
                   ) : undefined}
-                </div>
+                  {showExportMarker ? (
+                    <span
+                      className={`pointer-events-none absolute -top-1 h-1.5 w-1.5 rounded-full ${exportMarkerColor}`}
+                    />
+                  ) : undefined}
+                </button>
               )
             })}
+
+            <div />
+            <div
+              className="relative mt-2 h-8"
+              style={{ gridColumn: `2 / span ${FRET_NUMBERS.length}` }}
+              onPointerMove={handleTrackPointerMove}
+              onPointerUp={handleTrackPointerUp}
+              onPointerCancel={handleTrackPointerUp}
+              onPointerLeave={handleTrackPointerUp}
+            >
+              <div
+                ref={(node) => {
+                  trackRef.current = node ?? undefined
+                }}
+                data-testid="export-range-track"
+                className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-slate-700"
+              />
+              <div
+                className="pointer-events-none absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-cyan-400/80"
+                style={{
+                  left: `${(exportStart / maxFret) * 100}%`,
+                  width: `${((exportEnd - exportStart) / maxFret) * 100}%`,
+                }}
+              />
+              <button
+                type="button"
+                className="absolute top-1/2 flex h-6 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-400/90 text-[10px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+                style={{ left: `${(exportFretStart / maxFret) * 100}%` }}
+                data-testid="export-start-handle"
+                onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                  event.preventDefault()
+                  event.currentTarget.setPointerCapture(event.pointerId)
+                  setDraggingHandle('start')
+                  updateHandleFromClientX(event.clientX, 'start')
+                }}
+                onPointerMove={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                  if (draggingHandle !== 'start') {
+                    return
+                  }
+                  updateHandleFromClientX(event.clientX, 'start')
+                }}
+                onPointerUp={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                    event.currentTarget.releasePointerCapture(event.pointerId)
+                  }
+                  setDraggingHandle(undefined)
+                }}
+                aria-label="Drag start fret"
+              >
+                S
+              </button>
+              <button
+                type="button"
+                className="absolute top-1/2 flex h-6 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-400/90 text-[10px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+                style={{ left: `${(exportFretEnd / maxFret) * 100}%` }}
+                data-testid="export-end-handle"
+                onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                  event.preventDefault()
+                  event.currentTarget.setPointerCapture(event.pointerId)
+                  setDraggingHandle('end')
+                  updateHandleFromClientX(event.clientX, 'end')
+                }}
+                onPointerMove={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                  if (draggingHandle !== 'end') {
+                    return
+                  }
+                  updateHandleFromClientX(event.clientX, 'end')
+                }}
+                onPointerUp={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                    event.currentTarget.releasePointerCapture(event.pointerId)
+                  }
+                  setDraggingHandle(undefined)
+                }}
+                aria-label="Drag end fret"
+              >
+                E
+              </button>
+            </div>
           </div>
 
           <div className="mt-5 rounded-md border border-slate-700 bg-black/80 p-3">
@@ -118,33 +280,8 @@ export const FretboardView = ({
               </span>
             </div>
 
-            <div className="mb-2">
-              <div className="mb-1 text-xs text-slate-400">Start Fret</div>
-              <input
-                className="range-thumb mb-3 h-2 w-full appearance-none rounded-full bg-slate-700"
-                type="range"
-                min={0}
-                max={FRET_NUMBERS.length - 1}
-                value={exportFretStart}
-                onChange={(event) => {
-                  onExportFretStartChange(Number(event.target.value))
-                }}
-                aria-label="Export start fret"
-              />
-            </div>
-            <div className="mb-4">
-              <div className="mb-1 text-xs text-slate-400">End Fret</div>
-              <input
-                className="range-thumb h-2 w-full appearance-none rounded-full bg-slate-700"
-                type="range"
-                min={0}
-                max={FRET_NUMBERS.length - 1}
-                value={exportFretEnd}
-                onChange={(event) => {
-                  onExportFretEndChange(Number(event.target.value))
-                }}
-                aria-label="Export end fret"
-              />
+            <div className="mb-4 text-xs text-slate-400">
+              フレット線をクリック、または S / E マーカーをドラッグして範囲を設定
             </div>
 
             <div className="mb-4">
