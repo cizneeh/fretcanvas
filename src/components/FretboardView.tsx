@@ -120,13 +120,11 @@ export const FretboardView = ({
                   const isRoot = intervalFromKey === 0
                   const isStartFret = fret === startHighlightFret
                   const isEndFret = fret === exportFretEnd
-                  const showExportMarker = isStartFret || isEndFret
-                  const exportMarkerColor =
-                    isStartFret && isEndFret
-                      ? 'bg-fuchsia-300'
-                      : isStartFret
-                        ? 'bg-cyan-300'
-                        : 'bg-emerald-300'
+                  const isStartAtNutLine = exportFretStart === 0 && fret === 0
+                  const startMarkerColor =
+                    exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
+                  const endMarkerColor =
+                    exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
 
                   return (
                     <button
@@ -138,9 +136,19 @@ export const FretboardView = ({
                       }}
                     >
                       <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-500/70" />
-                      {showExportMarker ? (
+                      {isStartAtNutLine ? (
                         <span
-                          className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${exportMarkerColor}`}
+                          className={`pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-[2px] ${startMarkerColor}`}
+                        />
+                      ) : undefined}
+                      {isStartFret && !isStartAtNutLine ? (
+                        <span
+                          className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${startMarkerColor}`}
+                        />
+                      ) : undefined}
+                      {isEndFret ? (
+                        <span
+                          className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${endMarkerColor}`}
                         />
                       ) : undefined}
                       <NoteChip
