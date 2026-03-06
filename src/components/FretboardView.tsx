@@ -158,15 +158,6 @@ export const FretboardView = ({
             {FRET_NUMBERS.map((fret) => {
               const isDoubleDot = fret === 12 || fret === 24
               const showMarker = MARKER_FRETS.includes(fret)
-              const isStartFret = fret === exportFretStart
-              const isEndFret = fret === exportFretEnd
-              const showExportMarker = isStartFret || isEndFret
-              const exportMarkerColor =
-                isStartFret && isEndFret
-                  ? 'bg-fuchsia-300'
-                  : isStartFret
-                    ? 'bg-cyan-300'
-                    : 'bg-emerald-300'
 
               return (
                 <button
@@ -185,11 +176,6 @@ export const FretboardView = ({
                         <span className="h-2 w-2 rounded-full bg-slate-500" />
                       ) : undefined}
                     </span>
-                  ) : undefined}
-                  {showExportMarker ? (
-                    <span
-                      className={`pointer-events-none absolute -top-1 h-1.5 w-1.5 rounded-full ${exportMarkerColor}`}
-                    />
                   ) : undefined}
                 </button>
               )
