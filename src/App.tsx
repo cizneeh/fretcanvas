@@ -14,8 +14,10 @@ function App() {
     togglePosition,
     exportFretStart,
     exportFretEnd,
+    backgroundOpacityPercent,
     handleExportFretStartChange,
     handleExportFretEndChange,
+    handleBackgroundOpacityPercentChange,
     exportTransparentPng,
   } = useFretboardState()
 
@@ -44,8 +46,10 @@ function App() {
           onTogglePosition={togglePosition}
           exportFretStart={exportFretStart}
           exportFretEnd={exportFretEnd}
+          backgroundOpacityPercent={backgroundOpacityPercent}
           onExportFretStartChange={handleExportFretStartChange}
           onExportFretEndChange={handleExportFretEndChange}
+          onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
           onExportTransparentPng={exportTransparentPng}
         />
       </div>
