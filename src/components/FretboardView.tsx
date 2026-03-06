@@ -26,6 +26,7 @@ export const FretboardView = () => {
 
   const trackRef = useRef<HTMLDivElement | undefined>(undefined)
   const boardRef = useRef<HTMLDivElement | undefined>(undefined)
+  const suppressNextClickToggleForPositionRef = useRef<PositionId | undefined>(undefined)
 
   const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
   const [hoverPreview, setHoverPreview] = useState<
@@ -154,7 +155,8 @@ export const FretboardView = () => {
     clientY: number,
   ) => {
     if (!isHighlighted) {
-      return
+      togglePosition(positionId)
+      suppressNextClickToggleForPositionRef.current = positionId
     }
 
     setPendingConnectStart({
@@ -201,6 +203,10 @@ export const FretboardView = () => {
       return
     }
 
+    if (!highlightedPositions.has(positionId)) {
+      togglePosition(positionId)
+    }
+
     connectPositions(dragConnectFrom, positionId)
     resetConnectionDrag()
   }
@@ -210,6 +216,11 @@ export const FretboardView = () => {
   }
 
   const handleTogglePosition = (positionId: PositionId) => {
+    if (suppressNextClickToggleForPositionRef.current === positionId) {
+      suppressNextClickToggleForPositionRef.current = undefined
+      return
+    }
+
     togglePosition(positionId)
   }
 
