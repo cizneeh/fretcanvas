@@ -40,7 +40,9 @@ export const FretboardView = ({
   const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
 
   const maxFret = FRET_NUMBERS.length - 1
+  const fretCellCount = FRET_NUMBERS.length
   const clampFret = (value: number) => Math.max(0, Math.min(value, maxFret))
+  const toPercentFromFretCenter = (fret: number) => ((fret + 0.5) / fretCellCount) * 100
 
   const updateHandleFromClientX = (clientX: number, handle: 'start' | 'end') => {
     const track = trackRef.current
@@ -51,7 +53,7 @@ export const FretboardView = ({
     const rect = track.getBoundingClientRect()
     const relativeX = clientX - rect.left
     const ratio = rect.width > 0 ? relativeX / rect.width : 0
-    const nextFret = clampFret(Math.round(ratio * maxFret))
+    const nextFret = clampFret(Math.round(ratio * fretCellCount - 0.5))
 
     if (handle === 'start') {
       onExportFretStartChange(nextFret)
@@ -212,14 +214,14 @@ export const FretboardView = ({
               <div
                 className="pointer-events-none absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-cyan-400/80"
                 style={{
-                  left: `${(exportStart / maxFret) * 100}%`,
-                  width: `${((exportEnd - exportStart) / maxFret) * 100}%`,
+                  left: `${toPercentFromFretCenter(exportStart)}%`,
+                  width: `${((exportEnd - exportStart) / fretCellCount) * 100}%`,
                 }}
               />
               <button
                 type="button"
-                className="absolute top-1/2 flex h-6 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-400/90 text-[10px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
-                style={{ left: `${(exportFretStart / maxFret) * 100}%` }}
+                className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+                style={{ left: `${toPercentFromFretCenter(exportFretStart)}%` }}
                 data-testid="export-start-handle"
                 onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   event.preventDefault()
@@ -245,8 +247,8 @@ export const FretboardView = ({
               </button>
               <button
                 type="button"
-                className="absolute top-1/2 flex h-6 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-400/90 text-[10px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
-                style={{ left: `${(exportFretEnd / maxFret) * 100}%` }}
+                className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+                style={{ left: `${toPercentFromFretCenter(exportFretEnd)}%` }}
                 data-testid="export-end-handle"
                 onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   event.preventDefault()
