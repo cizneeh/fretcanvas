@@ -6,13 +6,13 @@ import {
   FRET_COUNT,
   FRET_NUMBERS,
   getConnectionId,
-  getPositionId,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
   SCALE_INTERVALS,
   type ScaleId,
+  toPositionId,
 } from '../libs/model'
 
 type FretboardStore = {
@@ -66,13 +66,18 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
 
     const next = new Set(highlightedPositions)
 
-    for (const stringInfo of OPEN_STRINGS) {
+    for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
       for (const fret of FRET_NUMBERS) {
         const midi = stringInfo.midi + fret
         const pitchClass = normalizePc(midi)
 
         if (pcsToAdd.has(pitchClass)) {
-          next.add(getPositionId(stringInfo.id, fret))
+          next.add(
+            toPositionId({
+              stringIndex,
+              fret,
+            }),
+          )
         }
       }
     }

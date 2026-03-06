@@ -1,13 +1,13 @@
 import {
   type Connection,
   DEGREE_LABELS,
-  getPositionId,
   MARKER_FRETS,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
   parsePositionId,
+  toPositionId,
 } from './model'
 
 type ExportTransparentPngInput = {
@@ -92,7 +92,10 @@ export const exportTransparentPng = ({
     ctx.stroke()
 
     for (let fret = start; fret <= end; fret += 1) {
-      const positionId = getPositionId(stringInfo.id, fret)
+      const positionId = toPositionId({
+        stringIndex: row,
+        fret,
+      })
       if (!highlightedPositions.has(positionId)) {
         continue
       }
@@ -136,8 +139,8 @@ export const exportTransparentPng = ({
       continue
     }
 
-    const fromStringIndex = OPEN_STRINGS.findIndex((stringInfo) => stringInfo.id === from.stringId)
-    const toStringIndex = OPEN_STRINGS.findIndex((stringInfo) => stringInfo.id === to.stringId)
+    const fromStringIndex = from.stringIndex
+    const toStringIndex = to.stringIndex
     if (fromStringIndex < 0 || toStringIndex < 0) {
       continue
     }

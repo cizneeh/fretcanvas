@@ -9,8 +9,13 @@ export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonic
  * ２次元配列ではんく文字数なのは、その方が一意idとして扱いやすく、setで高速にhas/add/deleteしやすいから。らしい。
  * まぁそうかも？表示側でも、セルごとにidを持ってて、突き合わせてハイライトする。
  * 上下左右のポジションをたどるとか、行・列単位の処理とか、矩形選択とか、そういうのをやるんだったら座標で持ったほうが良い。文字列だとそういう比較ができず、パースすることになるから。今stringで良いのは、単一点のトグルだけだから。
+ * やっぱりPositionという座標でもつことにした
  */
 export type PositionId = string
+export type Position = {
+  stringIndex: number
+  fret: number
+}
 export type ConnectionId = string
 export type Connection = {
   id: ConnectionId
@@ -79,20 +84,32 @@ export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= 
  * normalizePc(69) // 9 (midi number 69 は A4の音高でありA)
  */
 export const normalizePc = (value: number): PitchClass => ((value % 12) + 12) % 12
-export const getPositionId = (stringId: string, fret: number): PositionId => `${stringId}:${fret}`
-export const parsePositionId = (
-  positionId: PositionId,
-): { stringId: string; fret: number } | undefined => {
-  const [stringId, fretText] = positionId.split(':')
+export const toPositionId = (position: Position): PositionId =>
+  `${position.stringIndex}:${position.fret}`
+export const parsePositionId = (positionId: PositionId): Position | undefined => {
+  const [stringIndexText, fretText] = positionId.split(':')
+  const stringIndex = Number(stringIndexText)
   const fret = Number(fretText)
-  if (stringId === undefined || Number.isNaN(fret)) {
+  if (Number.isNaN(stringIndex) || Number.isNaN(fret)) {
     return undefined
   }
-  return { stringId, fret }
+  return { stringIndex, fret }
 }
 export const getConnectionId = (from: PositionId, to: PositionId): ConnectionId => {
-  if (from <= to) {
-    return `${from}|${to}`
+  const left = parsePositionId(from)
+  const right = parsePositionId(to)
+  if (left === undefined || right === undefined) {
+    if (from <= to) {
+      return `${from}|${to}`
+    }
+    return `${to}|${from}`
   }
-  return `${to}|${from}`
+
+  const isFromFirst =
+    left.stringIndex < right.stringIndex ||
+    (left.stringIndex === right.stringIndex && left.fret <= right.fret)
+  if (isFromFirst) {
+    return `${toPositionId(left)}|${toPositionId(right)}`
+  }
+  return `${toPositionId(right)}|${toPositionId(left)}`
 }

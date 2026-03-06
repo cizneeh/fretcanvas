@@ -3,13 +3,13 @@ import {
   type Connection,
   DEGREE_LABELS,
   FRET_NUMBERS,
-  getPositionId,
   MARKER_FRETS,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
   parsePositionId,
+  toPositionId,
 } from '../libs/model'
 import { NoteChip } from './NoteChip'
 
@@ -76,7 +76,7 @@ export const FretboardGrid = ({
       return undefined
     }
 
-    const stringIndex = OPEN_STRINGS.findIndex((stringInfo) => stringInfo.id === parsed.stringId)
+    const stringIndex = parsed.stringIndex
     if (stringIndex < 0) {
       return undefined
     }
@@ -194,14 +194,14 @@ export const FretboardGrid = ({
           </div>
         ))}
 
-        {OPEN_STRINGS.map((stringInfo) => (
+        {OPEN_STRINGS.map((stringInfo, stringIndex) => (
           <Fragment key={stringInfo.id}>
             <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
               {stringInfo.name}
             </div>
 
             {FRET_NUMBERS.map((fret) => {
-              const positionId = getPositionId(stringInfo.id, fret)
+              const positionId = toPositionId({ stringIndex, fret })
               const pitchClass = normalizePc(stringInfo.midi + fret)
               const isHighlighted = highlightedPositions.has(positionId)
               const intervalFromKey = normalizePc(pitchClass - keyPc)
