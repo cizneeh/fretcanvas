@@ -1,15 +1,8 @@
-import { Fragment, type PointerEvent as ReactPointerEvent, useRef, useState } from 'react'
-import {
-  DEGREE_LABELS,
-  FRET_NUMBERS,
-  getPositionId,
-  MARKER_FRETS,
-  normalizePc,
-  OPEN_STRINGS,
-  type PitchClass,
-  type PositionId,
-} from '../libs/model'
-import { NoteChip } from './NoteChip'
+import { type PointerEvent as ReactPointerEvent, useRef, useState } from 'react'
+import { FRET_NUMBERS, type PitchClass, type PositionId } from '../libs/model'
+import { ExportPanel } from './ExportPanel'
+import { ExportRangeTrack } from './ExportRangeTrack'
+import { FretboardGrid } from './FretboardGrid'
 
 type FretboardViewProps = {
   keyPc: PitchClass
@@ -95,7 +88,7 @@ export const FretboardView = ({
     moveNearestHandleToClientX(event.clientX)
   }
 
-  const handleTrackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handleTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (draggingHandle === undefined) {
       const nextFret = toFretFromClientX(event.clientX)
       if (nextFret === undefined) {
@@ -141,239 +134,86 @@ export const FretboardView = ({
     <section className="bg-black">
       <div className="overflow-x-auto p-4">
         <div className="min-w-max rounded-md border border-slate-700 bg-black p-3">
-          <div
-            className="grid"
-            style={{
-              gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(3.5rem, 3.5rem))`,
-            }}
-          >
-            <div />
-            {FRET_NUMBERS.map((fret) => (
-              <div key={`fret-header-${fret}`} className="pb-3 text-center text-sm text-slate-300">
-                {fret}
-              </div>
-            ))}
-
-            {OPEN_STRINGS.map((stringInfo) => (
-              <Fragment key={stringInfo.id}>
-                <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
-                  {stringInfo.name}
-                </div>
-
-                {FRET_NUMBERS.map((fret) => {
-                  const positionId = getPositionId(stringInfo.id, fret)
-                  const pitchClass = normalizePc(stringInfo.midi + fret)
-                  const isHighlighted = highlightedPositions.has(positionId)
-                  const intervalFromKey = normalizePc(pitchClass - keyPc)
-                  const isRoot = intervalFromKey === 0
-                  const isStartFret = fret === startHighlightFret
-                  const isEndFret = fret === exportFretEnd
-                  const isStartAtNutLine = exportFretStart === 0 && fret === 0
-                  const startMarkerColor =
-                    exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
-                  const endMarkerColor =
-                    exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
-
-                  return (
-                    <button
-                      key={`${stringInfo.id}-${fret}`}
-                      type="button"
-                      className="group relative flex h-12 items-center justify-center border-r border-slate-700 focus-visible:outline-none"
-                      onClick={() => {
-                        onTogglePosition(positionId)
-                      }}
-                    >
-                      <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-500/70" />
-                      {isStartAtNutLine ? (
-                        <span
-                          className={`pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-[2px] ${startMarkerColor}`}
-                        />
-                      ) : undefined}
-                      {isStartFret && !isStartAtNutLine ? (
-                        <span
-                          className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${startMarkerColor}`}
-                        />
-                      ) : undefined}
-                      {isEndFret ? (
-                        <span
-                          className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${endMarkerColor}`}
-                        />
-                      ) : undefined}
-                      <NoteChip
-                        isHighlighted={isHighlighted}
-                        isRoot={isRoot}
-                        label={DEGREE_LABELS[intervalFromKey]}
-                      />
-                    </button>
-                  )
-                })}
-              </Fragment>
-            ))}
-
-            <div />
-            {FRET_NUMBERS.map((fret) => {
-              const isDoubleDot = fret === 12 || fret === 24
-              const showMarker = MARKER_FRETS.includes(fret)
-
-              return (
-                <button
-                  key={`marker-${fret}`}
-                  type="button"
-                  className="relative flex h-6 items-center justify-center pt-2 focus-visible:outline-none"
-                  data-testid={`fret-selector-${fret}`}
-                  onClick={() => {
-                    setClosestHandleToFret(fret)
-                  }}
-                >
-                  {showMarker ? (
-                    <span className="flex items-center gap-1">
-                      <span className="h-2 w-2 rounded-full bg-slate-500" />
-                      {isDoubleDot ? (
-                        <span className="h-2 w-2 rounded-full bg-slate-500" />
-                      ) : undefined}
-                    </span>
-                  ) : undefined}
-                </button>
-              )
-            })}
-
-            <div />
-            <div
-              className="relative mt-2 h-8"
-              style={{ gridColumn: `2 / span ${FRET_NUMBERS.length}` }}
-              onPointerDown={handleTrackClickMove}
-              onPointerMove={handleTrackPointerMove}
-              onPointerUp={handleTrackPointerUp}
-              onPointerCancel={handleTrackPointerUp}
-              onPointerLeave={handleTrackPointerLeave}
-            >
-              <div
-                ref={(node) => {
-                  trackRef.current = node ?? undefined
+          <FretboardGrid
+            keyPc={keyPc}
+            highlightedPositions={highlightedPositions}
+            exportFretStart={exportFretStart}
+            exportFretEnd={exportFretEnd}
+            startHighlightFret={startHighlightFret}
+            onTogglePosition={onTogglePosition}
+            onSelectClosestHandleToFret={setClosestHandleToFret}
+            rangeTrack={
+              <ExportRangeTrack
+                fretColumnSpan={FRET_NUMBERS.length}
+                startRangePercent={toPercentFromFretCenter(exportStart)}
+                rangeWidthPercent={((exportEnd - exportStart) / fretCellCount) * 100}
+                startHandlePercent={toPercentFromFretCenter(exportFretStart)}
+                endHandlePercent={toPercentFromFretCenter(exportFretEnd)}
+                hoverPreview={
+                  hoverPreview === undefined
+                    ? undefined
+                    : {
+                        handle: hoverPreview.handle,
+                        percent: toPercentFromFretCenter(hoverPreview.fret),
+                      }
+                }
+                onTrackRefChange={(node) => {
+                  trackRef.current = node
                 }}
-                data-testid="export-range-track"
-                className="pointer-events-none absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-slate-700"
-              />
-              <div
-                className="pointer-events-none absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-cyan-400/80"
-                style={{
-                  left: `${toPercentFromFretCenter(exportStart)}%`,
-                  width: `${((exportEnd - exportStart) / fretCellCount) * 100}%`,
-                }}
-              />
-              {hoverPreview !== undefined ? (
-                <span
-                  className={`pointer-events-none absolute top-1/2 z-20 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border text-[11px] font-semibold text-slate-950/70 ${
-                    hoverPreview.handle === 'start'
-                      ? 'border-cyan-200/70 bg-cyan-400/40'
-                      : 'border-emerald-200/70 bg-emerald-400/40'
-                  }`}
-                  style={{ left: `${toPercentFromFretCenter(hoverPreview.fret)}%` }}
-                >
-                  {hoverPreview.handle === 'start' ? 'S' : 'E'}
-                </span>
-              ) : undefined}
-              <button
-                type="button"
-                className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
-                style={{ left: `${toPercentFromFretCenter(exportFretStart)}%` }}
-                data-testid="export-start-handle"
-                data-export-handle="true"
-                onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                onTrackPointerDown={handleTrackClickMove}
+                onTrackPointerMove={handleTrackPointerMove}
+                onTrackPointerUp={handleTrackPointerUp}
+                onTrackPointerCancel={handleTrackPointerUp}
+                onTrackPointerLeave={handleTrackPointerLeave}
+                onStartPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   event.preventDefault()
                   event.currentTarget.setPointerCapture(event.pointerId)
                   setDraggingHandle('start')
                   updateHandleFromClientX(event.clientX, 'start')
                 }}
-                onPointerMove={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                onStartPointerMove={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   if (draggingHandle !== 'start') {
                     return
                   }
                   updateHandleFromClientX(event.clientX, 'start')
                 }}
-                onPointerUp={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                onStartPointerUp={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                     event.currentTarget.releasePointerCapture(event.pointerId)
                   }
                   setDraggingHandle(undefined)
                 }}
-                aria-label="Drag start fret"
-              >
-                S
-              </button>
-              <button
-                type="button"
-                className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
-                style={{ left: `${toPercentFromFretCenter(exportFretEnd)}%` }}
-                data-testid="export-end-handle"
-                data-export-handle="true"
-                onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                onEndPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   event.preventDefault()
                   event.currentTarget.setPointerCapture(event.pointerId)
                   setDraggingHandle('end')
                   updateHandleFromClientX(event.clientX, 'end')
                 }}
-                onPointerMove={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                onEndPointerMove={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   if (draggingHandle !== 'end') {
                     return
                   }
                   updateHandleFromClientX(event.clientX, 'end')
                 }}
-                onPointerUp={(event: ReactPointerEvent<HTMLButtonElement>) => {
+                onEndPointerUp={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                     event.currentTarget.releasePointerCapture(event.pointerId)
                   }
                   setDraggingHandle(undefined)
                 }}
-                aria-label="Drag end fret"
-              >
-                E
-              </button>
-            </div>
-          </div>
+              />
+            }
+          />
         </div>
       </div>
 
-      <div className="px-4 pb-4">
-        <div className="w-fit max-w-full rounded-md border border-slate-700 bg-black/80 p-3">
-          <div className="mb-3 flex items-center justify-between text-sm text-slate-300">
-            <span>Export Range</span>
-            <span className="font-medium text-slate-100">
-              Frets {exportStart} - {exportEnd}
-            </span>
-          </div>
-
-          <div className="mb-4 text-xs text-slate-400">
-            S / E マーカーをドラッグ、またはバーをクリックして範囲を設定
-          </div>
-
-          <div className="mb-4">
-            <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
-              <span>Background Opacity</span>
-              <span>{backgroundOpacityPercent}%</span>
-            </div>
-            <input
-              className="range-thumb h-2 w-40 appearance-none rounded-full bg-slate-700"
-              type="range"
-              min={0}
-              max={100}
-              value={backgroundOpacityPercent}
-              onChange={(event) => {
-                onBackgroundOpacityPercentChange(Number(event.target.value))
-              }}
-              aria-label="Export background opacity"
-            />
-          </div>
-
-          <button
-            type="button"
-            className="rounded-md border border-emerald-400/80 bg-emerald-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
-            onClick={onExportTransparentPng}
-          >
-            Export Transparent PNG
-          </button>
-        </div>
-      </div>
+      <ExportPanel
+        exportStart={exportStart}
+        exportEnd={exportEnd}
+        backgroundOpacityPercent={backgroundOpacityPercent}
+        onBackgroundOpacityPercentChange={onBackgroundOpacityPercentChange}
+        onExportTransparentPng={onExportTransparentPng}
+      />
     </section>
   )
 }
