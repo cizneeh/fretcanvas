@@ -1,101 +1,25 @@
-import { useState } from 'react'
-import { exportTransparentPng } from '../libs/exportTransparentPng'
-import {
-  FRET_COUNT,
-  FRET_NUMBERS,
-  getPositionId,
-  normalizePc,
-  OPEN_STRINGS,
-  type PitchClass,
-  type PositionId,
-  SCALE_INTERVALS,
-  type ScaleId,
-} from '../libs/model'
+import { useFretboardStore } from '../stores/fretboardStore'
 
 export const useFretboardState = () => {
-  const [keyPc, setKeyPc] = useState<PitchClass>(0)
-  const [selectedScale, setSelectedScale] = useState<ScaleId | undefined>('major')
-  const [highlightedPositions, setHighlightedPositions] = useState<Set<PositionId>>(() => new Set())
-  const [exportFretStart, setExportFretStart] = useState(0)
-  const [exportFretEnd, setExportFretEnd] = useState(FRET_COUNT)
-  const [backgroundOpacityPercent, setBackgroundOpacityPercent] = useState(0)
-
-  const addScaleNotes = () => {
-    if (selectedScale === undefined) {
-      return
-    }
-
-    const pcsToAdd = new Set(
-      SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)),
-    )
-
-    setHighlightedPositions((current) => {
-      const next = new Set(current)
-
-      for (const stringInfo of OPEN_STRINGS) {
-        for (const fret of FRET_NUMBERS) {
-          const midi = stringInfo.midi + fret
-          const pitchClass = normalizePc(midi)
-
-          if (pcsToAdd.has(pitchClass)) {
-            next.add(getPositionId(stringInfo.id, fret))
-          }
-        }
-      }
-
-      return next
-    })
-  }
-
-  const clearHighlightedNotes = () => {
-    setHighlightedPositions(new Set())
-  }
-
-  const togglePosition = (positionId: PositionId) => {
-    setHighlightedPositions((current) => {
-      const next = new Set(current)
-      if (next.has(positionId)) {
-        next.delete(positionId)
-      } else {
-        next.add(positionId)
-      }
-      return next
-    })
-  }
-
-  const handleExportFretStartChange = (nextStart: number) => {
-    const clampedStart = Math.max(0, Math.min(nextStart, FRET_COUNT))
-    setExportFretStart(clampedStart)
-    if (clampedStart > exportFretEnd) {
-      setExportFretEnd(clampedStart)
-    }
-  }
-
-  const handleExportFretEndChange = (nextEnd: number) => {
-    const clampedEnd = Math.max(0, Math.min(nextEnd, FRET_COUNT))
-    setExportFretEnd(clampedEnd)
-    if (clampedEnd < exportFretStart) {
-      setExportFretStart(clampedEnd)
-    }
-  }
-
-  const handleBackgroundOpacityPercentChange = (nextOpacity: number) => {
-    const clampedOpacity = Math.max(0, Math.min(nextOpacity, 100))
-    setBackgroundOpacityPercent(clampedOpacity)
-  }
-
-  const handleExportTransparentPng = () => {
-    exportTransparentPng({
-      keyPc,
-      highlightedPositions,
-      exportFretStart,
-      exportFretEnd,
-      backgroundOpacityPercent,
-    })
-  }
+  const keyPc = useFretboardStore((state) => state.keyPc)
+  const selectedScale = useFretboardStore((state) => state.selectedScale)
+  const highlightedPositions = useFretboardStore((state) => state.highlightedPositions)
+  const setKeyPc = useFretboardStore((state) => state.setKeyPc)
+  const setSelectedScale = useFretboardStore((state) => state.setSelectedScale)
+  const addScaleNotes = useFretboardStore((state) => state.addScaleNotes)
+  const clearHighlightedNotes = useFretboardStore((state) => state.clearHighlightedNotes)
+  const togglePosition = useFretboardStore((state) => state.togglePosition)
+  const exportFretStart = useFretboardStore((state) => state.exportFretStart)
+  const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
+  const backgroundOpacityPercent = useFretboardStore((state) => state.backgroundOpacityPercent)
+  const handleExportFretStartChange = useFretboardStore((state) => state.handleExportFretStartChange)
+  const handleExportFretEndChange = useFretboardStore((state) => state.handleExportFretEndChange)
+  const handleBackgroundOpacityPercentChange = useFretboardStore(
+    (state) => state.handleBackgroundOpacityPercentChange,
+  )
+  const exportTransparentPng = useFretboardStore((state) => state.exportTransparentPng)
 
   return {
-    /** keyのPitch Class */
     keyPc,
     selectedScale,
     highlightedPositions,
@@ -110,6 +34,6 @@ export const useFretboardState = () => {
     handleExportFretStartChange,
     handleExportFretEndChange,
     handleBackgroundOpacityPercentChange,
-    exportTransparentPng: handleExportTransparentPng,
+    exportTransparentPng,
   }
 }
