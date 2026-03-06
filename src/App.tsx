@@ -12,6 +12,11 @@ function App() {
     addScaleNotes,
     clearHighlightedNotes,
     togglePosition,
+    exportFretStart,
+    exportFretEnd,
+    handleExportFretStartChange,
+    handleExportFretEndChange,
+    exportTransparentPng,
   } = useFretboardState()
 
   return (
@@ -37,6 +42,11 @@ function App() {
           keyPc={keyPc}
           highlightedPositions={highlightedPositions}
           onTogglePosition={togglePosition}
+          exportFretStart={exportFretStart}
+          exportFretEnd={exportFretEnd}
+          onExportFretStartChange={handleExportFretStartChange}
+          onExportFretEndChange={handleExportFretEndChange}
+          onExportTransparentPng={exportTransparentPng}
         />
       </div>
     </main>

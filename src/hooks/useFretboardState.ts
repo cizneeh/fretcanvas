@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { exportTransparentPng } from '../libs/exportTransparentPng'
 import {
+  FRET_COUNT,
   FRET_NUMBERS,
   getPositionId,
   normalizePc,
@@ -14,6 +16,8 @@ export const useFretboardState = () => {
   const [keyPc, setKeyPc] = useState<PitchClass>(0)
   const [selectedScale, setSelectedScale] = useState<ScaleId | undefined>('major')
   const [highlightedPositions, setHighlightedPositions] = useState<Set<PositionId>>(() => new Set())
+  const [exportFretStart, setExportFretStart] = useState(0)
+  const [exportFretEnd, setExportFretEnd] = useState(FRET_COUNT)
 
   const addScaleNotes = () => {
     if (selectedScale === undefined) {
@@ -58,6 +62,31 @@ export const useFretboardState = () => {
     })
   }
 
+  const handleExportFretStartChange = (nextStart: number) => {
+    const clampedStart = Math.max(0, Math.min(nextStart, FRET_COUNT))
+    setExportFretStart(clampedStart)
+    if (clampedStart > exportFretEnd) {
+      setExportFretEnd(clampedStart)
+    }
+  }
+
+  const handleExportFretEndChange = (nextEnd: number) => {
+    const clampedEnd = Math.max(0, Math.min(nextEnd, FRET_COUNT))
+    setExportFretEnd(clampedEnd)
+    if (clampedEnd < exportFretStart) {
+      setExportFretStart(clampedEnd)
+    }
+  }
+
+  const handleExportTransparentPng = () => {
+    exportTransparentPng({
+      keyPc,
+      highlightedPositions,
+      exportFretStart,
+      exportFretEnd,
+    })
+  }
+
   return {
     /** keyのPitch Class */
     keyPc,
@@ -68,5 +97,10 @@ export const useFretboardState = () => {
     addScaleNotes,
     clearHighlightedNotes,
     togglePosition,
+    exportFretStart,
+    exportFretEnd,
+    handleExportFretStartChange,
+    handleExportFretEndChange,
+    exportTransparentPng: handleExportTransparentPng,
   }
 }

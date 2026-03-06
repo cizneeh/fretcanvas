@@ -15,13 +15,26 @@ type FretboardViewProps = {
   keyPc: PitchClass
   highlightedPositions: Set<PositionId>
   onTogglePosition: (positionId: PositionId) => void
+  exportFretStart: number
+  exportFretEnd: number
+  onExportFretStartChange: (nextStart: number) => void
+  onExportFretEndChange: (nextEnd: number) => void
+  onExportTransparentPng: () => void
 }
 
 export const FretboardView = ({
   keyPc,
   highlightedPositions,
   onTogglePosition,
+  exportFretStart,
+  exportFretEnd,
+  onExportFretStartChange,
+  onExportFretEndChange,
+  onExportTransparentPng,
 }: FretboardViewProps) => {
+  const exportStart = Math.min(exportFretStart, exportFretEnd)
+  const exportEnd = Math.max(exportFretStart, exportFretEnd)
+
   return (
     <section className="bg-black">
       <div className="overflow-x-auto p-4">
@@ -91,6 +104,52 @@ export const FretboardView = ({
                 </div>
               )
             })}
+          </div>
+
+          <div className="mt-5 rounded-md border border-slate-700 bg-black/80 p-3">
+            <div className="mb-3 flex items-center justify-between text-sm text-slate-300">
+              <span>Export Range</span>
+              <span className="font-medium text-slate-100">
+                Frets {exportStart} - {exportEnd}
+              </span>
+            </div>
+
+            <div className="mb-2">
+              <div className="mb-1 text-xs text-slate-400">Start Fret</div>
+              <input
+                className="range-thumb mb-3 h-2 w-full appearance-none rounded-full bg-slate-700"
+                type="range"
+                min={0}
+                max={FRET_NUMBERS.length - 1}
+                value={exportFretStart}
+                onChange={(event) => {
+                  onExportFretStartChange(Number(event.target.value))
+                }}
+                aria-label="Export start fret"
+              />
+            </div>
+            <div className="mb-4">
+              <div className="mb-1 text-xs text-slate-400">End Fret</div>
+              <input
+                className="range-thumb h-2 w-full appearance-none rounded-full bg-slate-700"
+                type="range"
+                min={0}
+                max={FRET_NUMBERS.length - 1}
+                value={exportFretEnd}
+                onChange={(event) => {
+                  onExportFretEndChange(Number(event.target.value))
+                }}
+                aria-label="Export end fret"
+              />
+            </div>
+
+            <button
+              type="button"
+              className="rounded-md border border-emerald-400/80 bg-emerald-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
+              onClick={onExportTransparentPng}
+            >
+              Export Transparent PNG
+            </button>
           </div>
         </div>
       </div>

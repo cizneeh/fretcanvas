@@ -14,3 +14,25 @@ body {
   margin: 0;
   min-width: 320px;
 }
+
+.range-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #22d3ee;
+  border: 1px solid #e0f2fe;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+
+.range-thumb::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #22d3ee;
+  border: 1px solid #e0f2fe;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
