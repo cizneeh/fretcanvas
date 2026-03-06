@@ -1,6 +1,6 @@
 import { ControlPanel } from './components/ControlPanel'
 import { FretboardView } from './components/FretboardView'
-import { useFretboardState } from './hooks/useFretboardState'
+import { useFretboardStore } from './stores/fretboardStore'
 
 function App() {
   const {
@@ -19,7 +19,7 @@ function App() {
     handleExportFretEndChange,
     handleBackgroundOpacityPercentChange,
     exportTransparentPng,
-  } = useFretboardState()
+  } = useFretboardStore()
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-slate-100 md:px-8">
