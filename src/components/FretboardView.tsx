@@ -38,22 +38,32 @@ export const FretboardView = ({
 }: FretboardViewProps) => {
   const trackRef = useRef<HTMLDivElement | undefined>(undefined)
   const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
+  const [hoverPreview, setHoverPreview] = useState<
+    { handle: 'start' | 'end'; fret: number } | undefined
+  >(undefined)
 
   const maxFret = FRET_NUMBERS.length - 1
   const fretCellCount = FRET_NUMBERS.length
   const clampFret = (value: number) => Math.max(0, Math.min(value, maxFret))
   const toPercentFromFretCenter = (fret: number) => ((fret + 0.5) / fretCellCount) * 100
 
-  const updateHandleFromClientX = (clientX: number, handle: 'start' | 'end') => {
+  const toFretFromClientX = (clientX: number) => {
     const track = trackRef.current
     if (track === undefined) {
-      return
+      return undefined
     }
 
     const rect = track.getBoundingClientRect()
     const relativeX = clientX - rect.left
     const ratio = rect.width > 0 ? relativeX / rect.width : 0
-    const nextFret = clampFret(Math.round(ratio * fretCellCount - 0.5))
+    return clampFret(Math.round(ratio * fretCellCount - 0.5))
+  }
+
+  const updateHandleFromClientX = (clientX: number, handle: 'start' | 'end') => {
+    const nextFret = toFretFromClientX(clientX)
+    if (nextFret === undefined) {
+      return
+    }
 
     if (handle === 'start') {
       onExportFretStartChange(nextFret)
@@ -63,8 +73,39 @@ export const FretboardView = ({
     onExportFretEndChange(nextFret)
   }
 
+  const getNearestHandle = (fret: number): 'start' | 'end' => {
+    const startDistance = Math.abs(fret - exportFretStart)
+    const endDistance = Math.abs(fret - exportFretEnd)
+    return startDistance <= endDistance ? 'start' : 'end'
+  }
+
+  const moveNearestHandleToClientX = (clientX: number) => {
+    const nextFret = toFretFromClientX(clientX)
+    if (nextFret === undefined) {
+      return
+    }
+    updateHandleFromClientX(clientX, getNearestHandle(nextFret))
+  }
+
+  const handleTrackClickMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const target = event.target
+    if (target instanceof HTMLElement && target.closest('[data-export-handle="true"]') !== null) {
+      return
+    }
+    moveNearestHandleToClientX(event.clientX)
+  }
+
   const handleTrackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (draggingHandle === undefined) {
+      const nextFret = toFretFromClientX(event.clientX)
+      if (nextFret === undefined) {
+        setHoverPreview(undefined)
+        return
+      }
+      setHoverPreview({
+        fret: nextFret,
+        handle: getNearestHandle(nextFret),
+      })
       return
     }
 
@@ -72,6 +113,13 @@ export const FretboardView = ({
   }
 
   const handleTrackPointerUp = () => {
+    setDraggingHandle(undefined)
+  }
+
+  const handleTrackPointerLeave = () => {
+    if (draggingHandle === undefined) {
+      setHoverPreview(undefined)
+    }
     setDraggingHandle(undefined)
   }
 
@@ -193,17 +241,18 @@ export const FretboardView = ({
             <div
               className="relative mt-2 h-8"
               style={{ gridColumn: `2 / span ${FRET_NUMBERS.length}` }}
+              onPointerDown={handleTrackClickMove}
               onPointerMove={handleTrackPointerMove}
               onPointerUp={handleTrackPointerUp}
               onPointerCancel={handleTrackPointerUp}
-              onPointerLeave={handleTrackPointerUp}
+              onPointerLeave={handleTrackPointerLeave}
             >
               <div
                 ref={(node) => {
                   trackRef.current = node ?? undefined
                 }}
                 data-testid="export-range-track"
-                className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-slate-700"
+                className="pointer-events-none absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-slate-700"
               />
               <div
                 className="pointer-events-none absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-cyan-400/80"
@@ -212,11 +261,24 @@ export const FretboardView = ({
                   width: `${((exportEnd - exportStart) / fretCellCount) * 100}%`,
                 }}
               />
+              {hoverPreview !== undefined ? (
+                <span
+                  className={`pointer-events-none absolute top-1/2 z-20 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border text-[11px] font-semibold text-slate-950/70 ${
+                    hoverPreview.handle === 'start'
+                      ? 'border-cyan-200/70 bg-cyan-400/40'
+                      : 'border-emerald-200/70 bg-emerald-400/40'
+                  }`}
+                  style={{ left: `${toPercentFromFretCenter(hoverPreview.fret)}%` }}
+                >
+                  {hoverPreview.handle === 'start' ? 'S' : 'E'}
+                </span>
+              ) : undefined}
               <button
                 type="button"
                 className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
                 style={{ left: `${toPercentFromFretCenter(exportFretStart)}%` }}
                 data-testid="export-start-handle"
+                data-export-handle="true"
                 onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   event.preventDefault()
                   event.currentTarget.setPointerCapture(event.pointerId)
@@ -244,6 +306,7 @@ export const FretboardView = ({
                 className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
                 style={{ left: `${toPercentFromFretCenter(exportFretEnd)}%` }}
                 data-testid="export-end-handle"
+                data-export-handle="true"
                 onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
                   event.preventDefault()
                   event.currentTarget.setPointerCapture(event.pointerId)
@@ -268,7 +331,6 @@ export const FretboardView = ({
               </button>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -281,7 +343,9 @@ export const FretboardView = ({
             </span>
           </div>
 
-          <div className="mb-4 text-xs text-slate-400">S / E マーカーをドラッグして範囲を設定</div>
+          <div className="mb-4 text-xs text-slate-400">
+            S / E マーカーをドラッグ、またはバーをクリックして範囲を設定
+          </div>
 
           <div className="mb-4">
             <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
