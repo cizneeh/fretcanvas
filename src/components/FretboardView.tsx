@@ -85,6 +85,7 @@ export const FretboardView = ({
 
   const exportStart = Math.min(exportFretStart, exportFretEnd)
   const exportEnd = Math.max(exportFretStart, exportFretEnd)
+  const startHighlightFret = Math.max(0, exportFretStart - 1)
 
   return (
     <section className="bg-black">
@@ -115,7 +116,7 @@ export const FretboardView = ({
                   const isHighlighted = highlightedPositions.has(positionId)
                   const intervalFromKey = normalizePc(pitchClass - keyPc)
                   const isRoot = intervalFromKey === 0
-                  const isStartFret = fret === exportFretStart
+                  const isStartFret = fret === startHighlightFret
                   const isEndFret = fret === exportFretEnd
                   const showExportMarker = isStartFret || isEndFret
                   const exportMarkerColor =
