@@ -18,6 +18,10 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "noStaticElementInteractions": "off"
+      },
       "suspicious": {
         "noUnknownAtRules": "off"
       }

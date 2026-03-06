@@ -1,4 +1,5 @@
 import {
+  type Connection,
   DEGREE_LABELS,
   getPositionId,
   MARKER_FRETS,
@@ -6,11 +7,13 @@ import {
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
+  parsePositionId,
 } from './model'
 
 type ExportTransparentPngInput = {
   keyPc: PitchClass
   highlightedPositions: Set<PositionId>
+  connections: Connection[]
   exportFretStart: number
   exportFretEnd: number
   backgroundOpacityPercent: number
@@ -19,6 +22,7 @@ type ExportTransparentPngInput = {
 export const exportTransparentPng = ({
   keyPc,
   highlightedPositions,
+  connections,
   exportFretStart,
   exportFretEnd,
   backgroundOpacityPercent,
@@ -117,6 +121,38 @@ export const exportTransparentPng = ({
       ctx.fillText(label, xCenter, yCenter + 0.5)
     }
   })
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(boardLeft, boardTop, fretCountInRange * cellWidth, boardHeight)
+  ctx.clip()
+  ctx.strokeStyle = 'rgba(34, 211, 238, 0.95)'
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+  for (const connection of connections) {
+    const from = parsePositionId(connection.from)
+    const to = parsePositionId(connection.to)
+    if (from === undefined || to === undefined) {
+      continue
+    }
+
+    const fromStringIndex = OPEN_STRINGS.findIndex((stringInfo) => stringInfo.id === from.stringId)
+    const toStringIndex = OPEN_STRINGS.findIndex((stringInfo) => stringInfo.id === to.stringId)
+    if (fromStringIndex < 0 || toStringIndex < 0) {
+      continue
+    }
+
+    const fromX = boardLeft + (from.fret - start + 0.5) * cellWidth
+    const fromY = boardTop + fromStringIndex * rowHeight + rowHeight / 2
+    const toX = boardLeft + (to.fret - start + 0.5) * cellWidth
+    const toY = boardTop + toStringIndex * rowHeight + rowHeight / 2
+
+    ctx.beginPath()
+    ctx.moveTo(fromX, fromY)
+    ctx.lineTo(toX, toY)
+    ctx.stroke()
+  }
+  ctx.restore()
 
   const markerY = boardTop + boardHeight + markerHeight / 2
   for (let fret = start; fret <= end; fret += 1) {

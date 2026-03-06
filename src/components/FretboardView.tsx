@@ -1,5 +1,5 @@
 import { type PointerEvent as ReactPointerEvent, useRef, useState } from 'react'
-import { FRET_NUMBERS } from '../libs/model'
+import { FRET_NUMBERS, type PositionId } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ExportPanel } from './ExportPanel'
 import { ExportRangeTrack } from './ExportRangeTrack'
@@ -8,11 +8,16 @@ import { FretboardGrid } from './FretboardGrid'
 export const FretboardView = () => {
   const keyPc = useFretboardStore((state) => state.keyPc)
   const highlightedPositions = useFretboardStore((state) => state.highlightedPositions)
+  const connectionsById = useFretboardStore((state) => state.connections)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
+  const connectPositions = useFretboardStore((state) => state.connectPositions)
+  const removeConnection = useFretboardStore((state) => state.removeConnection)
   const exportFretStart = useFretboardStore((state) => state.exportFretStart)
   const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
   const backgroundOpacityPercent = useFretboardStore((state) => state.backgroundOpacityPercent)
-  const handleExportFretStartChange = useFretboardStore((state) => state.handleExportFretStartChange)
+  const handleExportFretStartChange = useFretboardStore(
+    (state) => state.handleExportFretStartChange,
+  )
   const handleExportFretEndChange = useFretboardStore((state) => state.handleExportFretEndChange)
   const handleBackgroundOpacityPercentChange = useFretboardStore(
     (state) => state.handleBackgroundOpacityPercentChange,
@@ -20,10 +25,17 @@ export const FretboardView = () => {
   const exportTransparentPng = useFretboardStore((state) => state.exportTransparentPng)
 
   const trackRef = useRef<HTMLDivElement | undefined>(undefined)
+  const boardRef = useRef<HTMLDivElement | undefined>(undefined)
+
   const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
   const [hoverPreview, setHoverPreview] = useState<
     { handle: 'start' | 'end'; fret: number } | undefined
   >(undefined)
+  const [pendingConnectStart, setPendingConnectStart] = useState<
+    { positionId: PositionId; clientX: number; clientY: number } | undefined
+  >(undefined)
+  const [dragConnectFrom, setDragConnectFrom] = useState<PositionId | undefined>(undefined)
+  const [dragPointer, setDragPointer] = useState<{ x: number; y: number } | undefined>(undefined)
 
   const maxFret = FRET_NUMBERS.length - 1
   const fretCellCount = FRET_NUMBERS.length
@@ -40,6 +52,25 @@ export const FretboardView = () => {
     const relativeX = clientX - rect.left
     const ratio = rect.width > 0 ? relativeX / rect.width : 0
     return clampFret(Math.round(ratio * fretCellCount - 0.5))
+  }
+
+  const toBoardPoint = (clientX: number, clientY: number) => {
+    const board = boardRef.current
+    if (board === undefined) {
+      return undefined
+    }
+
+    const rect = board.getBoundingClientRect()
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    }
+  }
+
+  const resetConnectionDrag = () => {
+    setPendingConnectStart(undefined)
+    setDragConnectFrom(undefined)
+    setDragPointer(undefined)
   }
 
   const updateHandleFromClientX = (clientX: number, handle: 'start' | 'end') => {
@@ -116,9 +147,76 @@ export const FretboardView = () => {
     handleExportFretEndChange(fret)
   }
 
+  const handleNotePointerDown = (
+    positionId: PositionId,
+    isHighlighted: boolean,
+    clientX: number,
+    clientY: number,
+  ) => {
+    if (!isHighlighted) {
+      return
+    }
+
+    setPendingConnectStart({
+      positionId,
+      clientX,
+      clientY,
+    })
+  }
+
+  const handleBoardPointerMove = (clientX: number, clientY: number) => {
+    if (dragConnectFrom !== undefined) {
+      const nextPoint = toBoardPoint(clientX, clientY)
+      if (nextPoint === undefined) {
+        return
+      }
+      setDragPointer(nextPoint)
+      return
+    }
+
+    if (pendingConnectStart === undefined) {
+      return
+    }
+
+    const distanceX = clientX - pendingConnectStart.clientX
+    const distanceY = clientY - pendingConnectStart.clientY
+    const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2)
+
+    if (distance < 5) {
+      return
+    }
+
+    const nextPoint = toBoardPoint(clientX, clientY)
+    if (nextPoint === undefined) {
+      return
+    }
+
+    setDragConnectFrom(pendingConnectStart.positionId)
+    setPendingConnectStart(undefined)
+    setDragPointer(nextPoint)
+  }
+
+  const handleNotePointerUp = (positionId: PositionId) => {
+    if (dragConnectFrom === undefined) {
+      return
+    }
+
+    connectPositions(dragConnectFrom, positionId)
+    resetConnectionDrag()
+  }
+
+  const handleBoardPointerUpOrCancel = () => {
+    resetConnectionDrag()
+  }
+
+  const handleTogglePosition = (positionId: PositionId) => {
+    togglePosition(positionId)
+  }
+
   const exportStart = Math.min(exportFretStart, exportFretEnd)
   const exportEnd = Math.max(exportFretStart, exportFretEnd)
   const startHighlightFret = Math.max(0, exportFretStart - 1)
+  const connections = Object.values(connectionsById)
 
   return (
     <section className="bg-black">
@@ -127,11 +225,29 @@ export const FretboardView = () => {
           <FretboardGrid
             keyPc={keyPc}
             highlightedPositions={highlightedPositions}
+            connections={connections}
             exportFretStart={exportFretStart}
             exportFretEnd={exportFretEnd}
             startHighlightFret={startHighlightFret}
-            onTogglePosition={togglePosition}
+            previewConnection={
+              dragConnectFrom !== undefined && dragPointer !== undefined
+                ? {
+                    from: dragConnectFrom,
+                    toX: dragPointer.x,
+                    toY: dragPointer.y,
+                  }
+                : undefined
+            }
+            onTogglePosition={handleTogglePosition}
             onSelectClosestHandleToFret={setClosestHandleToFret}
+            onRemoveConnection={removeConnection}
+            onNotePointerDown={handleNotePointerDown}
+            onNotePointerUp={handleNotePointerUp}
+            onBoardPointerMove={handleBoardPointerMove}
+            onBoardPointerUpOrCancel={handleBoardPointerUpOrCancel}
+            onBoardRefChange={(node) => {
+              boardRef.current = node
+            }}
             rangeTrack={
               <ExportRangeTrack
                 fretColumnSpan={FRET_NUMBERS.length}

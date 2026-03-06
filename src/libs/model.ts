@@ -11,6 +11,12 @@ export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonic
  * 上下左右のポジションをたどるとか、行・列単位の処理とか、矩形選択とか、そういうのをやるんだったら座標で持ったほうが良い。文字列だとそういう比較ができず、パースすることになるから。今stringで良いのは、単一点のトグルだけだから。
  */
 export type PositionId = string
+export type ConnectionId = string
+export type Connection = {
+  id: ConnectionId
+  from: PositionId
+  to: PositionId
+}
 
 export type StringInfo = {
   id: string
@@ -74,3 +80,19 @@ export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= 
  */
 export const normalizePc = (value: number): PitchClass => ((value % 12) + 12) % 12
 export const getPositionId = (stringId: string, fret: number): PositionId => `${stringId}:${fret}`
+export const parsePositionId = (
+  positionId: PositionId,
+): { stringId: string; fret: number } | undefined => {
+  const [stringId, fretText] = positionId.split(':')
+  const fret = Number(fretText)
+  if (stringId === undefined || Number.isNaN(fret)) {
+    return undefined
+  }
+  return { stringId, fret }
+}
+export const getConnectionId = (from: PositionId, to: PositionId): ConnectionId => {
+  if (from <= to) {
+    return `${from}|${to}`
+  }
+  return `${to}|${from}`
+}

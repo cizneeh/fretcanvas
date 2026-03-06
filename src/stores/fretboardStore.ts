@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import { exportTransparentPng } from '../libs/exportTransparentPng'
 import {
+  type Connection,
+  type ConnectionId,
   FRET_COUNT,
   FRET_NUMBERS,
+  getConnectionId,
   getPositionId,
   normalizePc,
   OPEN_STRINGS,
@@ -16,6 +19,7 @@ type FretboardStore = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
   highlightedPositions: Set<PositionId>
+  connections: Record<ConnectionId, Connection>
   exportFretStart: number
   exportFretEnd: number
   backgroundOpacityPercent: number
@@ -24,6 +28,9 @@ type FretboardStore = {
   addScaleNotes: () => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
+  connectPositions: (from: PositionId, to: PositionId) => void
+  removeConnection: (connectionId: ConnectionId) => void
+  removeConnectionsByPosition: (positionId: PositionId) => void
   handleExportFretStartChange: (nextStart: number) => void
   handleExportFretEndChange: (nextEnd: number) => void
   handleBackgroundOpacityPercentChange: (nextOpacity: number) => void
@@ -34,6 +41,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
   keyPc: 0,
   selectedScale: 'major',
   highlightedPositions: new Set(),
+  connections: {},
   exportFretStart: 0,
   exportFretEnd: FRET_COUNT,
   backgroundOpacityPercent: 0,
@@ -73,19 +81,64 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
   },
 
   clearHighlightedNotes: () => {
-    set({ highlightedPositions: new Set() })
+    set({ highlightedPositions: new Set(), connections: {} })
   },
 
   togglePosition: (positionId) => {
     const next = new Set(get().highlightedPositions)
+    const { removeConnectionsByPosition } = get()
 
     if (next.has(positionId)) {
       next.delete(positionId)
+      removeConnectionsByPosition(positionId)
     } else {
       next.add(positionId)
     }
 
     set({ highlightedPositions: next })
+  },
+
+  connectPositions: (from, to) => {
+    if (from === to) {
+      return
+    }
+
+    const connectionId = getConnectionId(from, to)
+    const currentConnections = get().connections
+    if (currentConnections[connectionId] !== undefined) {
+      return
+    }
+
+    set({
+      connections: {
+        ...currentConnections,
+        [connectionId]: {
+          id: connectionId,
+          from,
+          to,
+        },
+      },
+    })
+  },
+
+  removeConnection: (connectionId) => {
+    const currentConnections = get().connections
+    if (currentConnections[connectionId] === undefined) {
+      return
+    }
+
+    const nextConnections = { ...currentConnections }
+    delete nextConnections[connectionId]
+    set({ connections: nextConnections })
+  },
+
+  removeConnectionsByPosition: (positionId) => {
+    const currentConnections = get().connections
+    const nextEntries = Object.entries(currentConnections).filter(([, connection]) => {
+      return connection.from !== positionId && connection.to !== positionId
+    })
+    const nextConnections = Object.fromEntries(nextEntries) as Record<ConnectionId, Connection>
+    set({ connections: nextConnections })
   },
 
   handleExportFretStartChange: (nextStart) => {
@@ -118,6 +171,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
     const {
       keyPc,
       highlightedPositions,
+      connections,
       exportFretStart,
       exportFretEnd,
       backgroundOpacityPercent,
@@ -126,6 +180,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
     exportTransparentPng({
       keyPc,
       highlightedPositions,
+      connections: Object.values(connections),
       exportFretStart,
       exportFretEnd,
       backgroundOpacityPercent,
