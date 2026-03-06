@@ -64,7 +64,7 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
 
 export const POSITION_MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24] as const
 export const FRET_NUMBERS = Array.from({ length: FRET_COUNT + 1 }, (_, index) => index)
-export const MARKER_FRETS = POSITION_MARKERS.filter((fret) => fret <= FRET_COUNT)
+export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= FRET_COUNT)
 
 /**
  * PicthをPitch Classに正規化する

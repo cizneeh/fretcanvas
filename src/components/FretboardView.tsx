@@ -23,13 +23,9 @@ export const FretboardView = ({
   onTogglePosition,
 }: FretboardViewProps) => {
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <p className="mb-3 text-sm text-slate-300">
-        Highlighted Notes: {highlightedPositions.size === 0 ? 'None' : highlightedPositions.size}
-      </p>
-
-      <div className="overflow-x-auto">
-        <div className="min-w-max rounded-md border border-slate-800 bg-slate-950 p-3">
+    <section className="bg-black">
+      <div className="overflow-x-auto p-4">
+        <div className="min-w-max rounded-md border border-slate-700 bg-black p-3">
           <div
             className="grid"
             style={{

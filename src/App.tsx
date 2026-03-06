@@ -15,7 +15,7 @@ function App() {
   } = useFretboardState()
 
   return (
-    <main className="min-h-screen bg-[#0b0f17] px-4 py-8 text-slate-100 md:px-8">
+    <main className="min-h-screen bg-black px-4 py-8 text-slate-100 md:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-medium tracking-tight">Fretmap</h1>

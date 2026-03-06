@@ -18,12 +18,12 @@ export const ControlPanel = ({
   onClearNotes,
 }: ControlPanelProps) => {
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+    <section className="rounded-lg border border-slate-700 bg-black p-4">
       <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto_auto] md:items-end">
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-slate-300">Key</span>
           <select
-            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+            className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
             value={keyPc}
             onChange={(event) => {
               onKeyChange(Number(event.target.value))
@@ -40,7 +40,7 @@ export const ControlPanel = ({
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-slate-300">Scale</span>
           <select
-            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+            className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
             value={selectedScale ?? ''}
             onChange={(event) => {
               const value = event.target.value as ScaleId | ''
@@ -67,7 +67,7 @@ export const ControlPanel = ({
 
         <button
           type="button"
-          className="rounded-md border border-slate-600 bg-slate-950 px-4 py-2 text-sm font-medium transition hover:bg-slate-800"
+          className="rounded-md border border-slate-600 bg-black px-4 py-2 text-sm font-medium transition hover:bg-slate-900"
           onClick={onClearNotes}
         >
           Clear
