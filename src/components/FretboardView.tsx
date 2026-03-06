@@ -17,8 +17,10 @@ type FretboardViewProps = {
   onTogglePosition: (positionId: PositionId) => void
   exportFretStart: number
   exportFretEnd: number
+  backgroundOpacityPercent: number
   onExportFretStartChange: (nextStart: number) => void
   onExportFretEndChange: (nextEnd: number) => void
+  onBackgroundOpacityPercentChange: (nextOpacity: number) => void
   onExportTransparentPng: () => void
 }
 
@@ -28,8 +30,10 @@ export const FretboardView = ({
   onTogglePosition,
   exportFretStart,
   exportFretEnd,
+  backgroundOpacityPercent,
   onExportFretStartChange,
   onExportFretEndChange,
+  onBackgroundOpacityPercentChange,
   onExportTransparentPng,
 }: FretboardViewProps) => {
   const exportStart = Math.min(exportFretStart, exportFretEnd)
@@ -140,6 +144,24 @@ export const FretboardView = ({
                   onExportFretEndChange(Number(event.target.value))
                 }}
                 aria-label="Export end fret"
+              />
+            </div>
+
+            <div className="mb-4">
+              <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
+                <span>Background Opacity</span>
+                <span>{backgroundOpacityPercent}%</span>
+              </div>
+              <input
+                className="range-thumb h-2 w-40 appearance-none rounded-full bg-slate-700"
+                type="range"
+                min={0}
+                max={100}
+                value={backgroundOpacityPercent}
+                onChange={(event) => {
+                  onBackgroundOpacityPercentChange(Number(event.target.value))
+                }}
+                aria-label="Export background opacity"
               />
             </div>
 

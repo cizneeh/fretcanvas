@@ -18,6 +18,7 @@ export const useFretboardState = () => {
   const [highlightedPositions, setHighlightedPositions] = useState<Set<PositionId>>(() => new Set())
   const [exportFretStart, setExportFretStart] = useState(0)
   const [exportFretEnd, setExportFretEnd] = useState(FRET_COUNT)
+  const [backgroundOpacityPercent, setBackgroundOpacityPercent] = useState(0)
 
   const addScaleNotes = () => {
     if (selectedScale === undefined) {
@@ -78,12 +79,18 @@ export const useFretboardState = () => {
     }
   }
 
+  const handleBackgroundOpacityPercentChange = (nextOpacity: number) => {
+    const clampedOpacity = Math.max(0, Math.min(nextOpacity, 100))
+    setBackgroundOpacityPercent(clampedOpacity)
+  }
+
   const handleExportTransparentPng = () => {
     exportTransparentPng({
       keyPc,
       highlightedPositions,
       exportFretStart,
       exportFretEnd,
+      backgroundOpacityPercent,
     })
   }
 
@@ -99,8 +106,10 @@ export const useFretboardState = () => {
     togglePosition,
     exportFretStart,
     exportFretEnd,
+    backgroundOpacityPercent,
     handleExportFretStartChange,
     handleExportFretEndChange,
+    handleBackgroundOpacityPercentChange,
     exportTransparentPng: handleExportTransparentPng,
   }
 }

@@ -13,6 +13,7 @@ type ExportTransparentPngInput = {
   highlightedPositions: Set<PositionId>
   exportFretStart: number
   exportFretEnd: number
+  backgroundOpacityPercent: number
 }
 
 export const exportTransparentPng = ({
@@ -20,6 +21,7 @@ export const exportTransparentPng = ({
   highlightedPositions,
   exportFretStart,
   exportFretEnd,
+  backgroundOpacityPercent,
 }: ExportTransparentPngInput) => {
   const start = Math.min(exportFretStart, exportFretEnd)
   const end = Math.max(exportFretStart, exportFretEnd)
@@ -50,6 +52,10 @@ export const exportTransparentPng = ({
 
   // Background is intentionally transparent.
   ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+  if (backgroundOpacityPercent > 0) {
+    ctx.fillStyle = `rgba(0, 0, 0, ${(backgroundOpacityPercent / 100).toFixed(3)})`
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+  }
   ctx.font = '12px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
