@@ -1,22 +1,14 @@
 import { NOTE_LABELS, type PitchClass, SCALE_LABELS, type ScaleId } from '../libs/model'
+import { useFretboardStore } from '../stores/fretboardStore'
 
-type ControlPanelProps = {
-  keyPc: PitchClass
-  selectedScale: ScaleId | undefined
-  onKeyChange: (pitchClass: PitchClass) => void
-  onScaleChange: (scaleId: ScaleId | undefined) => void
-  onAddScaleNotes: () => void
-  onClearNotes: () => void
-}
+export const ControlPanel = () => {
+  const keyPc = useFretboardStore((state) => state.keyPc)
+  const selectedScale = useFretboardStore((state) => state.selectedScale)
+  const setKeyPc = useFretboardStore((state) => state.setKeyPc)
+  const setSelectedScale = useFretboardStore((state) => state.setSelectedScale)
+  const addScaleNotes = useFretboardStore((state) => state.addScaleNotes)
+  const clearHighlightedNotes = useFretboardStore((state) => state.clearHighlightedNotes)
 
-export const ControlPanel = ({
-  keyPc,
-  selectedScale,
-  onKeyChange,
-  onScaleChange,
-  onAddScaleNotes,
-  onClearNotes,
-}: ControlPanelProps) => {
   return (
     <section className="rounded-lg border border-slate-700 bg-black p-4">
       <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto_auto] md:items-end">
@@ -26,7 +18,7 @@ export const ControlPanel = ({
             className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
             value={keyPc}
             onChange={(event) => {
-              onKeyChange(Number(event.target.value))
+              setKeyPc(Number(event.target.value) as PitchClass)
             }}
           >
             {NOTE_LABELS.map((note, pitchClass) => (
@@ -44,7 +36,7 @@ export const ControlPanel = ({
             value={selectedScale ?? ''}
             onChange={(event) => {
               const value = event.target.value as ScaleId | ''
-              onScaleChange(value === '' ? undefined : value)
+              setSelectedScale(value === '' ? undefined : value)
             }}
           >
             <option value="">Select scale</option>
@@ -59,7 +51,7 @@ export const ControlPanel = ({
         <button
           type="button"
           className="rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onAddScaleNotes}
+          onClick={addScaleNotes}
           disabled={selectedScale === undefined}
         >
           Add Scale Notes
@@ -68,7 +60,7 @@ export const ControlPanel = ({
         <button
           type="button"
           className="rounded-md border border-slate-600 bg-black px-4 py-2 text-sm font-medium transition hover:bg-slate-900"
-          onClick={onClearNotes}
+          onClick={clearHighlightedNotes}
         >
           Clear
         </button>

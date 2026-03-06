@@ -1,34 +1,24 @@
 import { type PointerEvent as ReactPointerEvent, useRef, useState } from 'react'
-import { FRET_NUMBERS, type PitchClass, type PositionId } from '../libs/model'
+import { FRET_NUMBERS } from '../libs/model'
+import { useFretboardStore } from '../stores/fretboardStore'
 import { ExportPanel } from './ExportPanel'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'
 
-type FretboardViewProps = {
-  keyPc: PitchClass
-  highlightedPositions: Set<PositionId>
-  onTogglePosition: (positionId: PositionId) => void
-  exportFretStart: number
-  exportFretEnd: number
-  backgroundOpacityPercent: number
-  onExportFretStartChange: (nextStart: number) => void
-  onExportFretEndChange: (nextEnd: number) => void
-  onBackgroundOpacityPercentChange: (nextOpacity: number) => void
-  onExportTransparentPng: () => void
-}
+export const FretboardView = () => {
+  const keyPc = useFretboardStore((state) => state.keyPc)
+  const highlightedPositions = useFretboardStore((state) => state.highlightedPositions)
+  const togglePosition = useFretboardStore((state) => state.togglePosition)
+  const exportFretStart = useFretboardStore((state) => state.exportFretStart)
+  const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
+  const backgroundOpacityPercent = useFretboardStore((state) => state.backgroundOpacityPercent)
+  const handleExportFretStartChange = useFretboardStore((state) => state.handleExportFretStartChange)
+  const handleExportFretEndChange = useFretboardStore((state) => state.handleExportFretEndChange)
+  const handleBackgroundOpacityPercentChange = useFretboardStore(
+    (state) => state.handleBackgroundOpacityPercentChange,
+  )
+  const exportTransparentPng = useFretboardStore((state) => state.exportTransparentPng)
 
-export const FretboardView = ({
-  keyPc,
-  highlightedPositions,
-  onTogglePosition,
-  exportFretStart,
-  exportFretEnd,
-  backgroundOpacityPercent,
-  onExportFretStartChange,
-  onExportFretEndChange,
-  onBackgroundOpacityPercentChange,
-  onExportTransparentPng,
-}: FretboardViewProps) => {
   const trackRef = useRef<HTMLDivElement | undefined>(undefined)
   const [draggingHandle, setDraggingHandle] = useState<'start' | 'end' | undefined>(undefined)
   const [hoverPreview, setHoverPreview] = useState<
@@ -59,11 +49,11 @@ export const FretboardView = ({
     }
 
     if (handle === 'start') {
-      onExportFretStartChange(nextFret)
+      handleExportFretStartChange(nextFret)
       return
     }
 
-    onExportFretEndChange(nextFret)
+    handleExportFretEndChange(nextFret)
   }
 
   const getNearestHandle = (fret: number): 'start' | 'end' => {
@@ -120,10 +110,10 @@ export const FretboardView = ({
     const startDistance = Math.abs(fret - exportFretStart)
     const endDistance = Math.abs(fret - exportFretEnd)
     if (startDistance <= endDistance) {
-      onExportFretStartChange(fret)
+      handleExportFretStartChange(fret)
       return
     }
-    onExportFretEndChange(fret)
+    handleExportFretEndChange(fret)
   }
 
   const exportStart = Math.min(exportFretStart, exportFretEnd)
@@ -140,7 +130,7 @@ export const FretboardView = ({
             exportFretStart={exportFretStart}
             exportFretEnd={exportFretEnd}
             startHighlightFret={startHighlightFret}
-            onTogglePosition={onTogglePosition}
+            onTogglePosition={togglePosition}
             onSelectClosestHandleToFret={setClosestHandleToFret}
             rangeTrack={
               <ExportRangeTrack
@@ -211,8 +201,8 @@ export const FretboardView = ({
         exportStart={exportStart}
         exportEnd={exportEnd}
         backgroundOpacityPercent={backgroundOpacityPercent}
-        onBackgroundOpacityPercentChange={onBackgroundOpacityPercentChange}
-        onExportTransparentPng={onExportTransparentPng}
+        onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
+        onExportTransparentPng={exportTransparentPng}
       />
     </section>
   )

@@ -1,26 +1,7 @@
 import { ControlPanel } from './components/ControlPanel'
 import { FretboardView } from './components/FretboardView'
-import { useFretboardStore } from './stores/fretboardStore'
 
 function App() {
-  const {
-    keyPc,
-    selectedScale,
-    highlightedPositions,
-    setKeyPc,
-    setSelectedScale,
-    addScaleNotes,
-    clearHighlightedNotes,
-    togglePosition,
-    exportFretStart,
-    exportFretEnd,
-    backgroundOpacityPercent,
-    handleExportFretStartChange,
-    handleExportFretEndChange,
-    handleBackgroundOpacityPercentChange,
-    exportTransparentPng,
-  } = useFretboardStore()
-
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-slate-100 md:px-8">
       <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-6">
@@ -31,27 +12,9 @@ function App() {
           </p>
         </header>
 
-        <ControlPanel
-          keyPc={keyPc}
-          selectedScale={selectedScale}
-          onKeyChange={setKeyPc}
-          onScaleChange={setSelectedScale}
-          onAddScaleNotes={addScaleNotes}
-          onClearNotes={clearHighlightedNotes}
-        />
+        <ControlPanel />
 
-        <FretboardView
-          keyPc={keyPc}
-          highlightedPositions={highlightedPositions}
-          onTogglePosition={togglePosition}
-          exportFretStart={exportFretStart}
-          exportFretEnd={exportFretEnd}
-          backgroundOpacityPercent={backgroundOpacityPercent}
-          onExportFretStartChange={handleExportFretStartChange}
-          onExportFretEndChange={handleExportFretEndChange}
-          onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
-          onExportTransparentPng={exportTransparentPng}
-        />
+        <FretboardView />
       </div>
     </main>
   )
