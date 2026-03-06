@@ -6,6 +6,7 @@ import {
   FRET_COUNT,
   FRET_NUMBERS,
   getConnectionId,
+  type HighlightedNote,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
@@ -18,7 +19,7 @@ import {
 type FretboardStore = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
-  highlightedPositions: Set<PositionId>
+  displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
   exportFretStart: number
   exportFretEnd: number
@@ -40,7 +41,7 @@ type FretboardStore = {
 export const useFretboardStore = create<FretboardStore>((set, get) => ({
   keyPc: 0,
   selectedScale: 'major',
-  highlightedPositions: new Set(),
+  displayedNotes: {},
   connections: {},
   exportFretStart: 0,
   exportFretEnd: FRET_COUNT,
@@ -55,7 +56,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
   },
 
   addScaleNotes: () => {
-    const { keyPc, selectedScale, highlightedPositions } = get()
+    const { keyPc, selectedScale, displayedNotes } = get()
     if (selectedScale === undefined) {
       return
     }
@@ -64,7 +65,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
       SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)),
     )
 
-    const next = new Set(highlightedPositions)
+    const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
 
     for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
       for (const fret of FRET_NUMBERS) {
@@ -72,35 +73,44 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
         const pitchClass = normalizePc(midi)
 
         if (pcsToAdd.has(pitchClass)) {
-          next.add(
-            toPositionId({
-              stringIndex,
-              fret,
-            }),
-          )
+          const positionId = toPositionId({
+            stringIndex,
+            fret,
+          })
+          if (next[positionId] === undefined) {
+            next[positionId] = {
+              positionId,
+              isDimmed: false,
+              colorVariant: 'default',
+            }
+          }
         }
       }
     }
 
-    set({ highlightedPositions: next })
+    set({ displayedNotes: next })
   },
 
   clearHighlightedNotes: () => {
-    set({ highlightedPositions: new Set(), connections: {} })
+    set({ displayedNotes: {}, connections: {} })
   },
 
   togglePosition: (positionId) => {
-    const next = new Set(get().highlightedPositions)
+    const next: Record<PositionId, HighlightedNote> = { ...get().displayedNotes }
     const { removeConnectionsByPosition } = get()
 
-    if (next.has(positionId)) {
-      next.delete(positionId)
+    if (next[positionId] !== undefined) {
+      delete next[positionId]
       removeConnectionsByPosition(positionId)
     } else {
-      next.add(positionId)
+      next[positionId] = {
+        positionId,
+        isDimmed: false,
+        colorVariant: 'default',
+      }
     }
 
-    set({ highlightedPositions: next })
+    set({ displayedNotes: next })
   },
 
   connectPositions: (from, to) => {
@@ -175,7 +185,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
   exportTransparentPng: () => {
     const {
       keyPc,
-      highlightedPositions,
+      displayedNotes,
       connections,
       exportFretStart,
       exportFretEnd,
@@ -184,7 +194,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
 
     exportTransparentPng({
       keyPc,
-      highlightedPositions,
+      displayedNotes,
       connections: Object.values(connections),
       exportFretStart,
       exportFretEnd,

@@ -3,6 +3,7 @@ import {
   type Connection,
   DEGREE_LABELS,
   FRET_NUMBERS,
+  type HighlightedNote,
   MARKER_FRETS,
   normalizePc,
   OPEN_STRINGS,
@@ -20,7 +21,7 @@ const FRET_CELL_WIDTH = 56
 
 type FretboardGridProps = {
   keyPc: PitchClass
-  highlightedPositions: Set<PositionId>
+  displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   exportFretStart: number
   exportFretEnd: number
@@ -50,7 +51,7 @@ type FretboardGridProps = {
 
 export const FretboardGrid = ({
   keyPc,
-  highlightedPositions,
+  displayedNotes,
   connections,
   exportFretStart,
   exportFretEnd,
@@ -200,10 +201,11 @@ export const FretboardGrid = ({
               {stringInfo.name}
             </div>
 
+            {/* ノート自体じゃなくて、マス目がmidiのデータを持ってるのか。で、ノート自体は、midi　音高の情報を持っていない。マス目の上にノートが来たら、マス目の音高で表示される。 */}
             {FRET_NUMBERS.map((fret) => {
               const positionId = toPositionId({ stringIndex, fret })
               const pitchClass = normalizePc(stringInfo.midi + fret)
-              const isHighlighted = highlightedPositions.has(positionId)
+              const isHighlighted = displayedNotes[positionId] !== undefined
               const intervalFromKey = normalizePc(pitchClass - keyPc)
               const isRoot = intervalFromKey === 0
               const isStartFret = fret === startHighlightFret

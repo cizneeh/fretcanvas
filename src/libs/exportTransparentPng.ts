@@ -1,6 +1,7 @@
 import {
   type Connection,
   DEGREE_LABELS,
+  type HighlightedNote,
   MARKER_FRETS,
   normalizePc,
   OPEN_STRINGS,
@@ -12,7 +13,7 @@ import {
 
 type ExportTransparentPngInput = {
   keyPc: PitchClass
-  highlightedPositions: Set<PositionId>
+  displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   exportFretStart: number
   exportFretEnd: number
@@ -21,7 +22,7 @@ type ExportTransparentPngInput = {
 
 export const exportTransparentPng = ({
   keyPc,
-  highlightedPositions,
+  displayedNotes,
   connections,
   exportFretStart,
   exportFretEnd,
@@ -96,7 +97,7 @@ export const exportTransparentPng = ({
         stringIndex: row,
         fret,
       })
-      if (!highlightedPositions.has(positionId)) {
+      if (displayedNotes[positionId] === undefined) {
         continue
       }
 

@@ -7,7 +7,7 @@ import { FretboardGrid } from './FretboardGrid'
 
 export const FretboardView = () => {
   const keyPc = useFretboardStore((state) => state.keyPc)
-  const highlightedPositions = useFretboardStore((state) => state.highlightedPositions)
+  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const connectionsById = useFretboardStore((state) => state.connections)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
@@ -203,7 +203,7 @@ export const FretboardView = () => {
       return
     }
 
-    if (!highlightedPositions.has(positionId)) {
+    if (displayedNotes[positionId] === undefined) {
       togglePosition(positionId)
     }
 
@@ -235,7 +235,7 @@ export const FretboardView = () => {
         <div className="min-w-max rounded-md border border-slate-700 bg-black p-3">
           <FretboardGrid
             keyPc={keyPc}
-            highlightedPositions={highlightedPositions}
+            displayedNotes={displayedNotes}
             connections={connections}
             exportFretStart={exportFretStart}
             exportFretEnd={exportFretEnd}

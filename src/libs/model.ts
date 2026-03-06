@@ -9,7 +9,7 @@ export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonic
  * ２次元配列ではんく文字数なのは、その方が一意idとして扱いやすく、setで高速にhas/add/deleteしやすいから。らしい。
  * まぁそうかも？表示側でも、セルごとにidを持ってて、突き合わせてハイライトする。
  * 上下左右のポジションをたどるとか、行・列単位の処理とか、矩形選択とか、そういうのをやるんだったら座標で持ったほうが良い。文字列だとそういう比較ができず、パースすることになるから。今stringで良いのは、単一点のトグルだけだから。
- * やっぱりPositionという座標でもつことにした
+ * 検索するときに、positionIdみたいな文字列がキーになっている方が確認しやすい。なので、PositionIdをキーにして、そのRecordの値として、noteのデータ、dimmedやcolorを持つことにした。
  */
 export type PositionId = string
 export type Position = {
@@ -21,6 +21,12 @@ export type Connection = {
   id: ConnectionId
   from: PositionId
   to: PositionId
+}
+export type NoteColorVariant = 'default' | 'amber' | 'violet'
+export type HighlightedNote = {
+  positionId: PositionId
+  isDimmed: boolean
+  colorVariant: NoteColorVariant
 }
 
 export type StringInfo = {
