@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo } from 'react'
-import { FRET_NUMBERS, OPEN_STRINGS, type PositionId } from '../libs/model'
+import { type BendArrow, FRET_NUMBERS, OPEN_STRINGS, type PositionId } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
 import {
@@ -27,10 +27,16 @@ type FretboardGridProps = {
     button: number,
     isMetaKey: boolean,
     isCtrlKey: boolean,
+    isAltKey: boolean,
     clientX: number,
     clientY: number,
   ) => void
-  onNoteClick: (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean) => void
+  onNoteClick: (
+    positionId: PositionId,
+    isMetaKey: boolean,
+    isCtrlKey: boolean,
+    isAltKey: boolean,
+  ) => void
   onNoteContextMenu: (
     positionId: PositionId,
     isHighlighted: boolean,
@@ -57,8 +63,11 @@ export const FretboardGrid = ({
   rangeTrack,
 }: FretboardGridProps) => {
   const connectionsById = useFretboardStore((state) => state.connections)
+  const bendsById = useFretboardStore((state) => state.bends)
   const removeConnection = useFretboardStore((state) => state.removeConnection)
+  const removeBend = useFretboardStore((state) => state.removeBend)
   const connections = useMemo(() => Object.values(connectionsById), [connectionsById])
+  const bends = useMemo(() => Object.values(bendsById) as BendArrow[], [bendsById])
 
   const svgWidth = LABEL_WIDTH + FRET_NUMBERS.length * FRET_CELL_WIDTH
   const svgHeight = HEADER_ROW_HEIGHT + OPEN_STRINGS.length * STRING_ROW_HEIGHT
@@ -80,8 +89,10 @@ export const FretboardGrid = ({
         svgWidth={svgWidth}
         svgHeight={svgHeight}
         connections={connections}
+        bends={bends}
         previewConnection={previewConnection}
         onRemoveConnection={removeConnection}
+        onRemoveBend={removeBend}
       />
 
       <div

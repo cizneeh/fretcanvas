@@ -1,6 +1,6 @@
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react'
 import { FRET_NUMBERS, type PositionId } from '../libs/model'
-import { isDimShortcutPressed } from '../libs/shortcut'
+import { isBendShortcutPressed, isDimShortcutPressed } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 
@@ -11,6 +11,8 @@ export const useFretboardInteractionState = () => {
   const togglePosition = useFretboardStore((state) => state.togglePosition)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
+  const upsertBendFromPosition = useFretboardStore((state) => state.upsertBendFromPosition)
+  const removeBendByFromPosition = useFretboardStore((state) => state.removeBendByFromPosition)
   const handleExportFretStartChange = useSettingsStore((state) => state.handleExportFretStartChange)
   const handleExportFretEndChange = useSettingsStore((state) => state.handleExportFretEndChange)
 
@@ -184,10 +186,15 @@ export const useFretboardInteractionState = () => {
     button: number,
     isMetaKey: boolean,
     isCtrlKey: boolean,
+    isAltKey: boolean,
     clientX: number,
     clientY: number,
   ) => {
-    if (button !== 0 || isDimShortcutPressed(isMetaKey, isCtrlKey)) {
+    if (
+      button !== 0 ||
+      isDimShortcutPressed(isMetaKey, isCtrlKey) ||
+      isBendShortcutPressed(isAltKey)
+    ) {
       return
     }
 
@@ -251,9 +258,19 @@ export const useFretboardInteractionState = () => {
     resetConnectionDrag()
   }
 
-  const handleNoteClick = (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean) => {
+  const handleNoteClick = (
+    positionId: PositionId,
+    isMetaKey: boolean,
+    isCtrlKey: boolean,
+    isAltKey: boolean,
+  ) => {
     if (isDimShortcutPressed(isMetaKey, isCtrlKey)) {
       toggleNoteDimmed(positionId)
+      return
+    }
+
+    if (isBendShortcutPressed(isAltKey)) {
+      upsertBendFromPosition(positionId)
       return
     }
 
@@ -283,12 +300,22 @@ export const useFretboardInteractionState = () => {
     })
   }
 
+  const handleAddBendFromContextMenu = (positionId: PositionId) => {
+    upsertBendFromPosition(positionId)
+  }
+
+  const handleRemoveBendFromContextMenu = (positionId: PositionId) => {
+    removeBendByFromPosition(positionId)
+  }
+
   return {
     trackRef,
     boardRef,
     contextMenuRef,
     noteContextMenu,
     setNoteContextMenu,
+    handleAddBendFromContextMenu,
+    handleRemoveBendFromContextMenu,
     previewConnection:
       dragConnectFrom !== undefined && dragPointer !== undefined
         ? {

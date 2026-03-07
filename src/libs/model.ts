@@ -22,6 +22,11 @@ export type Connection = {
   from: PositionId
   to: PositionId
 }
+export type BendId = string
+export type BendArrow = {
+  id: BendId
+  from: PositionId
+}
 export type NoteColorVariant = 'default' | 'amber' | 'violet'
 export type HighlightedNote = {
   positionId: PositionId
@@ -119,3 +124,5 @@ export const getConnectionId = (from: PositionId, to: PositionId): ConnectionId 
   }
   return `${toPositionId(right)}|${toPositionId(left)}`
 }
+
+export const getBendId = (from: PositionId): BendId => `bend:${from}`

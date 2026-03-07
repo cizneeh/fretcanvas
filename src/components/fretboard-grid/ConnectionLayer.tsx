@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import type { Connection, PositionId } from '../../libs/model'
+import type { BendArrow, Connection, PositionId } from '../../libs/model'
 import { getPositionPoint } from './constants'
 
 type ConnectionLayerProps = {
   svgWidth: number
   svgHeight: number
   connections: Connection[]
+  bends: BendArrow[]
   previewConnection:
     | {
         from: PositionId
@@ -14,16 +15,20 @@ type ConnectionLayerProps = {
       }
     | undefined
   onRemoveConnection: (connectionId: string) => void
+  onRemoveBend: (bendId: string) => void
 }
 
 export const ConnectionLayer = ({
   svgWidth,
   svgHeight,
   connections,
+  bends,
   previewConnection,
   onRemoveConnection,
+  onRemoveBend,
 }: ConnectionLayerProps) => {
   const [hoveredConnectionId, setHoveredConnectionId] = useState<string | undefined>(undefined)
+  const [hoveredBendId, setHoveredBendId] = useState<string | undefined>(undefined)
 
   return (
     <svg
@@ -72,6 +77,80 @@ export const ConnectionLayer = ({
               stroke={isHovered ? 'rgba(34, 211, 238, 1)' : 'rgba(34, 211, 238, 0.9)'}
               strokeWidth={isHovered ? 4 : 2.5}
               strokeLinecap="round"
+              style={{ transition: 'stroke-width 140ms ease, stroke 140ms ease' }}
+            />
+          </g>
+        )
+      })}
+
+      {bends.map((bend) => {
+        const fromPoint = getPositionPoint(bend.from)
+        if (fromPoint === undefined) {
+          return undefined
+        }
+
+        const startX = fromPoint.x
+        const startY = fromPoint.y
+        const endX = startX + 36
+        const endY = startY - 28
+        const controlX = startX + 14
+        const controlY = startY - 44
+        const isHovered = hoveredBendId === bend.id
+        const strokeWidth = isHovered ? 4 : 2.5
+        const strokeColor = isHovered ? 'rgba(251, 191, 36, 1)' : 'rgba(251, 191, 36, 0.92)'
+
+        const tangentX = endX - controlX
+        const tangentY = endY - controlY
+        const tangentLength = Math.hypot(tangentX, tangentY) || 1
+        const unitX = tangentX / tangentLength
+        const unitY = tangentY / tangentLength
+        const arrowLength = 9
+        const arrowSpread = 4
+        const leftX = endX - unitX * arrowLength - unitY * arrowSpread
+        const leftY = endY - unitY * arrowLength + unitX * arrowSpread
+        const rightX = endX - unitX * arrowLength + unitY * arrowSpread
+        const rightY = endY - unitY * arrowLength - unitX * arrowSpread
+
+        const path = `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`
+
+        return (
+          <g key={bend.id}>
+            <path
+              className="pointer-events-auto cursor-pointer"
+              d={path}
+              fill="none"
+              stroke="rgba(0, 0, 0, 0.001)"
+              strokeWidth={14}
+              strokeLinecap="round"
+              onPointerEnter={() => {
+                setHoveredBendId(bend.id)
+              }}
+              onPointerLeave={() => {
+                setHoveredBendId(undefined)
+              }}
+              onClick={(event) => {
+                event.stopPropagation()
+                onRemoveBend(bend.id)
+              }}
+            />
+
+            <path
+              className="pointer-events-none"
+              d={path}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              style={{ transition: 'stroke-width 140ms ease, stroke 140ms ease' }}
+            />
+            <path
+              className="pointer-events-none"
+              d={`M ${leftX} ${leftY} L ${endX} ${endY} L ${rightX} ${rightY}`}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
               style={{ transition: 'stroke-width 140ms ease, stroke 140ms ease' }}
             />
           </g>

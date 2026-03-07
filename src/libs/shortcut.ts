@@ -36,6 +36,15 @@ export const getDimShortcutLabel = (): string => {
   return 'Ctrl + Click'
 }
 
+export const isBendShortcutPressed = (altKey: boolean): boolean => altKey
+
+export const getBendShortcutLabel = (): string => {
+  if (isMacLikePlatform()) {
+    return '⌥ + Click'
+  }
+  return 'Alt + Click'
+}
+
 export const isUndoShortcutPressed = (
   key: string,
   metaKey: boolean,

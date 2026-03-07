@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import {
+  type BendArrow,
+  type BendId,
   type Connection,
   type ConnectionId,
   FRET_COUNT,
+  getBendId,
   getConnectionId,
   type HighlightedNote,
   normalizePc,
@@ -17,6 +20,7 @@ import {
 type HistorySnapshot = {
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
+  bends: Record<BendId, BendArrow>
 }
 
 type AddScaleNotesOptions = {
@@ -33,6 +37,7 @@ type FretboardStore = {
   selectedScale: ScaleId | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
+  bends: Record<BendId, BendArrow>
   undoStack: HistorySnapshot[]
   redoStack: HistorySnapshot[]
   historyLimit: number
@@ -45,6 +50,9 @@ type FretboardStore = {
   connectPositions: (from: PositionId, to: PositionId) => void
   removeConnection: (connectionId: ConnectionId) => void
   removeConnectionsByPosition: (positionId: PositionId) => void
+  upsertBendFromPosition: (from: PositionId) => void
+  removeBend: (bendId: BendId) => void
+  removeBendByFromPosition: (from: PositionId) => void
   canUndo: () => boolean
   canRedo: () => boolean
   undo: () => void
@@ -52,10 +60,11 @@ type FretboardStore = {
 }
 
 const createHistorySnapshot = (
-  state: Pick<FretboardStore, 'displayedNotes' | 'connections'>,
+  state: Pick<FretboardStore, 'displayedNotes' | 'connections' | 'bends'>,
 ): HistorySnapshot => ({
   displayedNotes: { ...state.displayedNotes },
   connections: { ...state.connections },
+  bends: { ...state.bends },
 })
 
 const notesEqual = (
@@ -115,6 +124,19 @@ const connectionsEqual = (
 }
 
 const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): boolean => {
+  const leftBendEntries = Object.entries(left.bends)
+  const rightBendEntries = Object.entries(right.bends)
+  if (leftBendEntries.length !== rightBendEntries.length) {
+    return false
+  }
+
+  for (const [bendId, leftBend] of leftBendEntries) {
+    const rightBend = right.bends[bendId]
+    if (rightBend === undefined || rightBend.from !== leftBend.from) {
+      return false
+    }
+  }
+
   return (
     notesEqual(left.displayedNotes, right.displayedNotes) &&
     connectionsEqual(left.connections, right.connections)
@@ -145,6 +167,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     selectedScale: 'major',
     displayedNotes: {},
     connections: {},
+    bends: {},
     undoStack: [],
     redoStack: [],
     historyLimit: 100,
@@ -212,19 +235,21 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       const current = get()
       if (
         Object.keys(current.displayedNotes).length === 0 &&
-        Object.keys(current.connections).length === 0
+        Object.keys(current.connections).length === 0 &&
+        Object.keys(current.bends).length === 0
       ) {
         return
       }
 
       pushHistoryBeforeChange()
-      set({ displayedNotes: {}, connections: {} })
+      set({ displayedNotes: {}, connections: {}, bends: {} })
     },
 
     togglePosition: (positionId) => {
       const current = get()
       const next: Record<PositionId, HighlightedNote> = { ...current.displayedNotes }
       let nextConnections = current.connections
+      let nextBends = current.bends
 
       if (next[positionId] !== undefined) {
         delete next[positionId]
@@ -232,6 +257,11 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
           return connection.from !== positionId && connection.to !== positionId
         })
         nextConnections = Object.fromEntries(filteredEntries) as Record<ConnectionId, Connection>
+        const bendId = getBendId(positionId)
+        if (nextBends[bendId] !== undefined) {
+          nextBends = { ...nextBends }
+          delete nextBends[bendId]
+        }
       } else {
         next[positionId] = {
           positionId,
@@ -241,7 +271,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       }
 
       pushHistoryBeforeChange()
-      set({ displayedNotes: next, connections: nextConnections })
+      set({ displayedNotes: next, connections: nextConnections, bends: nextBends })
     },
 
     toggleNoteDimmed: (positionId) => {
@@ -313,6 +343,55 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ connections: nextConnections })
     },
 
+    upsertBendFromPosition: (from) => {
+      const current = get()
+      if (current.displayedNotes[from] === undefined) {
+        return
+      }
+
+      const bendId = getBendId(from)
+      const nextBends = {
+        ...current.bends,
+        [bendId]: {
+          id: bendId,
+          from,
+        },
+      }
+
+      const currentBend = current.bends[bendId]
+      if (currentBend !== undefined && currentBend.from === from) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ bends: nextBends })
+    },
+
+    removeBend: (bendId) => {
+      const current = get()
+      if (current.bends[bendId] === undefined) {
+        return
+      }
+
+      const nextBends = { ...current.bends }
+      delete nextBends[bendId]
+      pushHistoryBeforeChange()
+      set({ bends: nextBends })
+    },
+
+    removeBendByFromPosition: (from) => {
+      const current = get()
+      const bendId = getBendId(from)
+      if (current.bends[bendId] === undefined) {
+        return
+      }
+
+      const nextBends = { ...current.bends }
+      delete nextBends[bendId]
+      pushHistoryBeforeChange()
+      set({ bends: nextBends })
+    },
+
     canUndo: () => get().undoStack.length > 0,
 
     canRedo: () => get().redoStack.length > 0,
@@ -329,6 +408,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set((state) => ({
         displayedNotes: { ...previousSnapshot.displayedNotes },
         connections: { ...previousSnapshot.connections },
+        bends: { ...previousSnapshot.bends },
         undoStack: state.undoStack.slice(0, -1),
         redoStack: [...state.redoStack, currentSnapshot].slice(-state.historyLimit),
       }))
@@ -346,6 +426,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set((state) => ({
         displayedNotes: { ...nextSnapshot.displayedNotes },
         connections: { ...nextSnapshot.connections },
+        bends: { ...nextSnapshot.bends },
         redoStack: state.redoStack.slice(0, -1),
         undoStack: [...state.undoStack, currentSnapshot].slice(-state.historyLimit),
       }))

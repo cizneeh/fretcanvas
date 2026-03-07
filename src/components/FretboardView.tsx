@@ -10,6 +10,7 @@ export const FretboardView = () => {
   const keyPc = useFretboardStore((state) => state.keyPc)
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const connectionsById = useFretboardStore((state) => state.connections)
+  const bendsById = useFretboardStore((state) => state.bends)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const backgroundOpacityPercent = useSettingsStore((state) => state.backgroundOpacityPercent)
@@ -36,7 +37,9 @@ export const FretboardView = () => {
             positionId={interaction.noteContextMenu.positionId}
             x={interaction.noteContextMenu.x}
             y={interaction.noteContextMenu.y}
-            onToggleDimDone={() => {
+            onAddBend={interaction.handleAddBendFromContextMenu}
+            onRemoveBend={interaction.handleRemoveBendFromContextMenu}
+            onClose={() => {
               interaction.setNoteContextMenu(undefined)
             }}
           />
@@ -53,6 +56,7 @@ export const FretboardView = () => {
             keyPc,
             displayedNotes,
             connections: Object.values(connectionsById),
+            bends: Object.values(bendsById),
             exportFretStart,
             exportFretEnd,
             backgroundOpacityPercent,

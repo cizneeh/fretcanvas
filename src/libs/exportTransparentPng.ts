@@ -1,4 +1,5 @@
 import {
+  type BendArrow,
   type Connection,
   DEGREE_LABELS,
   type HighlightedNote,
@@ -15,6 +16,7 @@ type ExportTransparentPngInput = {
   keyPc: PitchClass
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
+  bends: BendArrow[]
   exportFretStart: number
   exportFretEnd: number
   backgroundOpacityPercent: number
@@ -24,6 +26,7 @@ export const exportTransparentPng = ({
   keyPc,
   displayedNotes,
   connections,
+  bends,
   exportFretStart,
   exportFretEnd,
   backgroundOpacityPercent,
@@ -167,6 +170,46 @@ export const exportTransparentPng = ({
     ctx.beginPath()
     ctx.moveTo(fromX, fromY)
     ctx.lineTo(toX, toY)
+    ctx.stroke()
+  }
+
+  for (const bend of bends) {
+    const from = parsePositionId(bend.from)
+    if (from === undefined || from.stringIndex < 0) {
+      continue
+    }
+
+    const startX = boardLeft + (from.fret - start + 0.5) * cellWidth
+    const startY = boardTop + from.stringIndex * rowHeight + rowHeight / 2
+    const endX = startX + 36
+    const endY = startY - 28
+    const controlX = startX + 14
+    const controlY = startY - 44
+
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.95)'
+    ctx.lineWidth = 2.5
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(startX, startY)
+    ctx.quadraticCurveTo(controlX, controlY, endX, endY)
+    ctx.stroke()
+
+    const tangentX = endX - controlX
+    const tangentY = endY - controlY
+    const tangentLength = Math.hypot(tangentX, tangentY) || 1
+    const unitX = tangentX / tangentLength
+    const unitY = tangentY / tangentLength
+    const arrowLength = 9
+    const arrowSpread = 4
+    const leftX = endX - unitX * arrowLength - unitY * arrowSpread
+    const leftY = endY - unitY * arrowLength + unitX * arrowSpread
+    const rightX = endX - unitX * arrowLength + unitY * arrowSpread
+    const rightY = endY - unitY * arrowLength - unitX * arrowSpread
+
+    ctx.beginPath()
+    ctx.moveTo(leftX, leftY)
+    ctx.lineTo(endX, endY)
+    ctx.lineTo(rightX, rightY)
     ctx.stroke()
   }
   ctx.restore()

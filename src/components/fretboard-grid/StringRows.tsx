@@ -18,10 +18,16 @@ type StringRowsProps = {
     button: number,
     isMetaKey: boolean,
     isCtrlKey: boolean,
+    isAltKey: boolean,
     clientX: number,
     clientY: number,
   ) => void
-  onNoteClick: (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean) => void
+  onNoteClick: (
+    positionId: PositionId,
+    isMetaKey: boolean,
+    isCtrlKey: boolean,
+    isAltKey: boolean,
+  ) => void
   onNoteContextMenu: (
     positionId: PositionId,
     isHighlighted: boolean,
