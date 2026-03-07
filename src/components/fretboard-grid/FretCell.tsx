@@ -50,7 +50,7 @@ export const FretCell = ({
   return (
     <button
       type="button"
-      className="group relative flex h-12 items-center justify-center border-r border-slate-700 focus-visible:outline-none"
+      className="group relative flex h-12 items-center justify-center border-r border-slate-400/55 focus-visible:outline-none"
       onClick={(event) => {
         onNoteClick(positionId, event.metaKey, event.ctrlKey)
       }}
@@ -73,7 +73,7 @@ export const FretCell = ({
         onNotePointerUp(positionId)
       }}
     >
-      <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-500/70" />
+      <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-300/45" />
       {isStartAtNutLine ? (
         <span
           className={`pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-[2px] ${startMarkerColor}`}

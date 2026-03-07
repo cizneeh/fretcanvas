@@ -71,7 +71,7 @@ export const ExportRangeTrack = ({
         />
         {hoverPreview !== undefined ? (
           <span
-            className={`pointer-events-none absolute top-1/2 z-20 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border text-[11px] font-semibold text-slate-950/70 ${
+            className={`pointer-events-none absolute top-1/2 z-20 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border text-[11px] font-semibold text-white/85 ${
               hoverPreview.handle === 'start'
                 ? 'border-cyan-200/70 bg-cyan-400/40'
                 : 'border-emerald-200/70 bg-emerald-400/40'
@@ -83,7 +83,7 @@ export const ExportRangeTrack = ({
         ) : undefined}
         <button
           type="button"
-          className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+          className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-700/90 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
           style={{ left: `${startHandlePercent}%` }}
           data-testid="export-start-handle"
           data-export-handle="true"
@@ -96,7 +96,7 @@ export const ExportRangeTrack = ({
         </button>
         <button
           type="button"
-          className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-400/90 text-[11px] font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+          className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-700/90 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
           style={{ left: `${endHandlePercent}%` }}
           data-testid="export-end-handle"
           data-export-handle="true"

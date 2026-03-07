@@ -71,7 +71,7 @@ export const exportTransparentPng = ({
     ctx.fillText(String(fret), xCenter, paddingY + headerHeight / 2)
 
     const lineX = boardLeft + (fret - start + 1) * cellWidth
-    ctx.strokeStyle = 'rgba(71, 85, 105, 0.85)'
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.62)'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(lineX, boardTop)
@@ -85,7 +85,7 @@ export const exportTransparentPng = ({
     ctx.textAlign = 'center'
     ctx.fillText(stringInfo.name, paddingX + labelWidth / 2, yCenter)
 
-    ctx.strokeStyle = 'rgba(100, 116, 139, 0.85)'
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.56)'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(boardLeft, yCenter)
@@ -97,7 +97,8 @@ export const exportTransparentPng = ({
         stringIndex: row,
         fret,
       })
-      if (displayedNotes[positionId] === undefined) {
+      const displayedNote = displayedNotes[positionId]
+      if (displayedNote === undefined) {
         continue
       }
 
@@ -107,22 +108,34 @@ export const exportTransparentPng = ({
       const label = DEGREE_LABELS[intervalFromKey]
       const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
-      ctx.fillStyle = isRoot ? 'rgba(244, 63, 94, 1)' : 'rgba(34, 211, 238, 1)'
+      const noteOpacity = displayedNote.isDimmed ? 0.45 : 1
+      ctx.save()
+      ctx.globalAlpha = noteOpacity
+      ctx.fillStyle = isRoot ? 'rgba(190, 24, 93, 0.8)' : 'rgba(8, 145, 178, 0.8)'
       ctx.beginPath()
       ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
       ctx.fill()
 
-      ctx.strokeStyle = isRoot ? 'rgba(255, 228, 230, 1)' : 'rgba(224, 242, 254, 1)'
+      ctx.strokeStyle = isRoot ? 'rgba(254, 205, 211, 0.8)' : 'rgba(207, 250, 254, 0.7)'
       ctx.lineWidth = 1.5
       ctx.beginPath()
       ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
       ctx.stroke()
 
-      ctx.fillStyle = isRoot ? '#ffffff' : '#082f49'
+      ctx.fillStyle = '#ffffff'
       ctx.font = '600 13px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'
+      ctx.shadowBlur = 2
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 1
       ctx.fillText(label, xCenter, yCenter + 0.5)
+      ctx.shadowColor = 'transparent'
+      ctx.shadowBlur = 0
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 0
+      ctx.restore()
     }
   })
 
