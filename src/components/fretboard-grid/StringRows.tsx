@@ -5,6 +5,7 @@ import {
   normalizePc,
   OPEN_STRINGS,
   type PositionId,
+  SCALE_INTERVALS,
   toPositionId,
 } from '../../libs/model'
 import { useFretboardStore } from '../../stores/fretboardStore'
@@ -44,12 +45,17 @@ export const StringRows = ({
   onNotePointerUp,
 }: StringRowsProps) => {
   const keyPc = useFretboardStore((state) => state.keyPc)
+  const selectedScale = useFretboardStore((state) => state.selectedScale)
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const startHighlightFret = Math.max(0, exportFretStart - 1)
   const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
   const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
+  const scalePitchClasses =
+    selectedScale === undefined
+      ? undefined
+      : new Set(SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)))
 
   return (
     <>
@@ -67,6 +73,8 @@ export const StringRows = ({
             const isHighlighted = displayedNote !== undefined
             const intervalFromKey = normalizePc(pitchClass - keyPc)
             const isRoot = intervalFromKey === 0
+            const isOutOfScale =
+              scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
             const isStartFret = fret === startHighlightFret
             const isEndFret = fret === exportFretEnd
             const isStartAtNutLine = exportFretStart === 0 && fret === 0
@@ -79,6 +87,7 @@ export const StringRows = ({
                 isDimmed={displayedNote?.isDimmed ?? false}
                 label={DEGREE_LABELS[intervalFromKey]}
                 isRoot={isRoot}
+                isOutOfScale={isOutOfScale}
                 isStartAtNutLine={isStartAtNutLine}
                 isStartFret={isStartFret}
                 isEndFret={isEndFret}

@@ -8,6 +8,7 @@ import { NoteContextMenu } from './NoteContextMenu'
 
 export const FretboardView = () => {
   const keyPc = useFretboardStore((state) => state.keyPc)
+  const selectedScale = useFretboardStore((state) => state.selectedScale)
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const connectionsById = useFretboardStore((state) => state.connections)
   const bendsById = useFretboardStore((state) => state.bends)
@@ -53,6 +54,7 @@ export const FretboardView = () => {
         onExportTransparentPng={() => {
           exportTransparentPng({
             keyPc,
+            selectedScale,
             displayedNotes,
             connections: Object.values(connectionsById),
             bends: Object.values(bendsById),

@@ -7,6 +7,7 @@ type FretCellProps = {
   isDimmed: boolean
   label: string
   isRoot: boolean
+  isOutOfScale: boolean
   isStartAtNutLine: boolean
   isStartFret: boolean
   isEndFret: boolean
@@ -43,6 +44,7 @@ export const FretCell = ({
   isDimmed,
   label,
   isRoot,
+  isOutOfScale,
   isStartAtNutLine,
   isStartFret,
   isEndFret,
@@ -96,7 +98,13 @@ export const FretCell = ({
           className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${endMarkerColor}`}
         />
       ) : undefined}
-      <NoteChip isHighlighted={isHighlighted} isRoot={isRoot} isDimmed={isDimmed} label={label} />
+      <NoteChip
+        isHighlighted={isHighlighted}
+        isRoot={isRoot}
+        isOutOfScale={isOutOfScale}
+        isDimmed={isDimmed}
+        label={label}
+      />
     </button>
   )
 }

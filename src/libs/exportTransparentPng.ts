@@ -9,11 +9,14 @@ import {
   type PitchClass,
   type PositionId,
   parsePositionId,
+  SCALE_INTERVALS,
+  type ScaleId,
   toPositionId,
 } from './model'
 
 type ExportTransparentPngInput = {
   keyPc: PitchClass
+  selectedScale: ScaleId | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   bends: BendArrow[]
@@ -24,6 +27,7 @@ type ExportTransparentPngInput = {
 
 export const exportTransparentPng = ({
   keyPc,
+  selectedScale,
   displayedNotes,
   connections,
   bends,
@@ -67,6 +71,10 @@ export const exportTransparentPng = ({
   ctx.font = '12px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
+  const scalePitchClasses =
+    selectedScale === undefined
+      ? undefined
+      : new Set(SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)))
 
   const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
     const positionId = toPositionId({
@@ -81,18 +89,27 @@ export const exportTransparentPng = ({
     const pitchClass = normalizePc(midiBase + fret)
     const intervalFromKey = normalizePc(pitchClass - keyPc)
     const isRoot = intervalFromKey === 0
+    const isOutOfScale = scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
     const label = DEGREE_LABELS[intervalFromKey]
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
     const noteOpacity = displayedNote.isDimmed ? 0.45 : 1
     ctx.save()
     ctx.globalAlpha = noteOpacity
-    ctx.fillStyle = isRoot ? 'rgba(190, 24, 93, 0.8)' : 'rgba(8, 145, 178, 0.8)'
+    ctx.fillStyle = isRoot
+      ? 'rgba(190, 24, 93, 0.8)'
+      : isOutOfScale
+        ? 'rgba(249, 115, 22, 0.8)'
+        : 'rgba(8, 145, 178, 0.8)'
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.strokeStyle = isRoot ? 'rgba(254, 205, 211, 0.8)' : 'rgba(207, 250, 254, 0.7)'
+    ctx.strokeStyle = isRoot
+      ? 'rgba(254, 205, 211, 0.8)'
+      : isOutOfScale
+        ? 'rgba(254, 215, 170, 0.75)'
+        : 'rgba(207, 250, 254, 0.7)'
     ctx.lineWidth = 1.5
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
