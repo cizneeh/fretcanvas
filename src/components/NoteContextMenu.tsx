@@ -28,8 +28,11 @@ export const NoteContextMenu = ({ positionId, x, y, onToggleDimDone }: NoteConte
           onToggleDimDone()
         }}
       >
-        <span>Dim</span>
-        <span className="w-4 text-center text-sm text-slate-300">
+        <span className="flex items-center gap-2 pr-3">
+          <span>Dim</span>
+          <span className="text-[11px] text-slate-400">⌘ + Click</span>
+        </span>
+        <span className="ml-2 w-4 shrink-0 text-center text-sm text-slate-300">
           {displayedNotes[positionId]?.isDimmed === true ? '✓' : ''}
         </span>
       </button>
