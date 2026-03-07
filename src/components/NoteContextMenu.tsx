@@ -1,4 +1,5 @@
 import type { PositionId } from '../libs/model'
+import { getDimShortcutLabel } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
 
 type NoteContextMenuProps = {
@@ -11,6 +12,7 @@ type NoteContextMenuProps = {
 export const NoteContextMenu = ({ positionId, x, y, onToggleDimDone }: NoteContextMenuProps) => {
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
+  const shortcutLabel = getDimShortcutLabel()
 
   return (
     <div
@@ -30,7 +32,7 @@ export const NoteContextMenu = ({ positionId, x, y, onToggleDimDone }: NoteConte
       >
         <span className="flex items-center gap-2 pr-3">
           <span>Dim</span>
-          <span className="text-[11px] text-slate-400">⌘ + Click</span>
+          <span className="text-[11px] text-slate-400">{shortcutLabel}</span>
         </span>
         <span className="ml-2 w-4 shrink-0 text-center text-sm text-slate-300">
           {displayedNotes[positionId]?.isDimmed === true ? '✓' : ''}

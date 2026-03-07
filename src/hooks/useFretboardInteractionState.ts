@@ -1,5 +1,6 @@
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react'
 import { FRET_NUMBERS, type PositionId } from '../libs/model'
+import { isDimShortcutPressed } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
 
 export const useFretboardInteractionState = () => {
@@ -177,10 +178,11 @@ export const useFretboardInteractionState = () => {
     isHighlighted: boolean,
     button: number,
     isMetaKey: boolean,
+    isCtrlKey: boolean,
     clientX: number,
     clientY: number,
   ) => {
-    if (button !== 0 || isMetaKey) {
+    if (button !== 0 || isDimShortcutPressed(isMetaKey, isCtrlKey)) {
       return
     }
 
@@ -244,8 +246,8 @@ export const useFretboardInteractionState = () => {
     resetConnectionDrag()
   }
 
-  const handleNoteClick = (positionId: PositionId, isMetaKey: boolean) => {
-    if (isMetaKey) {
+  const handleNoteClick = (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean) => {
+    if (isDimShortcutPressed(isMetaKey, isCtrlKey)) {
       toggleNoteDimmed(positionId)
       return
     }

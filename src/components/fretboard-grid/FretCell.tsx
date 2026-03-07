@@ -12,12 +12,13 @@ type FretCellProps = {
   isEndFret: boolean
   startMarkerColor: string
   endMarkerColor: string
-  onNoteClick: (positionId: PositionId, isMetaKey: boolean) => void
+  onNoteClick: (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean) => void
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
     button: number,
     isMetaKey: boolean,
+    isCtrlKey: boolean,
     clientX: number,
     clientY: number,
   ) => void
@@ -51,7 +52,7 @@ export const FretCell = ({
       type="button"
       className="group relative flex h-12 items-center justify-center border-r border-slate-700 focus-visible:outline-none"
       onClick={(event) => {
-        onNoteClick(positionId, event.metaKey)
+        onNoteClick(positionId, event.metaKey, event.ctrlKey)
       }}
       onPointerDown={(event) => {
         onNotePointerDown(
@@ -59,6 +60,7 @@ export const FretCell = ({
           isHighlighted,
           event.button,
           event.metaKey,
+          event.ctrlKey,
           event.clientX,
           event.clientY,
         )
