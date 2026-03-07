@@ -4,8 +4,12 @@ import { useFretboardStore } from '../stores/fretboardStore'
 export const ControlPanel = () => {
   const keyPc = useFretboardStore((state) => state.keyPc)
   const selectedScale = useFretboardStore((state) => state.selectedScale)
+  const addScaleWithinExportRange = useFretboardStore((state) => state.addScaleWithinExportRange)
   const setKeyPc = useFretboardStore((state) => state.setKeyPc)
   const setSelectedScale = useFretboardStore((state) => state.setSelectedScale)
+  const setAddScaleWithinExportRange = useFretboardStore(
+    (state) => state.setAddScaleWithinExportRange,
+  )
   const addScaleNotes = useFretboardStore((state) => state.addScaleNotes)
   const clearHighlightedNotes = useFretboardStore((state) => state.clearHighlightedNotes)
 
@@ -65,6 +69,18 @@ export const ControlPanel = () => {
           Clear
         </button>
       </div>
+
+      <label className="mt-3 inline-flex items-center gap-2 text-xs text-slate-300">
+        <input
+          type="checkbox"
+          className="h-4 w-4 rounded border border-slate-600 bg-black accent-cyan-500"
+          checked={addScaleWithinExportRange}
+          onChange={(event) => {
+            setAddScaleWithinExportRange(event.target.checked)
+          }}
+        />
+        Add scale notes within export range only
+      </label>
     </section>
   )
 }

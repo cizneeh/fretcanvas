@@ -4,7 +4,6 @@ import {
   type Connection,
   type ConnectionId,
   FRET_COUNT,
-  FRET_NUMBERS,
   getConnectionId,
   type HighlightedNote,
   normalizePc,
@@ -27,6 +26,7 @@ type HistorySnapshot = {
 type FretboardStore = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
+  addScaleWithinExportRange: boolean
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
   exportFretStart: number
@@ -38,6 +38,7 @@ type FretboardStore = {
   bufferedEditSnapshot: HistorySnapshot | undefined
   setKeyPc: (nextKeyPc: PitchClass) => void
   setSelectedScale: (nextScale: ScaleId | undefined) => void
+  setAddScaleWithinExportRange: (nextValue: boolean) => void
   addScaleNotes: () => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
@@ -152,6 +153,7 @@ const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): b
 export const useFretboardStore = create<FretboardStore>((set, get) => ({
   keyPc: 0,
   selectedScale: 'major',
+  addScaleWithinExportRange: true,
   displayedNotes: {},
   connections: {},
   exportFretStart: 0,
@@ -168,6 +170,10 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
 
   setSelectedScale: (nextScale) => {
     set({ selectedScale: nextScale })
+  },
+
+  setAddScaleWithinExportRange: (nextValue) => {
+    set({ addScaleWithinExportRange: nextValue })
   },
 
   beginBufferedEdit: () => {
@@ -266,7 +272,14 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
   },
 
   addScaleNotes: () => {
-    const { keyPc, selectedScale, displayedNotes } = get()
+    const {
+      keyPc,
+      selectedScale,
+      displayedNotes,
+      exportFretStart,
+      exportFretEnd,
+      addScaleWithinExportRange,
+    } = get()
     if (selectedScale === undefined) {
       return
     }
@@ -277,9 +290,13 @@ export const useFretboardStore = create<FretboardStore>((set, get) => ({
 
     const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
     let didChange = false
+    const minFret = addScaleWithinExportRange ? Math.min(exportFretStart, exportFretEnd) : 0
+    const maxFret = addScaleWithinExportRange
+      ? Math.max(exportFretStart, exportFretEnd)
+      : FRET_COUNT
 
     for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
-      for (const fret of FRET_NUMBERS) {
+      for (let fret = minFret; fret <= maxFret; fret += 1) {
         const midi = stringInfo.midi + fret
         const pitchClass = normalizePc(midi)
 
