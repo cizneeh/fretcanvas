@@ -67,11 +67,11 @@ export const exportTransparentPng = ({
 
   for (let fret = start; fret <= end; fret += 1) {
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
-    ctx.fillStyle = 'rgba(148, 163, 184, 0.9)'
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.98)'
     ctx.fillText(String(fret), xCenter, paddingY + headerHeight / 2)
 
     const lineX = boardLeft + (fret - start + 1) * cellWidth
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.62)'
+    ctx.strokeStyle = 'rgba(203, 213, 225, 0.78)'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(lineX, boardTop)
@@ -81,11 +81,11 @@ export const exportTransparentPng = ({
 
   OPEN_STRINGS.forEach((stringInfo, row) => {
     const yCenter = boardTop + row * rowHeight + rowHeight / 2
-    ctx.fillStyle = 'rgba(203, 213, 225, 0.95)'
+    ctx.fillStyle = 'rgba(241, 245, 249, 0.98)'
     ctx.textAlign = 'center'
     ctx.fillText(stringInfo.name, paddingX + labelWidth / 2, yCenter)
 
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.56)'
+    ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(boardLeft, yCenter)
@@ -130,7 +130,7 @@ export const exportTransparentPng = ({
       ctx.shadowBlur = 2
       ctx.shadowOffsetX = 0
       ctx.shadowOffsetY = 1
-      ctx.fillText(label, xCenter, yCenter + 0.5)
+      ctx.fillText(label, xCenter, yCenter + 1.5)
       ctx.shadowColor = 'transparent'
       ctx.shadowBlur = 0
       ctx.shadowOffsetX = 0
@@ -179,7 +179,7 @@ export const exportTransparentPng = ({
 
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
     const isDoubleMarker = fret === 12 || fret === 24
-    ctx.fillStyle = 'rgba(100, 116, 139, 0.9)'
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.9)'
     ctx.beginPath()
     ctx.arc(xCenter - (isDoubleMarker ? 4 : 0), markerY, 2.5, 0, Math.PI * 2)
     ctx.fill()
