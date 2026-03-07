@@ -1,0 +1,90 @@
+import { Fragment } from 'react'
+import {
+  DEGREE_LABELS,
+  FRET_NUMBERS,
+  normalizePc,
+  OPEN_STRINGS,
+  type PositionId,
+  toPositionId,
+} from '../../libs/model'
+import { useFretboardStore } from '../../stores/fretboardStore'
+import { FretCell } from './FretCell'
+
+type StringRowsProps = {
+  onNotePointerDown: (
+    positionId: PositionId,
+    isHighlighted: boolean,
+    button: number,
+    isMetaKey: boolean,
+    clientX: number,
+    clientY: number,
+  ) => void
+  onNoteClick: (positionId: PositionId, isMetaKey: boolean) => void
+  onNoteContextMenu: (
+    positionId: PositionId,
+    isHighlighted: boolean,
+    clientX: number,
+    clientY: number,
+  ) => void
+  onNotePointerUp: (positionId: PositionId) => void
+}
+
+export const StringRows = ({
+  onNotePointerDown,
+  onNoteClick,
+  onNoteContextMenu,
+  onNotePointerUp,
+}: StringRowsProps) => {
+  const keyPc = useFretboardStore((state) => state.keyPc)
+  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
+  const exportFretStart = useFretboardStore((state) => state.exportFretStart)
+  const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
+  const startHighlightFret = Math.max(0, exportFretStart - 1)
+  const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
+  const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
+
+  return (
+    <>
+      {OPEN_STRINGS.map((stringInfo, stringIndex) => (
+        <Fragment key={stringInfo.id}>
+          <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
+            {stringInfo.name}
+          </div>
+
+          {/* ノート自体じゃなくて、マス目がmidiのデータを持ってるのか。で、ノート自体は、midi　音高の情報を持っていない。マス目の上にノートが来たら、マス目の音高で表示される。 */}
+          {FRET_NUMBERS.map((fret) => {
+            const positionId = toPositionId({ stringIndex, fret })
+            const pitchClass = normalizePc(stringInfo.midi + fret)
+            const displayedNote = displayedNotes[positionId]
+            const isHighlighted = displayedNote !== undefined
+            const intervalFromKey = normalizePc(pitchClass - keyPc)
+            const isRoot = intervalFromKey === 0
+            const isStartFret = fret === startHighlightFret
+            const isEndFret = fret === exportFretEnd
+            const isStartAtNutLine = exportFretStart === 0 && fret === 0
+
+            return (
+              <FretCell
+                key={`${stringInfo.id}-${fret}`}
+                positionId={positionId}
+                isHighlighted={isHighlighted}
+                isDimmed={displayedNote?.isDimmed ?? false}
+                label={DEGREE_LABELS[intervalFromKey]}
+                isRoot={isRoot}
+                isStartAtNutLine={isStartAtNutLine}
+                isStartFret={isStartFret}
+                isEndFret={isEndFret}
+                startMarkerColor={startMarkerColor}
+                endMarkerColor={endMarkerColor}
+                onNotePointerDown={onNotePointerDown}
+                onNoteClick={onNoteClick}
+                onNoteContextMenu={onNoteContextMenu}
+                onNotePointerUp={onNotePointerUp}
+              />
+            )
+          })}
+        </Fragment>
+      ))}
+    </>
+  )
+}

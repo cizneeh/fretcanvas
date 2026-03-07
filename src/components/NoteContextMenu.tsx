@@ -1,20 +1,17 @@
-import type { HighlightedNote, PositionId } from '../libs/model'
+import type { PositionId } from '../libs/model'
+import { useFretboardStore } from '../stores/fretboardStore'
 
 type NoteContextMenuProps = {
   positionId: PositionId
   x: number
   y: number
-  displayedNotes: Record<PositionId, HighlightedNote>
-  onToggleDim: (positionId: PositionId) => void
+  onToggleDimDone: () => void
 }
 
-export const NoteContextMenu = ({
-  positionId,
-  x,
-  y,
-  displayedNotes,
-  onToggleDim,
-}: NoteContextMenuProps) => {
+export const NoteContextMenu = ({ positionId, x, y, onToggleDimDone }: NoteContextMenuProps) => {
+  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
+  const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
+
   return (
     <div
       className="fixed z-50 min-w-[170px] rounded-md border border-slate-700 bg-slate-900/95 p-1 shadow-2xl"
@@ -27,7 +24,8 @@ export const NoteContextMenu = ({
         type="button"
         className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800"
         onClick={() => {
-          onToggleDim(positionId)
+          toggleNoteDimmed(positionId)
+          onToggleDimDone()
         }}
       >
         <span>Dim</span>
