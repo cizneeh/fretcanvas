@@ -11,6 +11,8 @@ export const FretboardView = () => {
   const handleBackgroundOpacityPercentChange = useFretboardStore(
     (state) => state.handleBackgroundOpacityPercentChange,
   )
+  const beginBufferedEdit = useFretboardStore((state) => state.beginBufferedEdit)
+  const commitBufferedEdit = useFretboardStore((state) => state.commitBufferedEdit)
   const exportTransparentPng = useFretboardStore((state) => state.exportTransparentPng)
   const interaction = useFretboardInteractionState()
 
@@ -44,6 +46,8 @@ export const FretboardView = () => {
         exportEnd={Math.max(exportFretStart, exportFretEnd)}
         backgroundOpacityPercent={backgroundOpacityPercent}
         onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
+        onOpacityInteractionStart={beginBufferedEdit}
+        onOpacityInteractionEnd={commitBufferedEdit}
         onExportTransparentPng={exportTransparentPng}
       />
     </section>

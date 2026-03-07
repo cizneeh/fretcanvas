@@ -35,3 +35,45 @@ export const getDimShortcutLabel = (): string => {
   }
   return 'Ctrl + Click'
 }
+
+export const isUndoShortcutPressed = (
+  key: string,
+  metaKey: boolean,
+  ctrlKey: boolean,
+  shiftKey: boolean,
+): boolean => {
+  if (key.toLowerCase() !== 'z' || shiftKey) {
+    return false
+  }
+
+  if (isMacLikePlatform()) {
+    return metaKey
+  }
+  return ctrlKey
+}
+
+export const isRedoShortcutPressed = (
+  key: string,
+  metaKey: boolean,
+  ctrlKey: boolean,
+  shiftKey: boolean,
+): boolean => {
+  const lowerKey = key.toLowerCase()
+  if (isMacLikePlatform()) {
+    return lowerKey === 'z' && metaKey && shiftKey
+  }
+  return lowerKey === 'y' && ctrlKey
+}
+
+export const isEditableTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  if (target.isContentEditable) {
+    return true
+  }
+
+  const tagName = target.tagName.toLowerCase()
+  return tagName === 'input' || tagName === 'textarea' || tagName === 'select'
+}

@@ -10,6 +10,9 @@ export const useFretboardInteractionState = () => {
   const togglePosition = useFretboardStore((state) => state.togglePosition)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
+  const beginBufferedEdit = useFretboardStore((state) => state.beginBufferedEdit)
+  const commitBufferedEdit = useFretboardStore((state) => state.commitBufferedEdit)
+  const cancelBufferedEdit = useFretboardStore((state) => state.cancelBufferedEdit)
   const handleExportFretStartChange = useFretboardStore(
     (state) => state.handleExportFretStartChange,
   )
@@ -132,7 +135,9 @@ export const useFretboardInteractionState = () => {
       return
     }
 
+    beginBufferedEdit()
     updateHandleFromClientX(event.clientX, getNearestHandle(nextFret))
+    commitBufferedEdit()
   }
 
   const handleTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -153,13 +158,22 @@ export const useFretboardInteractionState = () => {
   }
 
   const handleTrackPointerUp = () => {
+    commitBufferedEdit()
+    setDraggingHandle(undefined)
+  }
+
+  const handleTrackPointerCancel = () => {
+    cancelBufferedEdit()
     setDraggingHandle(undefined)
   }
 
   const handleTrackPointerLeave = () => {
     if (draggingHandle === undefined) {
       setHoverPreview(undefined)
+      return
     }
+
+    commitBufferedEdit()
     setDraggingHandle(undefined)
   }
 
@@ -314,11 +328,12 @@ export const useFretboardInteractionState = () => {
       onTrackPointerDown: handleTrackClickMove,
       onTrackPointerMove: handleTrackPointerMove,
       onTrackPointerUp: handleTrackPointerUp,
-      onTrackPointerCancel: handleTrackPointerUp,
+      onTrackPointerCancel: handleTrackPointerCancel,
       onTrackPointerLeave: handleTrackPointerLeave,
       onStartPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
         event.preventDefault()
         event.currentTarget.setPointerCapture(event.pointerId)
+        beginBufferedEdit()
         setDraggingHandle('start')
         updateHandleFromClientX(event.clientX, 'start')
       },
@@ -332,11 +347,13 @@ export const useFretboardInteractionState = () => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId)
         }
+        commitBufferedEdit()
         setDraggingHandle(undefined)
       },
       onEndPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
         event.preventDefault()
         event.currentTarget.setPointerCapture(event.pointerId)
+        beginBufferedEdit()
         setDraggingHandle('end')
         updateHandleFromClientX(event.clientX, 'end')
       },
@@ -350,6 +367,7 @@ export const useFretboardInteractionState = () => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId)
         }
+        commitBufferedEdit()
         setDraggingHandle(undefined)
       },
     },

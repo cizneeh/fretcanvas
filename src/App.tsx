@@ -1,7 +1,37 @@
+import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { FretboardView } from './components/FretboardView'
+import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
+import { useFretboardStore } from './stores/fretboardStore'
 
 function App() {
+  const undo = useFretboardStore((state) => state.undo)
+  const redo = useFretboardStore((state) => state.redo)
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) {
+        return
+      }
+
+      if (isUndoShortcutPressed(event.key, event.metaKey, event.ctrlKey, event.shiftKey)) {
+        event.preventDefault()
+        undo()
+        return
+      }
+
+      if (isRedoShortcutPressed(event.key, event.metaKey, event.ctrlKey, event.shiftKey)) {
+        event.preventDefault()
+        redo()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [undo, redo])
+
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-slate-100 md:px-8">
       <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-6">
