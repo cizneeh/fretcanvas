@@ -65,6 +65,52 @@ export const exportTransparentPng = ({
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
 
+  const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
+    const positionId = toPositionId({
+      stringIndex,
+      fret,
+    })
+    const displayedNote = displayedNotes[positionId]
+    if (displayedNote === undefined) {
+      return
+    }
+
+    const pitchClass = normalizePc(midiBase + fret)
+    const intervalFromKey = normalizePc(pitchClass - keyPc)
+    const isRoot = intervalFromKey === 0
+    const label = DEGREE_LABELS[intervalFromKey]
+    const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
+
+    const noteOpacity = displayedNote.isDimmed ? 0.45 : 1
+    ctx.save()
+    ctx.globalAlpha = noteOpacity
+    ctx.fillStyle = isRoot ? 'rgba(190, 24, 93, 0.8)' : 'rgba(8, 145, 178, 0.8)'
+    ctx.beginPath()
+    ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
+    ctx.fill()
+
+    ctx.strokeStyle = isRoot ? 'rgba(254, 205, 211, 0.8)' : 'rgba(207, 250, 254, 0.7)'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
+    ctx.stroke()
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '600 13px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'
+    ctx.shadowBlur = 2
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 1
+    ctx.fillText(label, xCenter, yCenter + 1.5)
+    ctx.shadowColor = 'transparent'
+    ctx.shadowBlur = 0
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 0
+    ctx.restore()
+  }
+
   for (let fret = start; fret <= end; fret += 1) {
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
     ctx.fillStyle = 'rgba(226, 232, 240, 0.98)'
@@ -91,52 +137,6 @@ export const exportTransparentPng = ({
     ctx.moveTo(boardLeft, yCenter)
     ctx.lineTo(boardLeft + fretCountInRange * cellWidth, yCenter)
     ctx.stroke()
-
-    for (let fret = start; fret <= end; fret += 1) {
-      const positionId = toPositionId({
-        stringIndex: row,
-        fret,
-      })
-      const displayedNote = displayedNotes[positionId]
-      if (displayedNote === undefined) {
-        continue
-      }
-
-      const pitchClass = normalizePc(stringInfo.midi + fret)
-      const intervalFromKey = normalizePc(pitchClass - keyPc)
-      const isRoot = intervalFromKey === 0
-      const label = DEGREE_LABELS[intervalFromKey]
-      const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
-
-      const noteOpacity = displayedNote.isDimmed ? 0.45 : 1
-      ctx.save()
-      ctx.globalAlpha = noteOpacity
-      ctx.fillStyle = isRoot ? 'rgba(190, 24, 93, 0.8)' : 'rgba(8, 145, 178, 0.8)'
-      ctx.beginPath()
-      ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
-      ctx.fill()
-
-      ctx.strokeStyle = isRoot ? 'rgba(254, 205, 211, 0.8)' : 'rgba(207, 250, 254, 0.7)'
-      ctx.lineWidth = 1.5
-      ctx.beginPath()
-      ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
-      ctx.stroke()
-
-      ctx.fillStyle = '#ffffff'
-      ctx.font = '600 13px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'
-      ctx.shadowBlur = 2
-      ctx.shadowOffsetX = 0
-      ctx.shadowOffsetY = 1
-      ctx.fillText(label, xCenter, yCenter + 1.5)
-      ctx.shadowColor = 'transparent'
-      ctx.shadowBlur = 0
-      ctx.shadowOffsetX = 0
-      ctx.shadowOffsetY = 0
-      ctx.restore()
-    }
   })
 
   ctx.save()
@@ -170,6 +170,13 @@ export const exportTransparentPng = ({
     ctx.stroke()
   }
   ctx.restore()
+
+  OPEN_STRINGS.forEach((stringInfo, stringIndex) => {
+    const yCenter = boardTop + stringIndex * rowHeight + rowHeight / 2
+    for (let fret = start; fret <= end; fret += 1) {
+      drawNote(stringIndex, stringInfo.midi, fret, yCenter)
+    }
+  })
 
   const markerY = boardTop + boardHeight + markerHeight / 2
   for (let fret = start; fret <= end; fret += 1) {
