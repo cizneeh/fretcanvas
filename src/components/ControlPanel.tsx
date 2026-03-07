@@ -1,17 +1,20 @@
 import { NOTE_LABELS, type PitchClass, SCALE_LABELS, type ScaleId } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
+import { useSettingsStore } from '../stores/settingsStore'
 
 export const ControlPanel = () => {
   const keyPc = useFretboardStore((state) => state.keyPc)
   const selectedScale = useFretboardStore((state) => state.selectedScale)
-  const addScaleWithinExportRange = useFretboardStore((state) => state.addScaleWithinExportRange)
   const setKeyPc = useFretboardStore((state) => state.setKeyPc)
   const setSelectedScale = useFretboardStore((state) => state.setSelectedScale)
-  const setAddScaleWithinExportRange = useFretboardStore(
-    (state) => state.setAddScaleWithinExportRange,
-  )
   const addScaleNotes = useFretboardStore((state) => state.addScaleNotes)
   const clearHighlightedNotes = useFretboardStore((state) => state.clearHighlightedNotes)
+  const addScaleWithinExportRange = useSettingsStore((state) => state.addScaleWithinExportRange)
+  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
+  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
+  const setAddScaleWithinExportRange = useSettingsStore(
+    (state) => state.setAddScaleWithinExportRange,
+  )
 
   return (
     <section className="rounded-lg border border-slate-700 bg-black p-4">
@@ -55,7 +58,16 @@ export const ControlPanel = () => {
         <button
           type="button"
           className="rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={addScaleNotes}
+          onClick={() => {
+            addScaleNotes({
+              fretRange: addScaleWithinExportRange
+                ? {
+                    start: exportFretStart,
+                    end: exportFretEnd,
+                  }
+                : undefined,
+            })
+          }}
           disabled={selectedScale === undefined}
         >
           Add Scale Notes

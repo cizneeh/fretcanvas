@@ -8,6 +8,7 @@ import {
   toPositionId,
 } from '../../libs/model'
 import { useFretboardStore } from '../../stores/fretboardStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 import { FretCell } from './FretCell'
 
 type StringRowsProps = {
@@ -38,8 +39,8 @@ export const StringRows = ({
 }: StringRowsProps) => {
   const keyPc = useFretboardStore((state) => state.keyPc)
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
-  const exportFretStart = useFretboardStore((state) => state.exportFretStart)
-  const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
+  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
+  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const startHighlightFret = Math.max(0, exportFretStart - 1)
   const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
   const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'

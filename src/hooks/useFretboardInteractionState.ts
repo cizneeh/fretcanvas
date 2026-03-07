@@ -2,21 +2,17 @@ import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } f
 import { FRET_NUMBERS, type PositionId } from '../libs/model'
 import { isDimShortcutPressed } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
+import { useSettingsStore } from '../stores/settingsStore'
 
 export const useFretboardInteractionState = () => {
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
-  const exportFretStart = useFretboardStore((state) => state.exportFretStart)
-  const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
+  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
+  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
-  const beginBufferedEdit = useFretboardStore((state) => state.beginBufferedEdit)
-  const commitBufferedEdit = useFretboardStore((state) => state.commitBufferedEdit)
-  const cancelBufferedEdit = useFretboardStore((state) => state.cancelBufferedEdit)
-  const handleExportFretStartChange = useFretboardStore(
-    (state) => state.handleExportFretStartChange,
-  )
-  const handleExportFretEndChange = useFretboardStore((state) => state.handleExportFretEndChange)
+  const handleExportFretStartChange = useSettingsStore((state) => state.handleExportFretStartChange)
+  const handleExportFretEndChange = useSettingsStore((state) => state.handleExportFretEndChange)
 
   const trackRef = useRef<HTMLDivElement | undefined>(undefined)
   const boardRef = useRef<HTMLDivElement | undefined>(undefined)
@@ -135,9 +131,7 @@ export const useFretboardInteractionState = () => {
       return
     }
 
-    beginBufferedEdit()
     updateHandleFromClientX(event.clientX, getNearestHandle(nextFret))
-    commitBufferedEdit()
   }
 
   const handleTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -158,12 +152,10 @@ export const useFretboardInteractionState = () => {
   }
 
   const handleTrackPointerUp = () => {
-    commitBufferedEdit()
     setDraggingHandle(undefined)
   }
 
   const handleTrackPointerCancel = () => {
-    cancelBufferedEdit()
     setDraggingHandle(undefined)
   }
 
@@ -173,7 +165,6 @@ export const useFretboardInteractionState = () => {
       return
     }
 
-    commitBufferedEdit()
     setDraggingHandle(undefined)
   }
 
@@ -333,7 +324,6 @@ export const useFretboardInteractionState = () => {
       onStartPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
         event.preventDefault()
         event.currentTarget.setPointerCapture(event.pointerId)
-        beginBufferedEdit()
         setDraggingHandle('start')
         updateHandleFromClientX(event.clientX, 'start')
       },
@@ -347,13 +337,11 @@ export const useFretboardInteractionState = () => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId)
         }
-        commitBufferedEdit()
         setDraggingHandle(undefined)
       },
       onEndPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
         event.preventDefault()
         event.currentTarget.setPointerCapture(event.pointerId)
-        beginBufferedEdit()
         setDraggingHandle('end')
         updateHandleFromClientX(event.clientX, 'end')
       },
@@ -367,7 +355,6 @@ export const useFretboardInteractionState = () => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId)
         }
-        commitBufferedEdit()
         setDraggingHandle(undefined)
       },
     },

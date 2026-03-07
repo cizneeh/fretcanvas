@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { exportTransparentPng } from '../libs/exportTransparentPng'
 import {
   type Connection,
   type ConnectionId,
@@ -18,70 +17,45 @@ import {
 type HistorySnapshot = {
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
-  exportFretStart: number
-  exportFretEnd: number
-  backgroundOpacityPercent: number
+}
+
+type AddScaleNotesOptions = {
+  fretRange:
+    | {
+        start: number
+        end: number
+      }
+    | undefined
 }
 
 type FretboardStore = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
-  addScaleWithinExportRange: boolean
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
-  exportFretStart: number
-  exportFretEnd: number
-  backgroundOpacityPercent: number
   undoStack: HistorySnapshot[]
   redoStack: HistorySnapshot[]
   historyLimit: number
-  bufferedEditSnapshot: HistorySnapshot | undefined
   setKeyPc: (nextKeyPc: PitchClass) => void
   setSelectedScale: (nextScale: ScaleId | undefined) => void
-  setAddScaleWithinExportRange: (nextValue: boolean) => void
-  addScaleNotes: () => void
+  addScaleNotes: (options?: AddScaleNotesOptions) => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
   connectPositions: (from: PositionId, to: PositionId) => void
   removeConnection: (connectionId: ConnectionId) => void
   removeConnectionsByPosition: (positionId: PositionId) => void
-  handleExportFretStartChange: (nextStart: number) => void
-  handleExportFretEndChange: (nextEnd: number) => void
-  handleBackgroundOpacityPercentChange: (nextOpacity: number) => void
-  beginBufferedEdit: () => void
-  commitBufferedEdit: () => void
-  cancelBufferedEdit: () => void
   canUndo: () => boolean
   canRedo: () => boolean
   undo: () => void
   redo: () => void
-  exportTransparentPng: () => void
 }
 
-const cloneDisplayedNotes = (
-  displayedNotes: Record<PositionId, HighlightedNote>,
-): Record<PositionId, HighlightedNote> => ({ ...displayedNotes })
-
-const cloneConnections = (
-  connections: Record<ConnectionId, Connection>,
-): Record<ConnectionId, Connection> => ({ ...connections })
-
 const createHistorySnapshot = (
-  state: Pick<
-    FretboardStore,
-    | 'displayedNotes'
-    | 'connections'
-    | 'exportFretStart'
-    | 'exportFretEnd'
-    | 'backgroundOpacityPercent'
-  >,
+  state: Pick<FretboardStore, 'displayedNotes' | 'connections'>,
 ): HistorySnapshot => ({
-  displayedNotes: cloneDisplayedNotes(state.displayedNotes),
-  connections: cloneConnections(state.connections),
-  exportFretStart: state.exportFretStart,
-  exportFretEnd: state.exportFretEnd,
-  backgroundOpacityPercent: state.backgroundOpacityPercent,
+  displayedNotes: { ...state.displayedNotes },
+  connections: { ...state.connections },
 })
 
 const notesEqual = (
@@ -142,432 +116,239 @@ const connectionsEqual = (
 
 const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): boolean => {
   return (
-    left.exportFretStart === right.exportFretStart &&
-    left.exportFretEnd === right.exportFretEnd &&
-    left.backgroundOpacityPercent === right.backgroundOpacityPercent &&
     notesEqual(left.displayedNotes, right.displayedNotes) &&
     connectionsEqual(left.connections, right.connections)
   )
 }
 
-export const useFretboardStore = create<FretboardStore>((set, get) => ({
-  keyPc: 0,
-  selectedScale: 'major',
-  addScaleWithinExportRange: true,
-  displayedNotes: {},
-  connections: {},
-  exportFretStart: 0,
-  exportFretEnd: FRET_COUNT,
-  backgroundOpacityPercent: 0,
-  undoStack: [],
-  redoStack: [],
-  historyLimit: 100,
-  bufferedEditSnapshot: undefined,
-
-  setKeyPc: (nextKeyPc) => {
-    set({ keyPc: nextKeyPc })
-  },
-
-  setSelectedScale: (nextScale) => {
-    set({ selectedScale: nextScale })
-  },
-
-  setAddScaleWithinExportRange: (nextValue) => {
-    set({ addScaleWithinExportRange: nextValue })
-  },
-
-  beginBufferedEdit: () => {
+export const useFretboardStore = create<FretboardStore>((set, get) => {
+  const pushHistoryBeforeChange = () => {
     const current = get()
-    if (current.bufferedEditSnapshot !== undefined) {
-      return
-    }
-
-    set({
-      bufferedEditSnapshot: createHistorySnapshot(current),
-    })
-  },
-
-  commitBufferedEdit: () => {
-    const current = get()
-    const bufferedEditSnapshot = current.bufferedEditSnapshot
-    if (bufferedEditSnapshot === undefined) {
-      return
-    }
-
-    const afterSnapshot = createHistorySnapshot(current)
-    if (historySnapshotsEqual(bufferedEditSnapshot, afterSnapshot)) {
-      set({ bufferedEditSnapshot: undefined })
-      return
-    }
+    const snapshot = createHistorySnapshot(current)
 
     set((state) => {
-      const lastUndoSnapshot = state.undoStack[state.undoStack.length - 1]
+      const last = state.undoStack[state.undoStack.length - 1]
       const nextUndoStack =
-        lastUndoSnapshot !== undefined &&
-        historySnapshotsEqual(lastUndoSnapshot, bufferedEditSnapshot)
+        last !== undefined && historySnapshotsEqual(last, snapshot)
           ? state.undoStack
-          : [...state.undoStack, bufferedEditSnapshot]
+          : [...state.undoStack, snapshot]
 
       return {
         undoStack: nextUndoStack.slice(-state.historyLimit),
         redoStack: [],
-        bufferedEditSnapshot: undefined,
       }
     })
-  },
+  }
 
-  cancelBufferedEdit: () => {
-    if (get().bufferedEditSnapshot === undefined) {
-      return
-    }
-    set({ bufferedEditSnapshot: undefined })
-  },
+  return {
+    keyPc: 0,
+    selectedScale: 'major',
+    displayedNotes: {},
+    connections: {},
+    undoStack: [],
+    redoStack: [],
+    historyLimit: 100,
 
-  canUndo: () => get().undoStack.length > 0,
+    setKeyPc: (nextKeyPc) => {
+      set({ keyPc: nextKeyPc })
+    },
 
-  canRedo: () => get().redoStack.length > 0,
+    setSelectedScale: (nextScale) => {
+      set({ selectedScale: nextScale })
+    },
 
-  undo: () => {
-    const current = get()
-    const undoStackLength = current.undoStack.length
-    if (undoStackLength === 0) {
-      return
-    }
+    addScaleNotes: (options) => {
+      const { keyPc, selectedScale, displayedNotes } = get()
+      if (selectedScale === undefined) {
+        return
+      }
 
-    const previousSnapshot = current.undoStack[undoStackLength - 1]
-    const currentSnapshot = createHistorySnapshot(current)
+      const pcsToAdd = new Set(
+        SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)),
+      )
 
-    set((state) => ({
-      displayedNotes: cloneDisplayedNotes(previousSnapshot.displayedNotes),
-      connections: cloneConnections(previousSnapshot.connections),
-      exportFretStart: previousSnapshot.exportFretStart,
-      exportFretEnd: previousSnapshot.exportFretEnd,
-      backgroundOpacityPercent: previousSnapshot.backgroundOpacityPercent,
-      undoStack: state.undoStack.slice(0, -1),
-      redoStack: [...state.redoStack, currentSnapshot].slice(-state.historyLimit),
-      bufferedEditSnapshot: undefined,
-    }))
-  },
+      const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
+      let didChange = false
+      const minFret =
+        options?.fretRange !== undefined
+          ? Math.min(options.fretRange.start, options.fretRange.end)
+          : 0
+      const maxFret =
+        options?.fretRange !== undefined
+          ? Math.max(options.fretRange.start, options.fretRange.end)
+          : FRET_COUNT
 
-  redo: () => {
-    const current = get()
-    const redoStackLength = current.redoStack.length
-    if (redoStackLength === 0) {
-      return
-    }
+      for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
+        for (let fret = minFret; fret <= maxFret; fret += 1) {
+          const midi = stringInfo.midi + fret
+          const pitchClass = normalizePc(midi)
 
-    const nextSnapshot = current.redoStack[redoStackLength - 1]
-    const currentSnapshot = createHistorySnapshot(current)
-
-    set((state) => ({
-      displayedNotes: cloneDisplayedNotes(nextSnapshot.displayedNotes),
-      connections: cloneConnections(nextSnapshot.connections),
-      exportFretStart: nextSnapshot.exportFretStart,
-      exportFretEnd: nextSnapshot.exportFretEnd,
-      backgroundOpacityPercent: nextSnapshot.backgroundOpacityPercent,
-      redoStack: state.redoStack.slice(0, -1),
-      undoStack: [...state.undoStack, currentSnapshot].slice(-state.historyLimit),
-      bufferedEditSnapshot: undefined,
-    }))
-  },
-
-  addScaleNotes: () => {
-    const {
-      keyPc,
-      selectedScale,
-      displayedNotes,
-      exportFretStart,
-      exportFretEnd,
-      addScaleWithinExportRange,
-    } = get()
-    if (selectedScale === undefined) {
-      return
-    }
-
-    const pcsToAdd = new Set(
-      SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)),
-    )
-
-    const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
-    let didChange = false
-    const minFret = addScaleWithinExportRange ? Math.min(exportFretStart, exportFretEnd) : 0
-    const maxFret = addScaleWithinExportRange
-      ? Math.max(exportFretStart, exportFretEnd)
-      : FRET_COUNT
-
-    for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
-      for (let fret = minFret; fret <= maxFret; fret += 1) {
-        const midi = stringInfo.midi + fret
-        const pitchClass = normalizePc(midi)
-
-        if (pcsToAdd.has(pitchClass)) {
-          const positionId = toPositionId({
-            stringIndex,
-            fret,
-          })
-          if (next[positionId] === undefined) {
-            next[positionId] = {
-              positionId,
-              isDimmed: false,
-              colorVariant: 'default',
+          if (pcsToAdd.has(pitchClass)) {
+            const positionId = toPositionId({
+              stringIndex,
+              fret,
+            })
+            if (next[positionId] === undefined) {
+              next[positionId] = {
+                positionId,
+                isDimmed: false,
+                colorVariant: 'default',
+              }
+              didChange = true
             }
-            didChange = true
           }
         }
       }
-    }
 
-    if (!didChange) {
-      return
-    }
+      if (!didChange) {
+        return
+      }
 
-    const current = get()
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
+      pushHistoryBeforeChange()
+      set({ displayedNotes: next })
+    },
 
-    set({ displayedNotes: next })
-  },
+    clearHighlightedNotes: () => {
+      const current = get()
+      if (
+        Object.keys(current.displayedNotes).length === 0 &&
+        Object.keys(current.connections).length === 0
+      ) {
+        return
+      }
 
-  clearHighlightedNotes: () => {
-    const current = get()
-    if (
-      Object.keys(current.displayedNotes).length === 0 &&
-      Object.keys(current.connections).length === 0
-    ) {
-      return
-    }
+      pushHistoryBeforeChange()
+      set({ displayedNotes: {}, connections: {} })
+    },
 
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
+    togglePosition: (positionId) => {
+      const current = get()
+      const next: Record<PositionId, HighlightedNote> = { ...current.displayedNotes }
+      let nextConnections = current.connections
 
-    set({ displayedNotes: {}, connections: {} })
-  },
+      if (next[positionId] !== undefined) {
+        delete next[positionId]
+        const filteredEntries = Object.entries(current.connections).filter(([, connection]) => {
+          return connection.from !== positionId && connection.to !== positionId
+        })
+        nextConnections = Object.fromEntries(filteredEntries) as Record<ConnectionId, Connection>
+      } else {
+        next[positionId] = {
+          positionId,
+          isDimmed: false,
+          colorVariant: 'default',
+        }
+      }
 
-  togglePosition: (positionId) => {
-    const current = get()
-    const next: Record<PositionId, HighlightedNote> = { ...current.displayedNotes }
-    let nextConnections = current.connections
+      pushHistoryBeforeChange()
+      set({ displayedNotes: next, connections: nextConnections })
+    },
 
-    if (next[positionId] !== undefined) {
-      delete next[positionId]
-      const filteredEntries = Object.entries(current.connections).filter(([, connection]) => {
+    toggleNoteDimmed: (positionId) => {
+      const current = get()
+      const currentNote = current.displayedNotes[positionId]
+      if (currentNote === undefined) {
+        return
+      }
+
+      const next: Record<PositionId, HighlightedNote> = { ...current.displayedNotes }
+      next[positionId] = {
+        ...currentNote,
+        isDimmed: !currentNote.isDimmed,
+      }
+
+      pushHistoryBeforeChange()
+      set({ displayedNotes: next })
+    },
+
+    connectPositions: (from, to) => {
+      if (from === to) {
+        return
+      }
+
+      const current = get()
+      const connectionId = getConnectionId(from, to)
+      if (current.connections[connectionId] !== undefined) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({
+        connections: {
+          ...current.connections,
+          [connectionId]: {
+            id: connectionId,
+            from,
+            to,
+          },
+        },
+      })
+    },
+
+    removeConnection: (connectionId) => {
+      const current = get()
+      if (current.connections[connectionId] === undefined) {
+        return
+      }
+
+      const nextConnections = { ...current.connections }
+      delete nextConnections[connectionId]
+
+      pushHistoryBeforeChange()
+      set({ connections: nextConnections })
+    },
+
+    removeConnectionsByPosition: (positionId) => {
+      const current = get()
+      const nextEntries = Object.entries(current.connections).filter(([, connection]) => {
         return connection.from !== positionId && connection.to !== positionId
       })
-      nextConnections = Object.fromEntries(filteredEntries) as Record<ConnectionId, Connection>
-    } else {
-      next[positionId] = {
-        positionId,
-        isDimmed: false,
-        colorVariant: 'default',
+      const nextConnections = Object.fromEntries(nextEntries) as Record<ConnectionId, Connection>
+
+      if (Object.keys(nextConnections).length === Object.keys(current.connections).length) {
+        return
       }
-    }
 
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
+      pushHistoryBeforeChange()
+      set({ connections: nextConnections })
+    },
+
+    canUndo: () => get().undoStack.length > 0,
+
+    canRedo: () => get().redoStack.length > 0,
+
+    undo: () => {
+      const current = get()
+      if (current.undoStack.length === 0) {
+        return
+      }
+
+      const previousSnapshot = current.undoStack[current.undoStack.length - 1]
+      const currentSnapshot = createHistorySnapshot(current)
+
       set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
+        displayedNotes: { ...previousSnapshot.displayedNotes },
+        connections: { ...previousSnapshot.connections },
+        undoStack: state.undoStack.slice(0, -1),
+        redoStack: [...state.redoStack, currentSnapshot].slice(-state.historyLimit),
       }))
-    }
+    },
 
-    set({ displayedNotes: next, connections: nextConnections })
-  },
+    redo: () => {
+      const current = get()
+      if (current.redoStack.length === 0) {
+        return
+      }
 
-  toggleNoteDimmed: (positionId) => {
-    const current = get()
-    const currentNote = current.displayedNotes[positionId]
-    if (currentNote === undefined) {
-      return
-    }
+      const nextSnapshot = current.redoStack[current.redoStack.length - 1]
+      const currentSnapshot = createHistorySnapshot(current)
 
-    const next: Record<PositionId, HighlightedNote> = { ...current.displayedNotes }
-    next[positionId] = {
-      ...currentNote,
-      isDimmed: !currentNote.isDimmed,
-    }
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
       set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
+        displayedNotes: { ...nextSnapshot.displayedNotes },
+        connections: { ...nextSnapshot.connections },
+        redoStack: state.redoStack.slice(0, -1),
+        undoStack: [...state.undoStack, currentSnapshot].slice(-state.historyLimit),
       }))
-    }
-
-    set({ displayedNotes: next })
-  },
-
-  connectPositions: (from, to) => {
-    if (from === to) {
-      return
-    }
-
-    const current = get()
-    const connectionId = getConnectionId(from, to)
-    const currentConnections = current.connections
-    if (currentConnections[connectionId] !== undefined) {
-      return
-    }
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
-
-    set({
-      connections: {
-        ...currentConnections,
-        [connectionId]: {
-          id: connectionId,
-          from,
-          to,
-        },
-      },
-    })
-  },
-
-  removeConnection: (connectionId) => {
-    const current = get()
-    const currentConnections = current.connections
-    if (currentConnections[connectionId] === undefined) {
-      return
-    }
-
-    const nextConnections = { ...currentConnections }
-    delete nextConnections[connectionId]
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
-
-    set({ connections: nextConnections })
-  },
-
-  removeConnectionsByPosition: (positionId) => {
-    const current = get()
-    const currentConnections = current.connections
-    const nextEntries = Object.entries(currentConnections).filter(([, connection]) => {
-      return connection.from !== positionId && connection.to !== positionId
-    })
-    const nextConnections = Object.fromEntries(nextEntries) as Record<ConnectionId, Connection>
-
-    if (Object.keys(nextConnections).length === Object.keys(currentConnections).length) {
-      return
-    }
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
-
-    set({ connections: nextConnections })
-  },
-
-  handleExportFretStartChange: (nextStart) => {
-    const current = get()
-    const clampedStart = Math.max(0, Math.min(nextStart, FRET_COUNT))
-    const currentEnd = current.exportFretEnd
-    const resolvedEnd = clampedStart > currentEnd ? clampedStart : currentEnd
-
-    if (clampedStart === current.exportFretStart && resolvedEnd === currentEnd) {
-      return
-    }
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
-
-    set({
-      exportFretStart: clampedStart,
-      exportFretEnd: resolvedEnd,
-    })
-  },
-
-  handleExportFretEndChange: (nextEnd) => {
-    const current = get()
-    const clampedEnd = Math.max(0, Math.min(nextEnd, FRET_COUNT))
-    const currentStart = current.exportFretStart
-    const resolvedStart = clampedEnd < currentStart ? clampedEnd : currentStart
-
-    if (clampedEnd === current.exportFretEnd && resolvedStart === currentStart) {
-      return
-    }
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
-
-    set({
-      exportFretEnd: clampedEnd,
-      exportFretStart: resolvedStart,
-    })
-  },
-
-  handleBackgroundOpacityPercentChange: (nextOpacity) => {
-    const current = get()
-    const clampedOpacity = Math.max(0, Math.min(nextOpacity, 100))
-    if (clampedOpacity === current.backgroundOpacityPercent) {
-      return
-    }
-
-    if (current.bufferedEditSnapshot === undefined) {
-      const snapshot = createHistorySnapshot(current)
-      set((state) => ({
-        undoStack: [...state.undoStack, snapshot].slice(-state.historyLimit),
-        redoStack: [],
-      }))
-    }
-
-    set({
-      backgroundOpacityPercent: clampedOpacity,
-    })
-  },
-
-  exportTransparentPng: () => {
-    const {
-      keyPc,
-      displayedNotes,
-      connections,
-      exportFretStart,
-      exportFretEnd,
-      backgroundOpacityPercent,
-    } = get()
-
-    exportTransparentPng({
-      keyPc,
-      displayedNotes,
-      connections: Object.values(connections),
-      exportFretStart,
-      exportFretEnd,
-      backgroundOpacityPercent,
-    })
-  },
-}))
+    },
+  }
+})

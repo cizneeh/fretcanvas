@@ -1,19 +1,21 @@
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
+import { exportTransparentPng } from '../libs/exportTransparentPng'
 import { useFretboardStore } from '../stores/fretboardStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { ExportPanel } from './ExportPanel'
 import { FretboardStage } from './FretboardStage'
 import { NoteContextMenu } from './NoteContextMenu'
 
 export const FretboardView = () => {
-  const exportFretStart = useFretboardStore((state) => state.exportFretStart)
-  const exportFretEnd = useFretboardStore((state) => state.exportFretEnd)
-  const backgroundOpacityPercent = useFretboardStore((state) => state.backgroundOpacityPercent)
-  const handleBackgroundOpacityPercentChange = useFretboardStore(
+  const keyPc = useFretboardStore((state) => state.keyPc)
+  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
+  const connectionsById = useFretboardStore((state) => state.connections)
+  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
+  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
+  const backgroundOpacityPercent = useSettingsStore((state) => state.backgroundOpacityPercent)
+  const handleBackgroundOpacityPercentChange = useSettingsStore(
     (state) => state.handleBackgroundOpacityPercentChange,
   )
-  const beginBufferedEdit = useFretboardStore((state) => state.beginBufferedEdit)
-  const commitBufferedEdit = useFretboardStore((state) => state.commitBufferedEdit)
-  const exportTransparentPng = useFretboardStore((state) => state.exportTransparentPng)
   const interaction = useFretboardInteractionState()
 
   return (
@@ -46,9 +48,16 @@ export const FretboardView = () => {
         exportEnd={Math.max(exportFretStart, exportFretEnd)}
         backgroundOpacityPercent={backgroundOpacityPercent}
         onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
-        onOpacityInteractionStart={beginBufferedEdit}
-        onOpacityInteractionEnd={commitBufferedEdit}
-        onExportTransparentPng={exportTransparentPng}
+        onExportTransparentPng={() => {
+          exportTransparentPng({
+            keyPc,
+            displayedNotes,
+            connections: Object.values(connectionsById),
+            exportFretStart,
+            exportFretEnd,
+            backgroundOpacityPercent,
+          })
+        }}
       />
     </section>
   )
