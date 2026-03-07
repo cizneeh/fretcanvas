@@ -144,7 +144,8 @@ export const exportTransparentPng = ({
 
   ctx.save()
   ctx.beginPath()
-  ctx.rect(boardLeft, boardTop, fretCountInRange * cellWidth, boardHeight)
+  const clipTop = Math.max(0, boardTop - 56)
+  ctx.rect(boardLeft, clipTop, fretCountInRange * cellWidth, boardTop + boardHeight - clipTop)
   ctx.clip()
   ctx.strokeStyle = 'rgba(34, 211, 238, 0.95)'
   ctx.lineWidth = 2
@@ -181,12 +182,12 @@ export const exportTransparentPng = ({
 
     const startX = boardLeft + (from.fret - start + 0.5) * cellWidth
     const startY = boardTop + from.stringIndex * rowHeight + rowHeight / 2
-    const control1X = startX + 18
+    const control1X = startX + 14
     const control1Y = startY + 1
-    const control2X = startX + 38
+    const control2X = startX + 30
     const control2Y = startY - 8
-    const endX = startX + 40
-    const endY = startY - 46
+    const endX = startX + 32
+    const endY = startY - 36
 
     ctx.strokeStyle = 'rgba(192, 132, 252, 0.82)'
     ctx.lineWidth = 2.4

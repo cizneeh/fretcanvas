@@ -91,12 +91,12 @@ export const ConnectionLayer = ({
 
         const startX = fromPoint.x
         const startY = fromPoint.y
-        const control1X = startX + 18
+        const control1X = startX + 14
         const control1Y = startY + 1
-        const control2X = startX + 38
+        const control2X = startX + 30
         const control2Y = startY - 8
-        const endX = startX + 40
-        const endY = startY - 46
+        const endX = startX + 32
+        const endY = startY - 36
         const isHovered = hoveredBendId === bend.id
         const strokeWidth = isHovered ? 3.8 : 2.4
         const strokeColor = isHovered ? 'rgba(192, 132, 252, 0.96)' : 'rgba(192, 132, 252, 0.78)'
