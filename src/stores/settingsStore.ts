@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { FRET_COUNT } from '../libs/model'
-import { useFretboardStore } from './fretboardStore'
+import { captureHistorySnapshot } from './historySnapshot'
 import { useHistoryStore } from './historyStore'
-import { createHistorySnapshot } from './historyTypes'
 
 type SettingsUpdateOptions = {
   skipHistory?: boolean
@@ -29,26 +28,7 @@ export type SettingsStore = SettingsStoreState & SettingsStoreActions
 
 export const useSettingsStore = create<SettingsStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
-    const fretboard = useFretboardStore.getState()
-    const settings = get()
-
-    useHistoryStore.getState().pushBeforeChange(
-      createHistorySnapshot(
-        {
-          keyPc: fretboard.keyPc,
-          selectedScale: fretboard.selectedScale,
-          displayedNotes: fretboard.displayedNotes,
-          connections: fretboard.connections,
-          bends: fretboard.bends,
-        },
-        {
-          exportFretStart: settings.exportFretStart,
-          exportFretEnd: settings.exportFretEnd,
-          backgroundOpacityPercent: settings.backgroundOpacityPercent,
-          addScaleWithinExportRange: settings.addScaleWithinExportRange,
-        },
-      ),
-    )
+    useHistoryStore.getState().pushBeforeChange(captureHistorySnapshot())
   }
 
   return {

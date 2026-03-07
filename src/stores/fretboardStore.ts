@@ -16,9 +16,8 @@ import {
   type ScaleId,
   toPositionId,
 } from '../libs/model'
+import { captureHistorySnapshot } from './historySnapshot'
 import { useHistoryStore } from './historyStore'
-import { createHistorySnapshot } from './historyTypes'
-import { useSettingsStore } from './settingsStore'
 
 type AddScaleNotesOptions = {
   fretRange:
@@ -56,26 +55,7 @@ export type FretboardStore = FretboardStoreState & FretboardStoreActions
 
 export const useFretboardStore = create<FretboardStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
-    const fretboard = get()
-    const settings = useSettingsStore.getState()
-
-    useHistoryStore.getState().pushBeforeChange(
-      createHistorySnapshot(
-        {
-          keyPc: fretboard.keyPc,
-          selectedScale: fretboard.selectedScale,
-          displayedNotes: fretboard.displayedNotes,
-          connections: fretboard.connections,
-          bends: fretboard.bends,
-        },
-        {
-          exportFretStart: settings.exportFretStart,
-          exportFretEnd: settings.exportFretEnd,
-          backgroundOpacityPercent: settings.backgroundOpacityPercent,
-          addScaleWithinExportRange: settings.addScaleWithinExportRange,
-        },
-      ),
-    )
+    useHistoryStore.getState().pushBeforeChange(captureHistorySnapshot())
   }
 
   return {
