@@ -3,6 +3,8 @@ type ExportPanelProps = {
   exportEnd: number
   backgroundOpacityPercent: number
   onBackgroundOpacityPercentChange: (nextOpacity: number) => void
+  onBackgroundOpacityEditStart: () => void
+  onBackgroundOpacityEditEnd: () => void
   onExportTransparentPng: () => void
 }
 
@@ -11,6 +13,8 @@ export const ExportPanel = ({
   exportEnd,
   backgroundOpacityPercent,
   onBackgroundOpacityPercentChange,
+  onBackgroundOpacityEditStart,
+  onBackgroundOpacityEditEnd,
   onExportTransparentPng,
 }: ExportPanelProps) => {
   return (
@@ -38,6 +42,10 @@ export const ExportPanel = ({
             min={0}
             max={100}
             value={backgroundOpacityPercent}
+            onPointerDown={onBackgroundOpacityEditStart}
+            onPointerUp={onBackgroundOpacityEditEnd}
+            onFocus={onBackgroundOpacityEditStart}
+            onBlur={onBackgroundOpacityEditEnd}
             onChange={(event) => {
               onBackgroundOpacityPercentChange(Number(event.target.value))
             }}

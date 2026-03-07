@@ -2,11 +2,12 @@ import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { FretboardView } from './components/FretboardView'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
-import { useFretboardStore } from './stores/fretboardStore'
+import { applyHistorySnapshot, captureHistorySnapshot } from './stores/historySnapshot'
+import { useHistoryStore } from './stores/historyStore'
 
 function App() {
-  const undo = useFretboardStore((state) => state.undo)
-  const redo = useFretboardStore((state) => state.redo)
+  const undo = useHistoryStore((state) => state.undo)
+  const redo = useHistoryStore((state) => state.redo)
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -16,13 +17,13 @@ function App() {
 
       if (isUndoShortcutPressed(event.key, event.metaKey, event.ctrlKey, event.shiftKey)) {
         event.preventDefault()
-        undo()
+        undo(captureHistorySnapshot, applyHistorySnapshot)
         return
       }
 
       if (isRedoShortcutPressed(event.key, event.metaKey, event.ctrlKey, event.shiftKey)) {
         event.preventDefault()
-        redo()
+        redo(captureHistorySnapshot, applyHistorySnapshot)
       }
     }
 

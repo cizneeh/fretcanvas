@@ -16,12 +16,9 @@ import {
   type ScaleId,
   toPositionId,
 } from '../libs/model'
-
-type HistorySnapshot = {
-  displayedNotes: Record<PositionId, HighlightedNote>
-  connections: Record<ConnectionId, Connection>
-  bends: Record<BendId, BendArrow>
-}
+import { useHistoryStore } from './historyStore'
+import { createHistorySnapshot } from './historyTypes'
+import { useSettingsStore } from './settingsStore'
 
 type AddScaleNotesOptions = {
   fretRange:
@@ -32,15 +29,15 @@ type AddScaleNotesOptions = {
     | undefined
 }
 
-type FretboardStore = {
+export type FretboardStoreState = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
   bends: Record<BendId, BendArrow>
-  undoStack: HistorySnapshot[]
-  redoStack: HistorySnapshot[]
-  historyLimit: number
+}
+
+export type FretboardStoreActions = {
   setKeyPc: (nextKeyPc: PitchClass) => void
   setSelectedScale: (nextScale: ScaleId | undefined) => void
   addScaleNotes: (options?: AddScaleNotesOptions) => void
@@ -53,113 +50,32 @@ type FretboardStore = {
   upsertBendFromPosition: (from: PositionId) => void
   removeBend: (bendId: BendId) => void
   removeBendByFromPosition: (from: PositionId) => void
-  canUndo: () => boolean
-  canRedo: () => boolean
-  undo: () => void
-  redo: () => void
 }
 
-const createHistorySnapshot = (
-  state: Pick<FretboardStore, 'displayedNotes' | 'connections' | 'bends'>,
-): HistorySnapshot => ({
-  displayedNotes: { ...state.displayedNotes },
-  connections: { ...state.connections },
-  bends: { ...state.bends },
-})
-
-const notesEqual = (
-  left: Record<PositionId, HighlightedNote>,
-  right: Record<PositionId, HighlightedNote>,
-): boolean => {
-  const leftEntries = Object.entries(left)
-  const rightEntries = Object.entries(right)
-  if (leftEntries.length !== rightEntries.length) {
-    return false
-  }
-
-  for (const [positionId, leftNote] of leftEntries) {
-    const rightNote = right[positionId]
-    if (rightNote === undefined) {
-      return false
-    }
-
-    if (
-      leftNote.positionId !== rightNote.positionId ||
-      leftNote.isDimmed !== rightNote.isDimmed ||
-      leftNote.colorVariant !== rightNote.colorVariant
-    ) {
-      return false
-    }
-  }
-
-  return true
-}
-
-const connectionsEqual = (
-  left: Record<ConnectionId, Connection>,
-  right: Record<ConnectionId, Connection>,
-): boolean => {
-  const leftEntries = Object.entries(left)
-  const rightEntries = Object.entries(right)
-  if (leftEntries.length !== rightEntries.length) {
-    return false
-  }
-
-  for (const [connectionId, leftConnection] of leftEntries) {
-    const rightConnection = right[connectionId]
-    if (rightConnection === undefined) {
-      return false
-    }
-
-    if (
-      leftConnection.id !== rightConnection.id ||
-      leftConnection.from !== rightConnection.from ||
-      leftConnection.to !== rightConnection.to
-    ) {
-      return false
-    }
-  }
-
-  return true
-}
-
-const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): boolean => {
-  const leftBendEntries = Object.entries(left.bends)
-  const rightBendEntries = Object.entries(right.bends)
-  if (leftBendEntries.length !== rightBendEntries.length) {
-    return false
-  }
-
-  for (const [bendId, leftBend] of leftBendEntries) {
-    const rightBend = right.bends[bendId]
-    if (rightBend === undefined || rightBend.from !== leftBend.from) {
-      return false
-    }
-  }
-
-  return (
-    notesEqual(left.displayedNotes, right.displayedNotes) &&
-    connectionsEqual(left.connections, right.connections)
-  )
-}
+export type FretboardStore = FretboardStoreState & FretboardStoreActions
 
 export const useFretboardStore = create<FretboardStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
-    const current = get()
-    const snapshot = createHistorySnapshot(current)
+    const fretboard = get()
+    const settings = useSettingsStore.getState()
 
-    set((state) => {
-      const last = state.undoStack[state.undoStack.length - 1]
-      const nextUndoStack =
-        last !== undefined && historySnapshotsEqual(last, snapshot)
-          ? state.undoStack
-          : [...state.undoStack, snapshot]
-
-      return {
-        undoStack: nextUndoStack.slice(-state.historyLimit),
-        redoStack: [],
-      }
-    })
+    useHistoryStore.getState().pushBeforeChange(
+      createHistorySnapshot(
+        {
+          keyPc: fretboard.keyPc,
+          selectedScale: fretboard.selectedScale,
+          displayedNotes: fretboard.displayedNotes,
+          connections: fretboard.connections,
+          bends: fretboard.bends,
+        },
+        {
+          exportFretStart: settings.exportFretStart,
+          exportFretEnd: settings.exportFretEnd,
+          backgroundOpacityPercent: settings.backgroundOpacityPercent,
+          addScaleWithinExportRange: settings.addScaleWithinExportRange,
+        },
+      ),
+    )
   }
 
   return {
@@ -168,15 +84,24 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     displayedNotes: {},
     connections: {},
     bends: {},
-    undoStack: [],
-    redoStack: [],
-    historyLimit: 100,
 
     setKeyPc: (nextKeyPc) => {
+      const current = get()
+      if (current.keyPc === nextKeyPc) {
+        return
+      }
+
+      pushHistoryBeforeChange()
       set({ keyPc: nextKeyPc })
     },
 
     setSelectedScale: (nextScale) => {
+      const current = get()
+      if (current.selectedScale === nextScale) {
+        return
+      }
+
+      pushHistoryBeforeChange()
       set({ selectedScale: nextScale })
     },
 
@@ -390,46 +315,6 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       delete nextBends[bendId]
       pushHistoryBeforeChange()
       set({ bends: nextBends })
-    },
-
-    canUndo: () => get().undoStack.length > 0,
-
-    canRedo: () => get().redoStack.length > 0,
-
-    undo: () => {
-      const current = get()
-      if (current.undoStack.length === 0) {
-        return
-      }
-
-      const previousSnapshot = current.undoStack[current.undoStack.length - 1]
-      const currentSnapshot = createHistorySnapshot(current)
-
-      set((state) => ({
-        displayedNotes: { ...previousSnapshot.displayedNotes },
-        connections: { ...previousSnapshot.connections },
-        bends: { ...previousSnapshot.bends },
-        undoStack: state.undoStack.slice(0, -1),
-        redoStack: [...state.redoStack, currentSnapshot].slice(-state.historyLimit),
-      }))
-    },
-
-    redo: () => {
-      const current = get()
-      if (current.redoStack.length === 0) {
-        return
-      }
-
-      const nextSnapshot = current.redoStack[current.redoStack.length - 1]
-      const currentSnapshot = createHistorySnapshot(current)
-
-      set((state) => ({
-        displayedNotes: { ...nextSnapshot.displayedNotes },
-        connections: { ...nextSnapshot.connections },
-        bends: { ...nextSnapshot.bends },
-        redoStack: state.redoStack.slice(0, -1),
-        undoStack: [...state.undoStack, currentSnapshot].slice(-state.historyLimit),
-      }))
     },
   }
 })

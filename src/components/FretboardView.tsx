@@ -1,6 +1,8 @@
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
 import { exportTransparentPng } from '../libs/exportTransparentPng'
 import { useFretboardStore } from '../stores/fretboardStore'
+import { captureHistorySnapshot } from '../stores/historySnapshot'
+import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ExportPanel } from './ExportPanel'
 import { FretboardStage } from './FretboardStage'
@@ -18,6 +20,8 @@ export const FretboardView = () => {
   const handleBackgroundOpacityPercentChange = useSettingsStore(
     (state) => state.handleBackgroundOpacityPercentChange,
   )
+  const beginBufferedEdit = useHistoryStore((state) => state.beginBufferedEdit)
+  const commitBufferedEdit = useHistoryStore((state) => state.commitBufferedEdit)
   const interaction = useFretboardInteractionState()
 
   return (
@@ -51,6 +55,12 @@ export const FretboardView = () => {
         exportEnd={Math.max(exportFretStart, exportFretEnd)}
         backgroundOpacityPercent={backgroundOpacityPercent}
         onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
+        onBackgroundOpacityEditStart={() => {
+          beginBufferedEdit(captureHistorySnapshot())
+        }}
+        onBackgroundOpacityEditEnd={() => {
+          commitBufferedEdit(captureHistorySnapshot())
+        }}
         onExportTransparentPng={() => {
           exportTransparentPng({
             keyPc,

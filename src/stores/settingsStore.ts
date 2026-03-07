@@ -1,50 +1,125 @@
 import { create } from 'zustand'
 import { FRET_COUNT } from '../libs/model'
+import { useFretboardStore } from './fretboardStore'
+import { useHistoryStore } from './historyStore'
+import { createHistorySnapshot } from './historyTypes'
 
-type SettingsStore = {
+type SettingsUpdateOptions = {
+  skipHistory?: boolean
+}
+
+export type SettingsStoreState = {
   exportFretStart: number
   exportFretEnd: number
   backgroundOpacityPercent: number
   addScaleWithinExportRange: boolean
-  setAddScaleWithinExportRange: (nextValue: boolean) => void
-  handleExportFretStartChange: (nextStart: number) => void
-  handleExportFretEndChange: (nextEnd: number) => void
-  handleBackgroundOpacityPercentChange: (nextOpacity: number) => void
 }
 
-export const useSettingsStore = create<SettingsStore>((set, get) => ({
-  exportFretStart: 0,
-  exportFretEnd: FRET_COUNT,
-  backgroundOpacityPercent: 0,
-  addScaleWithinExportRange: true,
+export type SettingsStoreActions = {
+  setAddScaleWithinExportRange: (nextValue: boolean, options?: SettingsUpdateOptions) => void
+  handleExportFretStartChange: (nextStart: number, options?: SettingsUpdateOptions) => void
+  handleExportFretEndChange: (nextEnd: number, options?: SettingsUpdateOptions) => void
+  handleBackgroundOpacityPercentChange: (
+    nextOpacity: number,
+    options?: SettingsUpdateOptions,
+  ) => void
+}
 
-  setAddScaleWithinExportRange: (nextValue) => {
-    set({ addScaleWithinExportRange: nextValue })
-  },
+export type SettingsStore = SettingsStoreState & SettingsStoreActions
 
-  handleExportFretStartChange: (nextStart) => {
-    const clampedStart = Math.max(0, Math.min(nextStart, FRET_COUNT))
-    const currentEnd = get().exportFretEnd
+export const useSettingsStore = create<SettingsStore>((set, get) => {
+  const pushHistoryBeforeChange = () => {
+    const fretboard = useFretboardStore.getState()
+    const settings = get()
 
-    set({
-      exportFretStart: clampedStart,
-      exportFretEnd: clampedStart > currentEnd ? clampedStart : currentEnd,
-    })
-  },
+    useHistoryStore.getState().pushBeforeChange(
+      createHistorySnapshot(
+        {
+          keyPc: fretboard.keyPc,
+          selectedScale: fretboard.selectedScale,
+          displayedNotes: fretboard.displayedNotes,
+          connections: fretboard.connections,
+          bends: fretboard.bends,
+        },
+        {
+          exportFretStart: settings.exportFretStart,
+          exportFretEnd: settings.exportFretEnd,
+          backgroundOpacityPercent: settings.backgroundOpacityPercent,
+          addScaleWithinExportRange: settings.addScaleWithinExportRange,
+        },
+      ),
+    )
+  }
 
-  handleExportFretEndChange: (nextEnd) => {
-    const clampedEnd = Math.max(0, Math.min(nextEnd, FRET_COUNT))
-    const currentStart = get().exportFretStart
+  return {
+    exportFretStart: 0,
+    exportFretEnd: FRET_COUNT,
+    backgroundOpacityPercent: 0,
+    addScaleWithinExportRange: true,
 
-    set({
-      exportFretEnd: clampedEnd,
-      exportFretStart: clampedEnd < currentStart ? clampedEnd : currentStart,
-    })
-  },
+    setAddScaleWithinExportRange: (nextValue, options) => {
+      if (get().addScaleWithinExportRange === nextValue) {
+        return
+      }
 
-  handleBackgroundOpacityPercentChange: (nextOpacity) => {
-    set({
-      backgroundOpacityPercent: Math.max(0, Math.min(nextOpacity, 100)),
-    })
-  },
-}))
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({ addScaleWithinExportRange: nextValue })
+    },
+
+    handleExportFretStartChange: (nextStart, options) => {
+      const clampedStart = Math.max(0, Math.min(nextStart, FRET_COUNT))
+      const current = get()
+      const nextEnd = clampedStart > current.exportFretEnd ? clampedStart : current.exportFretEnd
+
+      if (clampedStart === current.exportFretStart && nextEnd === current.exportFretEnd) {
+        return
+      }
+
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({
+        exportFretStart: clampedStart,
+        exportFretEnd: nextEnd,
+      })
+    },
+
+    handleExportFretEndChange: (nextEnd, options) => {
+      const clampedEnd = Math.max(0, Math.min(nextEnd, FRET_COUNT))
+      const current = get()
+      const nextStart = clampedEnd < current.exportFretStart ? clampedEnd : current.exportFretStart
+
+      if (clampedEnd === current.exportFretEnd && nextStart === current.exportFretStart) {
+        return
+      }
+
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({
+        exportFretEnd: clampedEnd,
+        exportFretStart: nextStart,
+      })
+    },
+
+    handleBackgroundOpacityPercentChange: (nextOpacity, options) => {
+      const clampedOpacity = Math.max(0, Math.min(nextOpacity, 100))
+      if (get().backgroundOpacityPercent === clampedOpacity) {
+        return
+      }
+
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({
+        backgroundOpacityPercent: clampedOpacity,
+      })
+    },
+  }
+})
