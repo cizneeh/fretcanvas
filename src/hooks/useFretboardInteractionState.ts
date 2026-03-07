@@ -1,11 +1,12 @@
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react'
-import { FRET_NUMBERS, type PositionId } from '../libs/model'
+import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/model'
 import { isBendShortcutPressed, isDimShortcutPressed } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 
 export const useFretboardInteractionState = () => {
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
+  const bends = useFretboardStore((state) => state.bends)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
@@ -270,6 +271,10 @@ export const useFretboardInteractionState = () => {
     }
 
     if (isBendShortcutPressed(isAltKey)) {
+      if (bends[getBendId(positionId)] !== undefined) {
+        removeBendByFromPosition(positionId)
+        return
+      }
       upsertBendFromPosition(positionId)
       return
     }
@@ -300,12 +305,12 @@ export const useFretboardInteractionState = () => {
     })
   }
 
-  const handleAddBendFromContextMenu = (positionId: PositionId) => {
+  const handleToggleBendFromContextMenu = (positionId: PositionId) => {
+    if (bends[getBendId(positionId)] !== undefined) {
+      removeBendByFromPosition(positionId)
+      return
+    }
     upsertBendFromPosition(positionId)
-  }
-
-  const handleRemoveBendFromContextMenu = (positionId: PositionId) => {
-    removeBendByFromPosition(positionId)
   }
 
   return {
@@ -314,8 +319,7 @@ export const useFretboardInteractionState = () => {
     contextMenuRef,
     noteContextMenu,
     setNoteContextMenu,
-    handleAddBendFromContextMenu,
-    handleRemoveBendFromContextMenu,
+    handleToggleBendFromContextMenu,
     previewConnection:
       dragConnectFrom !== undefined && dragPointer !== undefined
         ? {

@@ -37,8 +37,7 @@ export const FretboardView = () => {
             positionId={interaction.noteContextMenu.positionId}
             x={interaction.noteContextMenu.x}
             y={interaction.noteContextMenu.y}
-            onAddBend={interaction.handleAddBendFromContextMenu}
-            onRemoveBend={interaction.handleRemoveBendFromContextMenu}
+            onToggleBend={interaction.handleToggleBendFromContextMenu}
             onClose={() => {
               interaction.setNoteContextMenu(undefined)
             }}

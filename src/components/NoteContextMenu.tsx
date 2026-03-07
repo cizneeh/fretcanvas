@@ -7,8 +7,7 @@ type NoteContextMenuProps = {
   x: number
   y: number
   onClose: () => void
-  onAddBend: (positionId: PositionId) => void
-  onRemoveBend: (positionId: PositionId) => void
+  onToggleBend: (positionId: PositionId) => void
 }
 
 export const NoteContextMenu = ({
@@ -16,8 +15,7 @@ export const NoteContextMenu = ({
   x,
   y,
   onClose,
-  onAddBend,
-  onRemoveBend,
+  onToggleBend,
 }: NoteContextMenuProps) => {
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const bends = useFretboardStore((state) => state.bends)
@@ -55,33 +53,16 @@ export const NoteContextMenu = ({
         type="button"
         className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800"
         onClick={() => {
-          onAddBend(positionId)
+          onToggleBend(positionId)
           onClose()
         }}
       >
         <span className="flex items-center gap-2 pr-3">
-          <span>Add Bend</span>
+          <span>{hasBend ? 'Remove Bend' : 'Add Bend'}</span>
           <span className="text-[11px] text-slate-400">{bendShortcutLabel}</span>
         </span>
         <span className="ml-2 w-4 shrink-0 text-center text-sm text-slate-300">
           {hasBend ? '✓' : ''}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800 disabled:cursor-not-allowed disabled:text-slate-500"
-        onClick={() => {
-          onRemoveBend(positionId)
-          onClose()
-        }}
-        disabled={!hasBend}
-      >
-        <span className="flex items-center gap-2 pr-3">
-          <span>Remove Bend</span>
-        </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-slate-300">
-          {hasBend ? '•' : ''}
         </span>
       </button>
     </div>

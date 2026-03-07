@@ -181,25 +181,27 @@ export const exportTransparentPng = ({
 
     const startX = boardLeft + (from.fret - start + 0.5) * cellWidth
     const startY = boardTop + from.stringIndex * rowHeight + rowHeight / 2
-    const endX = startX + 36
-    const endY = startY - 28
-    const controlX = startX + 14
-    const controlY = startY - 44
+    const control1X = startX + 18
+    const control1Y = startY + 1
+    const control2X = startX + 38
+    const control2Y = startY - 8
+    const endX = startX + 40
+    const endY = startY - 46
 
-    ctx.strokeStyle = 'rgba(251, 191, 36, 0.95)'
-    ctx.lineWidth = 2.5
+    ctx.strokeStyle = 'rgba(192, 132, 252, 0.82)'
+    ctx.lineWidth = 2.4
     ctx.lineCap = 'round'
     ctx.beginPath()
     ctx.moveTo(startX, startY)
-    ctx.quadraticCurveTo(controlX, controlY, endX, endY)
+    ctx.bezierCurveTo(control1X, control1Y, control2X, control2Y, endX, endY)
     ctx.stroke()
 
-    const tangentX = endX - controlX
-    const tangentY = endY - controlY
+    const tangentX = endX - control2X
+    const tangentY = endY - control2Y
     const tangentLength = Math.hypot(tangentX, tangentY) || 1
     const unitX = tangentX / tangentLength
     const unitY = tangentY / tangentLength
-    const arrowLength = 9
+    const arrowLength = 8
     const arrowSpread = 4
     const leftX = endX - unitX * arrowLength - unitY * arrowSpread
     const leftY = endY - unitY * arrowLength + unitX * arrowSpread
