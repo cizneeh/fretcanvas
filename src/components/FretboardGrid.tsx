@@ -33,16 +33,17 @@ type FretboardGridProps = {
         toY: number
       }
     | undefined
-  onTogglePosition: (positionId: PositionId) => void
   onSelectClosestHandleToFret: (fret: number) => void
   onRemoveConnection: (connectionId: string) => void
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
     button: number,
+    isMetaKey: boolean,
     clientX: number,
     clientY: number,
   ) => void
+  onNoteClick: (positionId: PositionId, isMetaKey: boolean) => void
   onNoteContextMenu: (
     positionId: PositionId,
     isHighlighted: boolean,
@@ -64,10 +65,10 @@ export const FretboardGrid = ({
   exportFretEnd,
   startHighlightFret,
   previewConnection,
-  onTogglePosition,
   onSelectClosestHandleToFret,
   onRemoveConnection,
   onNotePointerDown,
+  onNoteClick,
   onNoteContextMenu,
   onNotePointerUp,
   onBoardPointerMove,
@@ -226,14 +227,15 @@ export const FretboardGrid = ({
                   key={`${stringInfo.id}-${fret}`}
                   type="button"
                   className="group relative flex h-12 items-center justify-center border-r border-slate-700 focus-visible:outline-none"
-                  onClick={() => {
-                    onTogglePosition(positionId)
+                  onClick={(event) => {
+                    onNoteClick(positionId, event.metaKey)
                   }}
                   onPointerDown={(event) => {
                     onNotePointerDown(
                       positionId,
                       isHighlighted,
                       event.button,
+                      event.metaKey,
                       event.clientX,
                       event.clientY,
                     )
