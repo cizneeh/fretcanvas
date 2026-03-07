@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { FRET_COUNT } from '../libs/model'
-import { captureHistorySnapshot } from './historySnapshot'
 import { useHistoryStore } from './historyStore'
 
 type SettingsUpdateOptions = {
@@ -28,7 +27,7 @@ export type SettingsStore = SettingsStoreState & SettingsStoreActions
 
 export const useSettingsStore = create<SettingsStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
-    useHistoryStore.getState().pushBeforeChange(captureHistorySnapshot())
+    useHistoryStore.getState().pushBeforeChange()
   }
 
   return {

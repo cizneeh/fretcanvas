@@ -1,7 +1,6 @@
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
 import { exportTransparentPng } from '../libs/exportTransparentPng'
 import { useFretboardStore } from '../stores/fretboardStore'
-import { captureHistorySnapshot } from '../stores/historySnapshot'
 import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ExportPanel } from './ExportPanel'
@@ -22,6 +21,8 @@ export const FretboardView = () => {
   )
   const beginBufferedEdit = useHistoryStore((state) => state.beginBufferedEdit)
   const commitBufferedEdit = useHistoryStore((state) => state.commitBufferedEdit)
+  const cancelBufferedEdit = useHistoryStore((state) => state.cancelBufferedEdit)
+  const captureSnapshot = useHistoryStore((state) => state.captureSnapshot)
   const interaction = useFretboardInteractionState()
 
   return (
@@ -56,10 +57,18 @@ export const FretboardView = () => {
         backgroundOpacityPercent={backgroundOpacityPercent}
         onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
         onBackgroundOpacityEditStart={() => {
-          beginBufferedEdit(captureHistorySnapshot())
+          const snapshot = captureSnapshot()
+          if (snapshot !== undefined) {
+            beginBufferedEdit(snapshot)
+          }
         }}
         onBackgroundOpacityEditEnd={() => {
-          commitBufferedEdit(captureHistorySnapshot())
+          const snapshot = captureSnapshot()
+          if (snapshot !== undefined) {
+            commitBufferedEdit(snapshot)
+          } else {
+            cancelBufferedEdit()
+          }
         }}
         onExportTransparentPng={() => {
           exportTransparentPng({

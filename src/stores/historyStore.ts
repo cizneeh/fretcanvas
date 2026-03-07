@@ -1,25 +1,27 @@
 import { create } from 'zustand'
 import { createHistorySnapshot, type HistorySnapshot, historySnapshotsEqual } from './historyTypes'
 
+type HistoryBindings = {
+  capture: () => HistorySnapshot
+  apply: (snapshot: HistorySnapshot) => void
+}
+
 type HistoryStore = {
   undoStack: HistorySnapshot[]
   redoStack: HistorySnapshot[]
   historyLimit: number
   bufferedSnapshot: HistorySnapshot | undefined
-  pushBeforeChange: (snapshot: HistorySnapshot) => void
+  bindings: HistoryBindings | undefined
+  configureBindings: (bindings: HistoryBindings) => void
+  captureSnapshot: () => HistorySnapshot | undefined
+  pushBeforeChange: () => void
   beginBufferedEdit: (snapshot: HistorySnapshot) => void
   commitBufferedEdit: (snapshot: HistorySnapshot) => void
   cancelBufferedEdit: () => void
   canUndo: () => boolean
   canRedo: () => boolean
-  undo: (
-    getCurrentSnapshot: () => HistorySnapshot,
-    applySnapshot: (snapshot: HistorySnapshot) => void,
-  ) => void
-  redo: (
-    getCurrentSnapshot: () => HistorySnapshot,
-    applySnapshot: (snapshot: HistorySnapshot) => void,
-  ) => void
+  undo: () => void
+  redo: () => void
 }
 
 export const useHistoryStore = create<HistoryStore>((set, get) => ({
@@ -27,8 +29,27 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
   redoStack: [],
   historyLimit: 100,
   bufferedSnapshot: undefined,
+  bindings: undefined,
 
-  pushBeforeChange: (snapshot) => {
+  configureBindings: (bindings) => {
+    set({ bindings })
+  },
+
+  captureSnapshot: () => {
+    const bindings = get().bindings
+    if (bindings === undefined) {
+      return undefined
+    }
+
+    return bindings.capture()
+  },
+
+  pushBeforeChange: () => {
+    const snapshot = get().captureSnapshot()
+    if (snapshot === undefined) {
+      return
+    }
+
     set((state) => {
       const last = state.undoStack[state.undoStack.length - 1]
       const nextUndoStack =
@@ -95,16 +116,16 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
 
   canRedo: () => get().redoStack.length > 0,
 
-  undo: (getCurrentSnapshot, applySnapshot) => {
+  undo: () => {
     const current = get()
-    if (current.undoStack.length === 0) {
+    if (current.undoStack.length === 0 || current.bindings === undefined) {
       return
     }
 
     const previousSnapshot = current.undoStack[current.undoStack.length - 1]
-    const currentSnapshot = getCurrentSnapshot()
+    const currentSnapshot = current.bindings.capture()
 
-    applySnapshot(previousSnapshot)
+    current.bindings.apply(previousSnapshot)
 
     set((state) => ({
       undoStack: state.undoStack.slice(0, -1),
@@ -116,16 +137,16 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
     }))
   },
 
-  redo: (getCurrentSnapshot, applySnapshot) => {
+  redo: () => {
     const current = get()
-    if (current.redoStack.length === 0) {
+    if (current.redoStack.length === 0 || current.bindings === undefined) {
       return
     }
 
     const nextSnapshot = current.redoStack[current.redoStack.length - 1]
-    const currentSnapshot = getCurrentSnapshot()
+    const currentSnapshot = current.bindings.capture()
 
-    applySnapshot(nextSnapshot)
+    current.bindings.apply(nextSnapshot)
 
     set((state) => ({
       redoStack: state.redoStack.slice(0, -1),

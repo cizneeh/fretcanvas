@@ -16,7 +16,6 @@ import {
   type ScaleId,
   toPositionId,
 } from '../libs/model'
-import { captureHistorySnapshot } from './historySnapshot'
 import { useHistoryStore } from './historyStore'
 
 type AddScaleNotesOptions = {
@@ -55,7 +54,7 @@ export type FretboardStore = FretboardStoreState & FretboardStoreActions
 
 export const useFretboardStore = create<FretboardStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
-    useHistoryStore.getState().pushBeforeChange(captureHistorySnapshot())
+    useHistoryStore.getState().pushBeforeChange()
   }
 
   return {

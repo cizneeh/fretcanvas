@@ -2,10 +2,14 @@ import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { FretboardView } from './components/FretboardView'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
-import { applyHistorySnapshot, captureHistorySnapshot } from './stores/historySnapshot'
+import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
 
 function App() {
+  useEffect(() => {
+    initializeHistoryBindings()
+  }, [])
+
   const undo = useHistoryStore((state) => state.undo)
   const redo = useHistoryStore((state) => state.redo)
 
@@ -17,13 +21,13 @@ function App() {
 
       if (isUndoShortcutPressed(event.key, event.metaKey, event.ctrlKey, event.shiftKey)) {
         event.preventDefault()
-        undo(captureHistorySnapshot, applyHistorySnapshot)
+        undo()
         return
       }
 
       if (isRedoShortcutPressed(event.key, event.metaKey, event.ctrlKey, event.shiftKey)) {
         event.preventDefault()
-        redo(captureHistorySnapshot, applyHistorySnapshot)
+        redo()
       }
     }
 

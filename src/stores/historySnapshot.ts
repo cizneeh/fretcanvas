@@ -1,30 +1,28 @@
-import { useFretboardStore } from './fretboardStore'
-import { createHistorySnapshot, type HistorySnapshot } from './historyTypes'
-import { useSettingsStore } from './settingsStore'
+import {
+  createHistorySnapshot,
+  type FretboardHistoryState,
+  type HistorySnapshot,
+  type SettingsHistoryState,
+} from './historyTypes'
 
-export const captureHistorySnapshot = (): HistorySnapshot => {
-  const fretboardState = useFretboardStore.getState()
-  const settingsState = useSettingsStore.getState()
+export const captureHistorySnapshot = ({
+  fretboardState,
+  settingsState,
+}: {
+  fretboardState: FretboardHistoryState
+  settingsState: SettingsHistoryState
+}): HistorySnapshot => createHistorySnapshot(fretboardState, settingsState)
 
-  return createHistorySnapshot(
-    {
-      keyPc: fretboardState.keyPc,
-      selectedScale: fretboardState.selectedScale,
-      displayedNotes: fretboardState.displayedNotes,
-      connections: fretboardState.connections,
-      bends: fretboardState.bends,
-    },
-    {
-      exportFretStart: settingsState.exportFretStart,
-      exportFretEnd: settingsState.exportFretEnd,
-      backgroundOpacityPercent: settingsState.backgroundOpacityPercent,
-      addScaleWithinExportRange: settingsState.addScaleWithinExportRange,
-    },
-  )
-}
-
-export const applyHistorySnapshot = (snapshot: HistorySnapshot) => {
-  useFretboardStore.setState({
+export const applyHistorySnapshot = ({
+  snapshot,
+  setFretboardState,
+  setSettingsState,
+}: {
+  snapshot: HistorySnapshot
+  setFretboardState: (next: FretboardHistoryState) => void
+  setSettingsState: (next: SettingsHistoryState) => void
+}) => {
+  setFretboardState({
     keyPc: snapshot.fretboard.keyPc,
     selectedScale: snapshot.fretboard.selectedScale,
     displayedNotes: { ...snapshot.fretboard.displayedNotes },
@@ -32,7 +30,7 @@ export const applyHistorySnapshot = (snapshot: HistorySnapshot) => {
     bends: { ...snapshot.fretboard.bends },
   })
 
-  useSettingsStore.setState({
+  setSettingsState({
     exportFretStart: snapshot.settings.exportFretStart,
     exportFretEnd: snapshot.settings.exportFretEnd,
     backgroundOpacityPercent: snapshot.settings.backgroundOpacityPercent,
