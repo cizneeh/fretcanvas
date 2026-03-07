@@ -29,7 +29,7 @@ export const NoteChip = ({
             : 'border-cyan-100/70 bg-cyan-600/80 text-white'
       }`}
       style={{
-        opacity: isDimmed ? 0.45 : 1,
+        opacity: isDimmed ? 0.35 : 1,
         textShadow: '0 1px 2px rgba(0, 0, 0, 0.65)',
       }}
     >

@@ -93,7 +93,7 @@ export const exportTransparentPng = ({
     const label = DEGREE_LABELS[intervalFromKey]
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
-    const noteOpacity = displayedNote.isDimmed ? 0.45 : 1
+    const noteOpacity = displayedNote.isDimmed ? 0.35 : 1
     ctx.save()
     ctx.globalAlpha = noteOpacity
     ctx.fillStyle = isRoot
@@ -145,12 +145,8 @@ export const exportTransparentPng = ({
     ctx.stroke()
   }
 
-  OPEN_STRINGS.forEach((stringInfo, row) => {
+  OPEN_STRINGS.forEach((_stringInfo, row) => {
     const yCenter = boardTop + row * rowHeight + rowHeight / 2
-    ctx.fillStyle = 'rgba(241, 245, 249, 0.98)'
-    ctx.textAlign = 'center'
-    ctx.fillText(stringInfo.name, paddingX + labelWidth / 2, yCenter)
-
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'
     ctx.lineWidth = 1
     ctx.beginPath()
