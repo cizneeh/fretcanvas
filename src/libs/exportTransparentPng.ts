@@ -145,6 +145,16 @@ export const exportTransparentPng = ({
     ctx.stroke()
   }
 
+  if (start === 0) {
+    const nutRightX = boardLeft + cellWidth
+    ctx.strokeStyle = 'rgba(226, 232, 240, 0.92)'
+    ctx.lineWidth = 2.8
+    ctx.beginPath()
+    ctx.moveTo(nutRightX, boardTop)
+    ctx.lineTo(nutRightX, boardTop + boardHeight)
+    ctx.stroke()
+  }
+
   OPEN_STRINGS.forEach((_stringInfo, row) => {
     const yCenter = boardTop + row * rowHeight + rowHeight / 2
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'

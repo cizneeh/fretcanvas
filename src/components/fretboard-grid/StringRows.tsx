@@ -83,6 +83,7 @@ export const StringRows = ({
               <FretCell
                 key={`${stringInfo.id}-${fret}`}
                 positionId={positionId}
+                isNut={fret === 0}
                 isHighlighted={isHighlighted}
                 isDimmed={displayedNote?.isDimmed ?? false}
                 label={DEGREE_LABELS[intervalFromKey]}

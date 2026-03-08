@@ -3,6 +3,7 @@ import { NoteChip } from '../NoteChip'
 
 type FretCellProps = {
   positionId: PositionId
+  isNut: boolean
   isHighlighted: boolean
   isDimmed: boolean
   label: string
@@ -40,6 +41,7 @@ type FretCellProps = {
 
 export const FretCell = ({
   positionId,
+  isNut,
   isHighlighted,
   isDimmed,
   label,
@@ -58,7 +60,9 @@ export const FretCell = ({
   return (
     <button
       type="button"
-      className="group relative flex h-12 items-center justify-center border-r border-slate-400/55 focus-visible:outline-none"
+      className={`group relative flex h-12 items-center justify-center border-r focus-visible:outline-none ${
+        isNut ? 'border-r-[3px] border-slate-200/85' : 'border-slate-400/55'
+      }`}
       onClick={(event) => {
         onNoteClick(positionId, event.metaKey, event.ctrlKey, event.altKey)
       }}
