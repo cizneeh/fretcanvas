@@ -58,6 +58,9 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
     return bindings.capture()
   },
 
+  /**
+   * 直前のundoStackと今のsnapshotが同じなら、重複pushしない。
+   */
   pushBeforeChange: () => {
     const snapshot = get().captureSnapshot()
     if (snapshot === undefined) {
