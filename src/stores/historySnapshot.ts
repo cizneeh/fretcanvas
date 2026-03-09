@@ -29,81 +29,54 @@ export const createHistorySnapshot = (
   },
 })
 
-const notesEqual = (
-  left: HistorySnapshot['fretboard']['displayedNotes'],
-  right: HistorySnapshot['fretboard']['displayedNotes'],
+const recordsEqual = <T>(
+  left: Record<string, T>,
+  right: Record<string, T>,
+  itemEqual: (leftItem: T, rightItem: T) => boolean,
 ) => {
   const leftEntries = Object.entries(left)
-  const rightEntries = Object.entries(right)
-  if (leftEntries.length !== rightEntries.length) {
+  if (leftEntries.length !== Object.keys(right).length) {
     return false
   }
 
-  for (const [positionId, leftNote] of leftEntries) {
-    const rightNote = right[positionId]
-    if (rightNote === undefined) {
-      return false
-    }
-
-    if (
-      leftNote.positionId !== rightNote.positionId ||
-      leftNote.isDimmed !== rightNote.isDimmed ||
-      leftNote.colorVariant !== rightNote.colorVariant
-    ) {
+  for (const [key, leftItem] of leftEntries) {
+    const rightItem = right[key]
+    if (rightItem === undefined || !itemEqual(leftItem, rightItem)) {
       return false
     }
   }
 
   return true
 }
+
+const notesEqual = (
+  left: HistorySnapshot['fretboard']['displayedNotes'],
+  right: HistorySnapshot['fretboard']['displayedNotes'],
+) =>
+  recordsEqual(left, right, (leftNote, rightNote) => {
+    return (
+      leftNote.positionId === rightNote.positionId &&
+      leftNote.isDimmed === rightNote.isDimmed &&
+      leftNote.colorVariant === rightNote.colorVariant
+    )
+  })
 
 const connectionsEqual = (
   left: HistorySnapshot['fretboard']['connections'],
   right: HistorySnapshot['fretboard']['connections'],
-) => {
-  const leftEntries = Object.entries(left)
-  const rightEntries = Object.entries(right)
-  if (leftEntries.length !== rightEntries.length) {
-    return false
-  }
-
-  for (const [connectionId, leftConnection] of leftEntries) {
-    const rightConnection = right[connectionId]
-    if (rightConnection === undefined) {
-      return false
-    }
-
-    if (
-      leftConnection.id !== rightConnection.id ||
-      leftConnection.from !== rightConnection.from ||
-      leftConnection.to !== rightConnection.to
-    ) {
-      return false
-    }
-  }
-
-  return true
-}
+) =>
+  recordsEqual(left, right, (leftConnection, rightConnection) => {
+    return (
+      leftConnection.id === rightConnection.id &&
+      leftConnection.from === rightConnection.from &&
+      leftConnection.to === rightConnection.to
+    )
+  })
 
 const bendsEqual = (
   left: HistorySnapshot['fretboard']['bends'],
   right: HistorySnapshot['fretboard']['bends'],
-) => {
-  const leftEntries = Object.entries(left)
-  const rightEntries = Object.entries(right)
-  if (leftEntries.length !== rightEntries.length) {
-    return false
-  }
-
-  for (const [bendId, leftBend] of leftEntries) {
-    const rightBend = right[bendId]
-    if (rightBend === undefined || rightBend.from !== leftBend.from) {
-      return false
-    }
-  }
-
-  return true
-}
+) => recordsEqual(left, right, (leftBend, rightBend) => leftBend.from === rightBend.from)
 
 export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): boolean => {
   return (
