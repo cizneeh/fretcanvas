@@ -1,20 +1,21 @@
 import type { FretboardStoreState } from './fretboardStore'
 import type { SettingsStoreState } from './settingsStore'
 
-export type FretboardHistoryState = FretboardStoreState
-export type SettingsHistoryState = SettingsStoreState
-
+/**
+ * 各storeの値のsnapshotを保持する
+ * storeが増えたら、ここに追加される想定
+ */
 export type HistorySnapshot = {
-  fretboard: FretboardHistoryState
-  settings: SettingsHistoryState
+  fretboard: FretboardStoreState
+  settings: SettingsStoreState
 }
 
 const cloneFretboardState = (
   state: Pick<
-    FretboardHistoryState,
+    FretboardStoreState,
     'keyPc' | 'selectedScale' | 'displayedNotes' | 'connections' | 'bends'
   >,
-): FretboardHistoryState => ({
+): FretboardStoreState => ({
   keyPc: state.keyPc,
   selectedScale: state.selectedScale,
   displayedNotes: { ...state.displayedNotes },
@@ -22,7 +23,7 @@ const cloneFretboardState = (
   bends: { ...state.bends },
 })
 
-const cloneSettingsState = (state: SettingsHistoryState): SettingsHistoryState => ({
+const cloneSettingsState = (state: SettingsStoreState): SettingsStoreState => ({
   exportFretStart: state.exportFretStart,
   exportFretEnd: state.exportFretEnd,
   backgroundOpacityPercent: state.backgroundOpacityPercent,
@@ -30,8 +31,8 @@ const cloneSettingsState = (state: SettingsHistoryState): SettingsHistoryState =
 })
 
 export const createHistorySnapshot = (
-  fretboard: FretboardHistoryState,
-  settings: SettingsHistoryState,
+  fretboard: FretboardStoreState,
+  settings: SettingsStoreState,
 ): HistorySnapshot => ({
   fretboard: cloneFretboardState(fretboard),
   settings: cloneSettingsState(settings),

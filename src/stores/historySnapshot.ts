@@ -1,16 +1,13 @@
-import {
-  createHistorySnapshot,
-  type FretboardHistoryState,
-  type HistorySnapshot,
-  type SettingsHistoryState,
-} from './historyTypes'
+import type { FretboardStoreState } from './fretboardStore'
+import { createHistorySnapshot, type HistorySnapshot } from './historyTypes'
+import type { SettingsStoreState } from './settingsStore'
 
 export const captureHistorySnapshot = ({
   fretboardState,
   settingsState,
 }: {
-  fretboardState: FretboardHistoryState
-  settingsState: SettingsHistoryState
+  fretboardState: FretboardStoreState
+  settingsState: SettingsStoreState
 }): HistorySnapshot => createHistorySnapshot(fretboardState, settingsState)
 
 export const applyHistorySnapshot = ({
@@ -19,8 +16,8 @@ export const applyHistorySnapshot = ({
   setSettingsState,
 }: {
   snapshot: HistorySnapshot
-  setFretboardState: (next: FretboardHistoryState) => void
-  setSettingsState: (next: SettingsHistoryState) => void
+  setFretboardState: (next: FretboardStoreState) => void
+  setSettingsState: (next: SettingsStoreState) => void
 }) => {
   setFretboardState({
     keyPc: snapshot.fretboard.keyPc,
