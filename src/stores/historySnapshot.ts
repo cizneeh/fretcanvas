@@ -10,25 +10,18 @@ export type HistorySnapshot = {
   settings: SettingsStoreState
 }
 
+/**
+ * 各storeのstateをコピーして、historysnapshotを作る
+ * コピーしないと参照が共有される
+ */
 export const createHistorySnapshot = (
   fretboard: FretboardStoreState,
   settings: SettingsStoreState,
-): HistorySnapshot => ({
-  fretboard: {
-    keyPc: fretboard.keyPc,
-    selectedScale: fretboard.selectedScale,
-    displayedNotes: { ...fretboard.displayedNotes },
-    connections: { ...fretboard.connections },
-    bends: { ...fretboard.bends },
-  },
-  settings: {
-    exportFretStart: settings.exportFretStart,
-    exportFretEnd: settings.exportFretEnd,
-    backgroundOpacityPercent: settings.backgroundOpacityPercent,
-    addScaleWithinExportRange: settings.addScaleWithinExportRange,
-  },
-})
-
+): HistorySnapshot =>
+  structuredClone({
+    fretboard,
+    settings,
+  })
 const recordsEqual = <T>(
   left: Record<string, T>,
   right: Record<string, T>,
