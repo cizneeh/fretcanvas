@@ -1,6 +1,6 @@
 import { useFretboardStore } from './fretboardStore'
 import {
-  applyHistorySnapshot,
+  applyHistorySnapshotToActualStores,
   createHistorySnapshot,
   type HistorySnapshot,
 } from './historySnapshot'
@@ -72,7 +72,7 @@ export const initializeHistoryBindings = () => {
   useHistoryStore.getState().configureBindings({
     capture: captureCurrentSnapshot,
     apply: (snapshot) => {
-      applyHistorySnapshot({
+      applyHistorySnapshotToActualStores({
         snapshot,
         setFretboardState: (nextFretboardState) => {
           useFretboardStore.setState(nextFretboardState)
@@ -87,7 +87,7 @@ export const initializeHistoryBindings = () => {
   isHydrating = true
   const persisted = loadPersistedHistory()
   if (persisted !== undefined) {
-    applyHistorySnapshot({
+    applyHistorySnapshotToActualStores({
       snapshot: persisted.current,
       setFretboardState: (nextFretboardState) => {
         useFretboardStore.setState(nextFretboardState)

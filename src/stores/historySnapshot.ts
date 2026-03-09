@@ -95,7 +95,7 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
   )
 }
 
-export const applyHistorySnapshot = ({
+export const applyHistorySnapshotToActualStores = ({
   snapshot,
   setFretboardState,
   setSettingsState,
