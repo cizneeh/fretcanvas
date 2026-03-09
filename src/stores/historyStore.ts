@@ -1,15 +1,29 @@
 import { create } from 'zustand'
-import { createHistorySnapshot, type HistorySnapshot, historySnapshotsEqual } from './historyTypes'
+import {
+  createHistorySnapshot,
+  type HistorySnapshot,
+  historySnapshotsEqual,
+} from './historySnapshot'
 
 type HistoryBindings = {
   capture: () => HistorySnapshot
   apply: (snapshot: HistorySnapshot) => void
 }
 
+/**
+ * 編集のhistoryを持つstore
+ * undo/redoのstackと、その更新ロジックを持つ
+ * state変更時、その変更前の状態がsnapshotとしてundostackに入る
+ */
 type HistoryStore = {
   undoStack: HistorySnapshot[]
   redoStack: HistorySnapshot[]
   historyLimit: number
+  /**
+   * ドラッグみたいな連続での変更を 1回の履歴にまとめるための一時バッファ
+   * 変更開始時にコミットだと、実際には変更が無かった場合に困るのでバッファが必要
+   * あるいは、変更操作をキャンセルするような場合にもこれが使えるはず
+   */
   bufferedSnapshot: HistorySnapshot | undefined
   bindings: HistoryBindings | undefined
   configureBindings: (bindings: HistoryBindings) => void

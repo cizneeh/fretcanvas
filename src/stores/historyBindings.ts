@@ -1,7 +1,11 @@
 import { useFretboardStore } from './fretboardStore'
-import { applyHistorySnapshot, captureHistorySnapshot } from './historySnapshot'
+import {
+  applyHistorySnapshot,
+  captureHistorySnapshot,
+  createHistorySnapshot,
+  type HistorySnapshot,
+} from './historySnapshot'
 import { useHistoryStore } from './historyStore'
-import { createHistorySnapshot, type HistorySnapshot } from './historyTypes'
 import { useSettingsStore } from './settingsStore'
 
 const HISTORY_STORAGE_KEY = 'fretmap:history:v1'
