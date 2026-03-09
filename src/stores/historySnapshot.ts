@@ -10,32 +10,23 @@ export type HistorySnapshot = {
   settings: SettingsStoreState
 }
 
-const cloneFretboardState = (
-  state: Pick<
-    FretboardStoreState,
-    'keyPc' | 'selectedScale' | 'displayedNotes' | 'connections' | 'bends'
-  >,
-): FretboardStoreState => ({
-  keyPc: state.keyPc,
-  selectedScale: state.selectedScale,
-  displayedNotes: { ...state.displayedNotes },
-  connections: { ...state.connections },
-  bends: { ...state.bends },
-})
-
-const cloneSettingsState = (state: SettingsStoreState): SettingsStoreState => ({
-  exportFretStart: state.exportFretStart,
-  exportFretEnd: state.exportFretEnd,
-  backgroundOpacityPercent: state.backgroundOpacityPercent,
-  addScaleWithinExportRange: state.addScaleWithinExportRange,
-})
-
 export const createHistorySnapshot = (
   fretboard: FretboardStoreState,
   settings: SettingsStoreState,
 ): HistorySnapshot => ({
-  fretboard: cloneFretboardState(fretboard),
-  settings: cloneSettingsState(settings),
+  fretboard: {
+    keyPc: fretboard.keyPc,
+    selectedScale: fretboard.selectedScale,
+    displayedNotes: { ...fretboard.displayedNotes },
+    connections: { ...fretboard.connections },
+    bends: { ...fretboard.bends },
+  },
+  settings: {
+    exportFretStart: settings.exportFretStart,
+    exportFretEnd: settings.exportFretEnd,
+    backgroundOpacityPercent: settings.backgroundOpacityPercent,
+    addScaleWithinExportRange: settings.addScaleWithinExportRange,
+  },
 })
 
 const notesEqual = (
@@ -128,14 +119,6 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
   )
 }
 
-export const captureHistorySnapshot = ({
-  fretboardState,
-  settingsState,
-}: {
-  fretboardState: FretboardStoreState
-  settingsState: SettingsStoreState
-}): HistorySnapshot => createHistorySnapshot(fretboardState, settingsState)
-
 export const applyHistorySnapshot = ({
   snapshot,
   setFretboardState,
@@ -145,18 +128,7 @@ export const applyHistorySnapshot = ({
   setFretboardState: (next: FretboardStoreState) => void
   setSettingsState: (next: SettingsStoreState) => void
 }) => {
-  setFretboardState({
-    keyPc: snapshot.fretboard.keyPc,
-    selectedScale: snapshot.fretboard.selectedScale,
-    displayedNotes: { ...snapshot.fretboard.displayedNotes },
-    connections: { ...snapshot.fretboard.connections },
-    bends: { ...snapshot.fretboard.bends },
-  })
-
-  setSettingsState({
-    exportFretStart: snapshot.settings.exportFretStart,
-    exportFretEnd: snapshot.settings.exportFretEnd,
-    backgroundOpacityPercent: snapshot.settings.backgroundOpacityPercent,
-    addScaleWithinExportRange: snapshot.settings.addScaleWithinExportRange,
-  })
+  const cloned = createHistorySnapshot(snapshot.fretboard, snapshot.settings)
+  setFretboardState(cloned.fretboard)
+  setSettingsState(cloned.settings)
 }

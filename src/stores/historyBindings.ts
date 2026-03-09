@@ -1,7 +1,6 @@
 import { useFretboardStore } from './fretboardStore'
 import {
   applyHistorySnapshot,
-  captureHistorySnapshot,
   createHistorySnapshot,
   type HistorySnapshot,
 } from './historySnapshot'
@@ -20,10 +19,7 @@ let isConfigured = false
 let isHydrating = false
 
 const captureCurrentSnapshot = (): HistorySnapshot =>
-  captureHistorySnapshot({
-    fretboardState: useFretboardStore.getState(),
-    settingsState: useSettingsStore.getState(),
-  })
+  createHistorySnapshot(useFretboardStore.getState(), useSettingsStore.getState())
 
 const cloneStack = (stack: HistorySnapshot[]): HistorySnapshot[] =>
   stack.map((snapshot) => createHistorySnapshot(snapshot.fretboard, snapshot.settings))
