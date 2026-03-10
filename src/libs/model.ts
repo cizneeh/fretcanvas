@@ -97,6 +97,13 @@ const CHORD_QUALITY_INTERVALS: Record<ChordQuality, number[]> = {
   m7b5: [0, 3, 6, 10],
 }
 
+const CHORD_QUALITY_LABELS: Record<ChordQuality, string> = {
+  maj7: 'maj7',
+  m7: 'm7',
+  '7': '7',
+  m7b5: 'm7b5',
+}
+
 const MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS: {
   id: string
   label: string
@@ -145,14 +152,20 @@ export const getChordPitchClasses = (selectedChord: SelectedChord): PitchClass[]
 export const getMajorDiatonicSeventhChordOptions = (
   keyPc: PitchClass,
 ): MajorDiatonicSeventhChordOption[] =>
-  MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS.map((definition) => ({
-    id: definition.id,
-    label: definition.label,
-    chord: {
-      rootPc: normalizePc(keyPc + definition.intervalFromKey),
-      quality: definition.quality,
-    },
-  }))
+  MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS.map((definition) => {
+    const rootPc = normalizePc(keyPc + definition.intervalFromKey)
+    const rootLabel = NOTE_LABELS[rootPc].split('/')[0]
+    const qualityLabel = CHORD_QUALITY_LABELS[definition.quality]
+
+    return {
+      id: definition.id,
+      label: `${rootLabel}${qualityLabel}`,
+      chord: {
+        rootPc,
+        quality: definition.quality,
+      },
+    }
+  })
 export const toPositionId = (position: Position): PositionId =>
   `${position.stringIndex}:${position.fret}`
 export const parsePositionId = (positionId: PositionId): Position | undefined => {

@@ -29,6 +29,9 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
     return undefined
   }
 
+  // TOOO 型チェックとハンドリングをちゃんとやる
+  // ローカルストレージからの読み込みでクラッシュするかもしれない。
+  // zodでパースして、キャッチしてハンドリングするかな
   const candidate = value as Partial<PersistedHistory>
   if (candidate.current === undefined) {
     return undefined
