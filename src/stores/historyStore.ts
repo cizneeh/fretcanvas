@@ -25,6 +25,11 @@ type HistoryStore = {
    * あるいは、変更操作をキャンセルするような場合にもこれが使えるはず
    */
   bufferedSnapshot: HistorySnapshot | undefined
+  /**
+   * undo, redoを操作する場合は、このbindingsのapplyを呼ぶ
+   * historyStoreにsettingsStore/fretboardStoreを直接操作させないためこうしている
+   * これをundo, redo内で呼ぶ
+   */
   bindings: HistoryBindings | undefined
   configureBindings: (bindings: HistoryBindings) => void
   captureSnapshot: () => HistorySnapshot | undefined
