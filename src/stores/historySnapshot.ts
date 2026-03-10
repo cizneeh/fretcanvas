@@ -20,7 +20,15 @@ export const createHistorySnapshot = (
 ): HistorySnapshot => ({
   fretboard: {
     keyPc: fretboard.keyPc,
+    noteLabelMode: fretboard.noteLabelMode,
     selectedScale: fretboard.selectedScale,
+    selectedChord:
+      fretboard.selectedChord === undefined
+        ? undefined
+        : {
+            rootPc: fretboard.selectedChord.rootPc,
+            quality: fretboard.selectedChord.quality,
+          },
     displayedNotes: { ...fretboard.displayedNotes },
     connections: { ...fretboard.connections },
     bends: { ...fretboard.bends },
@@ -81,10 +89,27 @@ const bendsEqual = (
   right: HistorySnapshot['fretboard']['bends'],
 ) => recordsEqual(left, right, (leftBend, rightBend) => leftBend.from === rightBend.from)
 
+const selectedChordEqual = (
+  left: HistorySnapshot['fretboard']['selectedChord'],
+  right: HistorySnapshot['fretboard']['selectedChord'],
+) => {
+  if (left === undefined && right === undefined) {
+    return true
+  }
+
+  if (left === undefined || right === undefined) {
+    return false
+  }
+
+  return left.rootPc === right.rootPc && left.quality === right.quality
+}
+
 export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): boolean => {
   return (
     left.fretboard.keyPc === right.fretboard.keyPc &&
+    left.fretboard.noteLabelMode === right.fretboard.noteLabelMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
+    selectedChordEqual(left.fretboard.selectedChord, right.fretboard.selectedChord) &&
     notesEqual(left.fretboard.displayedNotes, right.fretboard.displayedNotes) &&
     connectionsEqual(left.fretboard.connections, right.fretboard.connections) &&
     bendsEqual(left.fretboard.bends, right.fretboard.bends) &&

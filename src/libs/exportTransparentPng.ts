@@ -1,9 +1,11 @@
 import {
   type BendArrow,
   type Connection,
-  DEGREE_LABELS,
+  getChordToneLabel,
+  getLabelFromRoot,
   type HighlightedNote,
   MARKER_FRETS,
+  type NoteLabelMode,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
@@ -11,12 +13,15 @@ import {
   parsePositionId,
   SCALE_INTERVALS,
   type ScaleId,
+  type SelectedChord,
   toPositionId,
 } from './model'
 
 type ExportTransparentPngInput = {
   keyPc: PitchClass
+  noteLabelMode: NoteLabelMode
   selectedScale: ScaleId | undefined
+  selectedChord: SelectedChord | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   bends: BendArrow[]
@@ -27,7 +32,9 @@ type ExportTransparentPngInput = {
 
 export const exportTransparentPng = ({
   keyPc,
+  noteLabelMode,
   selectedScale,
+  selectedChord,
   displayedNotes,
   connections,
   bends,
@@ -90,7 +97,10 @@ export const exportTransparentPng = ({
     const intervalFromKey = normalizePc(pitchClass - keyPc)
     const isRoot = intervalFromKey === 0
     const isOutOfScale = scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
-    const label = DEGREE_LABELS[intervalFromKey]
+    const label =
+      noteLabelMode === 'chord' && selectedChord !== undefined
+        ? getChordToneLabel(pitchClass, selectedChord)
+        : getLabelFromRoot(pitchClass, keyPc)
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
     const noteOpacity = displayedNote.isDimmed ? 0.35 : 1

@@ -6,19 +6,22 @@ import {
   type ConnectionId,
   FRET_COUNT,
   getBendId,
+  getChordPitchClasses,
   getConnectionId,
   type HighlightedNote,
+  type NoteLabelMode,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
   SCALE_INTERVALS,
   type ScaleId,
+  type SelectedChord,
   toPositionId,
 } from '../libs/model'
 import { useHistoryStore } from './historyStore'
 
-type AddScaleNotesOptions = {
+type AddNotesOptions = {
   fretRange:
     | {
         start: number
@@ -30,6 +33,8 @@ type AddScaleNotesOptions = {
 export type FretboardStoreState = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
+  noteLabelMode: NoteLabelMode
+  selectedChord: SelectedChord | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
   bends: Record<BendId, BendArrow>
@@ -38,7 +43,10 @@ export type FretboardStoreState = {
 export type FretboardStoreActions = {
   setKeyPc: (nextKeyPc: PitchClass) => void
   setSelectedScale: (nextScale: ScaleId | undefined) => void
-  addScaleNotes: (options?: AddScaleNotesOptions) => void
+  setNoteLabelMode: (nextMode: NoteLabelMode) => void
+  setSelectedChord: (nextChord: SelectedChord | undefined) => void
+  addScaleNotes: (options?: AddNotesOptions) => void
+  addSelectedChordNotes: (options?: AddNotesOptions) => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
@@ -57,9 +65,71 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     useHistoryStore.getState().pushBeforeChange()
   }
 
+  const areSameChord = (
+    left: SelectedChord | undefined,
+    right: SelectedChord | undefined,
+  ): boolean => {
+    if (left === undefined && right === undefined) {
+      return true
+    }
+
+    if (left === undefined || right === undefined) {
+      return false
+    }
+
+    return left.rootPc === right.rootPc && left.quality === right.quality
+  }
+
+  const addPitchClassNotes = (
+    pitchClasses: Set<PitchClass>,
+    displayedNotes: Record<PositionId, HighlightedNote>,
+    options: AddNotesOptions | undefined,
+  ): Record<PositionId, HighlightedNote> | undefined => {
+    const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
+    let didChange = false
+    const minFret =
+      options?.fretRange !== undefined
+        ? Math.min(options.fretRange.start, options.fretRange.end)
+        : 0
+    const maxFret =
+      options?.fretRange !== undefined
+        ? Math.max(options.fretRange.start, options.fretRange.end)
+        : FRET_COUNT
+
+    for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
+      for (let fret = minFret; fret <= maxFret; fret += 1) {
+        const midi = stringInfo.midi + fret
+        const pitchClass = normalizePc(midi)
+
+        if (pitchClasses.has(pitchClass)) {
+          const positionId = toPositionId({
+            stringIndex,
+            fret,
+          })
+          if (next[positionId] === undefined) {
+            next[positionId] = {
+              positionId,
+              isDimmed: false,
+              colorVariant: 'default',
+            }
+            didChange = true
+          }
+        }
+      }
+    }
+
+    if (!didChange) {
+      return undefined
+    }
+
+    return next
+  }
+
   return {
     keyPc: 0,
     selectedScale: 'major',
+    noteLabelMode: 'scale',
+    selectedChord: undefined,
     displayedNotes: {},
     connections: {},
     bends: {},
@@ -71,7 +141,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       }
 
       pushHistoryBeforeChange()
-      set({ keyPc: nextKeyPc })
+      set({ keyPc: nextKeyPc, selectedChord: undefined })
     },
 
     setSelectedScale: (nextScale) => {
@@ -84,6 +154,26 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ selectedScale: nextScale })
     },
 
+    setNoteLabelMode: (nextMode) => {
+      const current = get()
+      if (current.noteLabelMode === nextMode) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ noteLabelMode: nextMode })
+    },
+
+    setSelectedChord: (nextChord) => {
+      const current = get()
+      if (areSameChord(current.selectedChord, nextChord)) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ selectedChord: nextChord })
+    },
+
     addScaleNotes: (options) => {
       const { keyPc, selectedScale, displayedNotes } = get()
       if (selectedScale === undefined) {
@@ -93,41 +183,24 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       const pcsToAdd = new Set(
         SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)),
       )
-
-      const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
-      let didChange = false
-      const minFret =
-        options?.fretRange !== undefined
-          ? Math.min(options.fretRange.start, options.fretRange.end)
-          : 0
-      const maxFret =
-        options?.fretRange !== undefined
-          ? Math.max(options.fretRange.start, options.fretRange.end)
-          : FRET_COUNT
-
-      for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
-        for (let fret = minFret; fret <= maxFret; fret += 1) {
-          const midi = stringInfo.midi + fret
-          const pitchClass = normalizePc(midi)
-
-          if (pcsToAdd.has(pitchClass)) {
-            const positionId = toPositionId({
-              stringIndex,
-              fret,
-            })
-            if (next[positionId] === undefined) {
-              next[positionId] = {
-                positionId,
-                isDimmed: false,
-                colorVariant: 'default',
-              }
-              didChange = true
-            }
-          }
-        }
+      const next = addPitchClassNotes(pcsToAdd, displayedNotes, options)
+      if (next === undefined) {
+        return
       }
 
-      if (!didChange) {
+      pushHistoryBeforeChange()
+      set({ displayedNotes: next })
+    },
+
+    addSelectedChordNotes: (options) => {
+      const { selectedChord, displayedNotes } = get()
+      if (selectedChord === undefined) {
+        return
+      }
+
+      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(selectedChord))
+      const next = addPitchClassNotes(pitchClasses, displayedNotes, options)
+      if (next === undefined) {
         return
       }
 

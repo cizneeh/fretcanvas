@@ -1,5 +1,7 @@
 // なんか、historyのbinding? つまりhistoryのキャプチャーするのとアプライするのと
 // 永続化コードが一緒になってて若干責務として分離できてないし理解しづらい感じがするけど、まあとりあえずこのままにしておく。
+
+import type { FretboardStoreState } from './fretboardStore'
 import { useFretboardStore } from './fretboardStore'
 import {
   applyHistorySnapshotToActualStores,
@@ -7,6 +9,7 @@ import {
   type HistorySnapshot,
 } from './historySnapshot'
 import { useHistoryStore } from './historyStore'
+import type { SettingsStoreState } from './settingsStore'
 import { useSettingsStore } from './settingsStore'
 
 const HISTORY_STORAGE_KEY = 'fretmap:history:v1'
@@ -31,8 +34,27 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
     return undefined
   }
 
+  const rawFretboard = candidate.current.fretboard as Partial<FretboardStoreState>
+  const rawSettings = candidate.current.settings as Partial<SettingsStoreState>
+
   return {
-    current: createHistorySnapshot(candidate.current.fretboard, candidate.current.settings),
+    current: createHistorySnapshot(
+      {
+        keyPc: rawFretboard.keyPc ?? 0,
+        selectedScale: rawFretboard.selectedScale,
+        noteLabelMode: rawFretboard.noteLabelMode ?? 'scale',
+        selectedChord: rawFretboard.selectedChord,
+        displayedNotes: rawFretboard.displayedNotes ?? {},
+        connections: rawFretboard.connections ?? {},
+        bends: rawFretboard.bends ?? {},
+      },
+      {
+        exportFretStart: rawSettings.exportFretStart ?? 0,
+        exportFretEnd: rawSettings.exportFretEnd ?? 24,
+        backgroundOpacityPercent: rawSettings.backgroundOpacityPercent ?? 0,
+        addScaleWithinExportRange: rawSettings.addScaleWithinExportRange ?? true,
+      },
+    ),
   }
 }
 

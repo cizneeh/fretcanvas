@@ -3,6 +3,12 @@
 /** number of 0~11. 0 is C, 1 is C#, 2 is D, 3 is Eb, 4 is E, 5 is F, 6 is F#, 7 is G, 8 is Ab, 9 is A, 10 is Bb, 11 is B. */
 export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
+export type ChordQuality = 'maj7' | 'm7' | '7' | 'm7b5'
+export type NoteLabelMode = 'scale' | 'chord'
+export type SelectedChord = {
+  rootPc: PitchClass
+  quality: ChordQuality
+}
 /**
  * 指板上の1マスごとのid
  * 例: "1:3" は1弦3フレット
@@ -84,6 +90,34 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
   pentatonicMinor: 'Pentatonic Minor',
 }
 
+const CHORD_QUALITY_INTERVALS: Record<ChordQuality, number[]> = {
+  maj7: [0, 4, 7, 11],
+  m7: [0, 3, 7, 10],
+  '7': [0, 4, 7, 10],
+  m7b5: [0, 3, 6, 10],
+}
+
+const MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS: {
+  id: string
+  label: string
+  intervalFromKey: number
+  quality: ChordQuality
+}[] = [
+  { id: 'Imaj7', label: 'Imaj7', intervalFromKey: 0, quality: 'maj7' },
+  { id: 'iim7', label: 'iim7', intervalFromKey: 2, quality: 'm7' },
+  { id: 'iiim7', label: 'iiim7', intervalFromKey: 4, quality: 'm7' },
+  { id: 'IVmaj7', label: 'IVmaj7', intervalFromKey: 5, quality: 'maj7' },
+  { id: 'V7', label: 'V7', intervalFromKey: 7, quality: '7' },
+  { id: 'vim7', label: 'vim7', intervalFromKey: 9, quality: 'm7' },
+  { id: 'viim7b5', label: 'viim7b5', intervalFromKey: 11, quality: 'm7b5' },
+]
+
+export type MajorDiatonicSeventhChordOption = {
+  id: string
+  label: string
+  chord: SelectedChord
+}
+
 export const POSITION_MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24] as const
 export const FRET_NUMBERS = Array.from({ length: FRET_COUNT + 1 }, (_, index) => index)
 export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= FRET_COUNT)
@@ -95,6 +129,30 @@ export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= 
  * normalizePc(69) // 9 (midi number 69 は A4の音高でありA)
  */
 export const normalizePc = (value: number): PitchClass => ((value % 12) + 12) % 12
+export const getLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
+  DEGREE_LABELS[normalizePc(pitchClass - rootPc)]
+export const getChordToneLabel = (pitchClass: PitchClass, selectedChord: SelectedChord): string => {
+  const intervalFromRoot = normalizePc(pitchClass - selectedChord.rootPc)
+  if (selectedChord.quality === 'm7b5' && intervalFromRoot === 6) {
+    return 'b5'
+  }
+  return DEGREE_LABELS[intervalFromRoot]
+}
+export const getChordPitchClasses = (selectedChord: SelectedChord): PitchClass[] =>
+  CHORD_QUALITY_INTERVALS[selectedChord.quality].map((interval) =>
+    normalizePc(selectedChord.rootPc + interval),
+  )
+export const getMajorDiatonicSeventhChordOptions = (
+  keyPc: PitchClass,
+): MajorDiatonicSeventhChordOption[] =>
+  MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS.map((definition) => ({
+    id: definition.id,
+    label: definition.label,
+    chord: {
+      rootPc: normalizePc(keyPc + definition.intervalFromKey),
+      quality: definition.quality,
+    },
+  }))
 export const toPositionId = (position: Position): PositionId =>
   `${position.stringIndex}:${position.fret}`
 export const parsePositionId = (positionId: PositionId): Position | undefined => {

@@ -1,7 +1,8 @@
 import { Fragment } from 'react'
 import {
-  DEGREE_LABELS,
   FRET_NUMBERS,
+  getChordToneLabel,
+  getLabelFromRoot,
   normalizePc,
   OPEN_STRINGS,
   type PositionId,
@@ -45,6 +46,8 @@ export const StringRows = ({
   onNotePointerUp,
 }: StringRowsProps) => {
   const keyPc = useFretboardStore((state) => state.keyPc)
+  const noteLabelMode = useFretboardStore((state) => state.noteLabelMode)
+  const selectedChord = useFretboardStore((state) => state.selectedChord)
   const selectedScale = useFretboardStore((state) => state.selectedScale)
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
@@ -75,6 +78,10 @@ export const StringRows = ({
             const isRoot = intervalFromKey === 0
             const isOutOfScale =
               scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
+            const label =
+              noteLabelMode === 'chord' && selectedChord !== undefined
+                ? getChordToneLabel(pitchClass, selectedChord)
+                : getLabelFromRoot(pitchClass, keyPc)
             const isStartFret = fret === startHighlightFret
             const isEndFret = fret === exportFretEnd
             const isStartAtNutLine = exportFretStart === 0 && fret === 0
@@ -86,7 +93,7 @@ export const StringRows = ({
                 isNut={fret === 0}
                 isHighlighted={isHighlighted}
                 isDimmed={displayedNote?.isDimmed ?? false}
-                label={DEGREE_LABELS[intervalFromKey]}
+                label={label}
                 isRoot={isRoot}
                 isOutOfScale={isOutOfScale}
                 isStartAtNutLine={isStartAtNutLine}
