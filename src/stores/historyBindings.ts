@@ -1,3 +1,5 @@
+// なんか、historyのbinding? つまりhistoryのキャプチャーするのとアプライするのと
+// 永続化コードが一緒になってて若干責務として分離できてないし理解しづらい感じがするけど、まあとりあえずこのままにしておく。
 import { useFretboardStore } from './fretboardStore'
 import {
   applyHistorySnapshotToActualStores,
