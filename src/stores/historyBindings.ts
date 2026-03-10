@@ -51,6 +51,10 @@ const loadPersistedHistory = (): PersistedHistory | undefined => {
   }
 }
 
+/**
+ * ローカルストレージに現在のストアの状態を保存する
+ * 各ストアから現在のStateを読んでそれを保存する
+ */
 const persistHistoryToLocalStorage = () => {
   if (typeof window === 'undefined' || isHydrating) {
     return
