@@ -60,9 +60,8 @@ const persistHistoryToLocalStorage = () => {
     return
   }
 
-  const current = captureCurrentSnapshot()
   const payload: PersistedHistory = {
-    current: createHistorySnapshot(current.fretboard, current.settings),
+    current: captureCurrentSnapshot(),
   }
 
   window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(payload))
@@ -100,13 +99,6 @@ export const initializeHistoryBindings = () => {
         useSettingsStore.setState(nextSettingsState)
       },
     })
-
-    useHistoryStore.setState((state) => ({
-      undoStack: [],
-      redoStack: [],
-      bufferedSnapshot: undefined,
-      historyLimit: state.historyLimit,
-    }))
   }
   isHydrating = false
 
@@ -114,9 +106,6 @@ export const initializeHistoryBindings = () => {
     persistHistoryToLocalStorage()
   })
   useSettingsStore.subscribe(() => {
-    persistHistoryToLocalStorage()
-  })
-  useHistoryStore.subscribe(() => {
     persistHistoryToLocalStorage()
   })
 
