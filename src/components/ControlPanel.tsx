@@ -50,13 +50,13 @@ export const ControlPanel = () => {
   ]
 
   return (
-    <section className="rounded-lg border border-slate-700 bg-black p-4">
+    <section className="rounded-lg border border-zinc-600 bg-zinc-800/70 p-4 backdrop-blur-sm">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
         <div className="space-y-4">
           <label className="flex flex-col gap-2 text-sm">
-            <span className="text-slate-300">Key</span>
+            <span className="text-zinc-200">Key</span>
             <select
-              className="w-full rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+              className="w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-3 py-2 text-zinc-50 outline-none ring-cyan-500 focus:ring-2"
               value={keyPc}
               onChange={(event) => {
                 setKeyPc(Number(event.target.value) as PitchClass)
@@ -71,8 +71,8 @@ export const ControlPanel = () => {
           </label>
 
           <div className="flex flex-col gap-2 text-sm">
-            <span className="text-slate-300">Mode</span>
-            <div className="inline-flex w-fit rounded-md border border-slate-700 bg-slate-950 p-1">
+            <span className="text-zinc-200">Mode</span>
+            <div className="inline-flex w-fit rounded-md border border-zinc-500 bg-zinc-700/90 p-1">
               {modeOptions.map((modeOption) => (
                 <button
                   key={modeOption.value}
@@ -81,7 +81,7 @@ export const ControlPanel = () => {
                   className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                     noteLabelMode === modeOption.value
                       ? 'bg-cyan-500 text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-900'
+                      : 'text-zinc-100 hover:bg-zinc-600'
                   }`}
                   onClick={() => {
                     setNoteLabelMode(modeOption.value)
@@ -94,10 +94,10 @@ export const ControlPanel = () => {
           </div>
 
           <div className="flex flex-col gap-2 text-sm">
-            <span className="text-slate-300">{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
+            <span className="text-zinc-200">{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
             {noteLabelMode === 'scale' ? (
               <select
-                className="w-full rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+                className="w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-3 py-2 text-zinc-50 outline-none ring-cyan-500 focus:ring-2"
                 value={selectedScale ?? ''}
                 onChange={(event) => {
                   const value = event.target.value as ScaleId | ''
@@ -113,7 +113,7 @@ export const ControlPanel = () => {
               </select>
             ) : (
               <select
-                className="w-full rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+                className="w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-3 py-2 text-zinc-50 outline-none ring-cyan-500 focus:ring-2"
                 value={selectedChordOptionId}
                 onChange={(event) => {
                   const nextId = event.target.value
@@ -153,7 +153,7 @@ export const ControlPanel = () => {
 
           <button
             type="button"
-            className="rounded-md border border-slate-600 bg-black px-4 py-2 text-sm font-medium transition hover:bg-slate-900"
+            className="rounded-md border border-zinc-500 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
             onClick={clearHighlightedNotes}
           >
             Clear
@@ -161,10 +161,10 @@ export const ControlPanel = () => {
         </div>
       </div>
 
-      <label className="mt-4 inline-flex items-center gap-2 text-xs text-slate-300">
+      <label className="mt-4 inline-flex items-center gap-2 text-xs text-zinc-200">
         <input
           type="checkbox"
-          className="h-4 w-4 rounded border border-slate-600 bg-black accent-cyan-500"
+          className="h-4 w-4 rounded border border-zinc-400 bg-zinc-700 accent-cyan-500"
           checked={addScaleWithinExportRange}
           onChange={(event) => {
             setAddScaleWithinExportRange(event.target.checked)

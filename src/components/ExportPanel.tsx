@@ -19,25 +19,25 @@ export const ExportPanel = ({
 }: ExportPanelProps) => {
   return (
     <div className="px-4 pb-4">
-      <div className="w-fit max-w-full rounded-md border border-slate-700 bg-black/80 p-3">
-        <div className="mb-3 flex items-center justify-between text-sm text-slate-300">
+      <div className="w-fit max-w-full rounded-md border border-zinc-600 bg-zinc-800/80 p-3">
+        <div className="mb-3 flex items-center justify-between text-sm text-zinc-300">
           <span>Export Range</span>
-          <span className="font-medium text-slate-100">
+          <span className="font-medium text-zinc-50">
             Frets {exportStart} - {exportEnd}
           </span>
         </div>
 
-        <div className="mb-4 text-xs text-slate-400">
+        <div className="mb-4 text-xs text-zinc-300">
           S / E マーカーをドラッグ、またはバーをクリックして範囲を設定
         </div>
 
         <div className="mb-4">
-          <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
+          <div className="mb-1 flex items-center justify-between text-xs text-zinc-300">
             <span>Background Opacity</span>
             <span>{backgroundOpacityPercent}%</span>
           </div>
           <input
-            className="range-thumb h-2 w-40 appearance-none rounded-full bg-slate-700"
+            className="range-thumb h-2 w-40 appearance-none rounded-full bg-zinc-700"
             type="range"
             min={0}
             max={100}

@@ -28,7 +28,7 @@ export const FretboardView = () => {
   const interaction = useFretboardInteractionState()
 
   return (
-    <section className="bg-black">
+    <section className="rounded-lg border border-zinc-800 bg-zinc-900/30">
       <FretboardStage
         previewConnection={interaction.previewConnection}
         gridProps={interaction.gridProps}

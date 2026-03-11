@@ -26,7 +26,7 @@ export const NoteContextMenu = ({
 
   return (
     <div
-      className="fixed z-50 min-w-[170px] rounded-md border border-slate-700 bg-slate-900/95 p-1 shadow-2xl"
+      className="fixed z-50 min-w-[170px] rounded-md border border-zinc-600 bg-zinc-800/95 p-1 shadow-2xl"
       style={{
         left: x,
         top: y,
@@ -34,7 +34,7 @@ export const NoteContextMenu = ({
     >
       <button
         type="button"
-        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800"
+        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-zinc-100 hover:bg-zinc-700"
         onClick={() => {
           toggleNoteDimmed(positionId)
           onClose()
@@ -42,16 +42,16 @@ export const NoteContextMenu = ({
       >
         <span className="flex items-center gap-2 pr-3">
           <span>Dim</span>
-          <span className="text-[11px] text-slate-400">{shortcutLabel}</span>
+          <span className="text-[11px] text-zinc-300">{shortcutLabel}</span>
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-slate-300">
+        <span className="ml-2 w-4 shrink-0 text-center text-sm text-zinc-300">
           {displayedNotes[positionId]?.isDimmed === true ? '✓' : ''}
         </span>
       </button>
 
       <button
         type="button"
-        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800"
+        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-zinc-100 hover:bg-zinc-700"
         onClick={() => {
           onToggleBend(positionId)
           onClose()
@@ -59,9 +59,9 @@ export const NoteContextMenu = ({
       >
         <span className="flex items-center gap-2 pr-3">
           <span>{hasBend ? 'Remove Bend' : 'Add Bend'}</span>
-          <span className="text-[11px] text-slate-400">{bendShortcutLabel}</span>
+          <span className="text-[11px] text-zinc-300">{bendShortcutLabel}</span>
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-slate-300">
+        <span className="ml-2 w-4 shrink-0 text-center text-sm text-zinc-300">
           {hasBend ? '✓' : ''}
         </span>
       </button>

@@ -14,7 +14,7 @@ export const FretboardStage = ({
 }: FretboardStageProps) => {
   return (
     <div className="overflow-x-auto p-4">
-      <div className="min-w-max rounded-md border border-slate-700 bg-black p-3">
+      <div className="min-w-max rounded-md border border-zinc-700 bg-black p-3">
         <FretboardGrid
           previewConnection={previewConnection}
           {...gridProps}
