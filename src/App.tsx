@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
+import { ExportSettingsSection } from './components/ExportSettingsSection'
 import { FretboardView } from './components/FretboardView'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
 import { initializeHistoryBindings } from './stores/historyBindings'
@@ -50,6 +51,8 @@ function App() {
         <ControlPanel />
 
         <FretboardView />
+
+        <ExportSettingsSection />
       </div>
     </main>
   )
