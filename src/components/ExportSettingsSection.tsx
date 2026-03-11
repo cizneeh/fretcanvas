@@ -10,7 +10,14 @@ import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ExportPanel } from './ExportPanel'
 
-export const ExportSettingsSection = () => {
+const checkerboardStyle = {
+  backgroundColor: '#27272a',
+  backgroundImage:
+    'repeating-conic-gradient(rgba(255,255,255,0.09) 0% 25%, rgba(255,255,255,0.02) 0% 50%)',
+  backgroundSize: '14px 14px',
+} as const
+
+const ExpandedExportSettingsContent = () => {
   const {
     keyPc,
     noteLabelMode,
@@ -124,8 +131,8 @@ export const ExportSettingsSection = () => {
   }, [isPreviewModalOpen])
 
   return (
-    <section className="rounded-lg border border-zinc-600 bg-zinc-800/80 p-4">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start">
+    <>
+      <div className="grid gap-4 border-t border-zinc-700/70 p-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start">
         <ExportPanel
           exportStart={Math.min(exportFretStart, exportFretEnd)}
           exportEnd={Math.max(exportFretStart, exportFretEnd)}
@@ -150,13 +157,13 @@ export const ExportSettingsSection = () => {
           }}
         />
 
-        <div className="rounded-md border border-zinc-600 bg-zinc-900/60 p-3">
+        <div className="rounded-xl border border-zinc-600 bg-zinc-900/60 p-3">
           <div className="mb-2 text-sm font-medium text-zinc-100">Preview</div>
           <button
             type="button"
             className={`w-full rounded-md border border-zinc-600 p-2 text-left transition-colors ${
               previewUrl !== undefined
-                ? 'cursor-zoom-in hover:border-zinc-500'
+                ? 'cursor-zoom-in hover:border-zinc-500 hover:bg-zinc-700/20'
                 : 'cursor-not-allowed opacity-80'
             }`}
             onClick={() => {
@@ -169,12 +176,7 @@ export const ExportSettingsSection = () => {
           >
             <div
               className="relative aspect-[16/7] w-full overflow-hidden rounded-sm"
-              style={{
-                backgroundColor: '#27272a',
-                backgroundImage:
-                  'repeating-conic-gradient(rgba(255,255,255,0.09) 0% 25%, rgba(255,255,255,0.02) 0% 50%)',
-                backgroundSize: '14px 14px',
-              }}
+              style={checkerboardStyle}
             >
               {previewUrl !== undefined ? (
                 <img
@@ -221,12 +223,7 @@ export const ExportSettingsSection = () => {
 
             <div
               className="max-h-[80vh] overflow-auto rounded-md border border-zinc-600 p-2"
-              style={{
-                backgroundColor: '#27272a',
-                backgroundImage:
-                  'repeating-conic-gradient(rgba(255,255,255,0.09) 0% 25%, rgba(255,255,255,0.02) 0% 50%)',
-                backgroundSize: '14px 14px',
-              }}
+              style={checkerboardStyle}
             >
               <img
                 src={previewUrl}
@@ -238,6 +235,70 @@ export const ExportSettingsSection = () => {
           </div>
         </div>
       ) : undefined}
+    </>
+  )
+}
+
+export const ExportSettingsSection = () => {
+  const { exportFretStart, exportFretEnd, backgroundOpacityPercent } = useSettingsStore(
+    useShallow((state) => ({
+      exportFretStart: state.exportFretStart,
+      exportFretEnd: state.exportFretEnd,
+      backgroundOpacityPercent: state.backgroundOpacityPercent,
+    })),
+  )
+  const [isExpanded, setIsExpanded] = useState(false)
+  const exportStart = Math.min(exportFretStart, exportFretEnd)
+  const exportEnd = Math.max(exportFretStart, exportFretEnd)
+  const contentId = 'export-settings-content'
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80">
+      <button
+        type="button"
+        className="group flex min-h-12 w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors hover:bg-zinc-700/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80"
+        aria-expanded={isExpanded}
+        aria-controls={contentId}
+        onClick={() => {
+          setIsExpanded((previous) => !previous)
+        }}
+      >
+        <div className="min-w-0">
+          <div className="text-sm font-medium tracking-[0.01em] text-zinc-100">Export Settings</div>
+          <div className="mt-1 text-xs text-zinc-300">
+            Frets {exportStart} - {exportEnd} ・ Opacity {backgroundOpacityPercent}%
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="hidden text-xs text-zinc-300 sm:inline">
+            {isExpanded ? 'Collapse' : 'Expand'}
+          </span>
+          <svg
+            className={`h-5 w-5 text-zinc-300 transition-transform duration-200 ease-out ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.1 1.02l-4.25 4.5a.75.75 0 0 1-1.1 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+      </button>
+
+      <div
+        id={contentId}
+        className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="min-h-0">{isExpanded ? <ExpandedExportSettingsContent /> : undefined}</div>
+      </div>
     </section>
   )
 }
