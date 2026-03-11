@@ -1,3 +1,4 @@
+import { createBendGeometry } from './bendGeometry'
 import {
   type BendArrow,
   type Connection,
@@ -215,12 +216,8 @@ export const renderExportPngCanvas = ({
 
     const startX = boardLeft + (from.fret - start + 0.5) * cellWidth
     const startY = boardTop + from.stringIndex * rowHeight + rowHeight / 2
-    const control1X = startX + 14
-    const control1Y = startY + 1
-    const control2X = startX + 30
-    const control2Y = startY - 8
-    const endX = startX + 32
-    const endY = startY - 36
+    const { control1X, control1Y, control2X, control2Y, endX, endY, leftX, leftY, rightX, rightY } =
+      createBendGeometry(startX, startY)
 
     ctx.strokeStyle = 'rgba(192, 132, 252, 0.82)'
     ctx.lineWidth = 2.4
@@ -229,18 +226,6 @@ export const renderExportPngCanvas = ({
     ctx.moveTo(startX, startY)
     ctx.bezierCurveTo(control1X, control1Y, control2X, control2Y, endX, endY)
     ctx.stroke()
-
-    const tangentX = endX - control2X
-    const tangentY = endY - control2Y
-    const tangentLength = Math.hypot(tangentX, tangentY) || 1
-    const unitX = tangentX / tangentLength
-    const unitY = tangentY / tangentLength
-    const arrowLength = 8
-    const arrowSpread = 4
-    const leftX = endX - unitX * arrowLength - unitY * arrowSpread
-    const leftY = endY - unitY * arrowLength + unitX * arrowSpread
-    const rightX = endX - unitX * arrowLength + unitY * arrowSpread
-    const rightY = endY - unitY * arrowLength - unitX * arrowSpread
 
     ctx.beginPath()
     ctx.moveTo(leftX, leftY)

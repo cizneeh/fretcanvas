@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createBendGeometry } from '../../libs/bendGeometry'
 import type { BendArrow, Connection, PositionId } from '../../libs/model'
 import { getPositionPoint } from './constants'
 
@@ -91,29 +92,13 @@ export const ConnectionLayer = ({
 
         const startX = fromPoint.x
         const startY = fromPoint.y
-        const control1X = startX + 14
-        const control1Y = startY + 1
-        const control2X = startX + 30
-        const control2Y = startY - 8
-        const endX = startX + 32
-        const endY = startY - 36
+        const { endX, endY, leftX, leftY, path, rightX, rightY } = createBendGeometry(
+          startX,
+          startY,
+        )
         const isHovered = hoveredBendId === bend.id
         const strokeWidth = isHovered ? 3.8 : 2.4
         const strokeColor = isHovered ? 'rgba(192, 132, 252, 0.96)' : 'rgba(192, 132, 252, 0.78)'
-
-        const tangentX = endX - control2X
-        const tangentY = endY - control2Y
-        const tangentLength = Math.hypot(tangentX, tangentY) || 1
-        const unitX = tangentX / tangentLength
-        const unitY = tangentY / tangentLength
-        const arrowLength = 8
-        const arrowSpread = 4
-        const leftX = endX - unitX * arrowLength - unitY * arrowSpread
-        const leftY = endY - unitY * arrowLength + unitX * arrowSpread
-        const rightX = endX - unitX * arrowLength + unitY * arrowSpread
-        const rightY = endY - unitY * arrowLength - unitX * arrowSpread
-
-        const path = `M ${startX} ${startY} C ${control1X} ${control1Y} ${control2X} ${control2Y} ${endX} ${endY}`
 
         return (
           <g key={bend.id}>

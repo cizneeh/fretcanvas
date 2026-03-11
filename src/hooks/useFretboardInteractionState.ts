@@ -126,6 +126,16 @@ export const useFretboardInteractionState = () => {
     handleExportFretEndChange(nextFret, { skipHistory })
   }
 
+  const commitBufferedEditFromCurrentSnapshot = () => {
+    const snapshot = captureSnapshot()
+    if (snapshot !== undefined) {
+      commitBufferedEdit(snapshot)
+      return
+    }
+
+    cancelBufferedEdit()
+  }
+
   const getNearestHandle = (fret: number): 'start' | 'end' => {
     const startDistance = Math.abs(fret - exportFretStart)
     const endDistance = Math.abs(fret - exportFretEnd)
@@ -165,12 +175,7 @@ export const useFretboardInteractionState = () => {
 
   const handleTrackPointerUp = () => {
     if (draggingHandle !== undefined) {
-      const snapshot = captureSnapshot()
-      if (snapshot !== undefined) {
-        commitBufferedEdit(snapshot)
-      } else {
-        cancelBufferedEdit()
-      }
+      commitBufferedEditFromCurrentSnapshot()
     }
     setDraggingHandle(undefined)
   }
@@ -188,12 +193,7 @@ export const useFretboardInteractionState = () => {
       return
     }
 
-    const snapshot = captureSnapshot()
-    if (snapshot !== undefined) {
-      commitBufferedEdit(snapshot)
-    } else {
-      cancelBufferedEdit()
-    }
+    commitBufferedEditFromCurrentSnapshot()
     setDraggingHandle(undefined)
   }
 
@@ -339,6 +339,35 @@ export const useFretboardInteractionState = () => {
     upsertBendFromPosition(positionId)
   }
 
+  const createRangeHandlePointerHandlers = (handle: 'start' | 'end') => ({
+    onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      const snapshot = captureSnapshot()
+      if (snapshot !== undefined) {
+        beginBufferedEdit(snapshot)
+      }
+      setDraggingHandle(handle)
+      updateHandleFromClientX(event.clientX, handle, true)
+    },
+    onPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (draggingHandle !== handle) {
+        return
+      }
+      updateHandleFromClientX(event.clientX, handle, true)
+    },
+    onPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+      commitBufferedEditFromCurrentSnapshot()
+      setDraggingHandle(undefined)
+    },
+  })
+
+  const startHandlePointerHandlers = createRangeHandlePointerHandlers('start')
+  const endHandlePointerHandlers = createRangeHandlePointerHandlers('end')
+
   return {
     trackRef,
     boardRef,
@@ -378,62 +407,12 @@ export const useFretboardInteractionState = () => {
       onTrackPointerUp: handleTrackPointerUp,
       onTrackPointerCancel: handleTrackPointerCancel,
       onTrackPointerLeave: handleTrackPointerLeave,
-      onStartPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        event.currentTarget.setPointerCapture(event.pointerId)
-        const snapshot = captureSnapshot()
-        if (snapshot !== undefined) {
-          beginBufferedEdit(snapshot)
-        }
-        setDraggingHandle('start')
-        updateHandleFromClientX(event.clientX, 'start', true)
-      },
-      onStartPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => {
-        if (draggingHandle !== 'start') {
-          return
-        }
-        updateHandleFromClientX(event.clientX, 'start', true)
-      },
-      onStartPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-          event.currentTarget.releasePointerCapture(event.pointerId)
-        }
-        const snapshot = captureSnapshot()
-        if (snapshot !== undefined) {
-          commitBufferedEdit(snapshot)
-        } else {
-          cancelBufferedEdit()
-        }
-        setDraggingHandle(undefined)
-      },
-      onEndPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        event.currentTarget.setPointerCapture(event.pointerId)
-        const snapshot = captureSnapshot()
-        if (snapshot !== undefined) {
-          beginBufferedEdit(snapshot)
-        }
-        setDraggingHandle('end')
-        updateHandleFromClientX(event.clientX, 'end', true)
-      },
-      onEndPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => {
-        if (draggingHandle !== 'end') {
-          return
-        }
-        updateHandleFromClientX(event.clientX, 'end', true)
-      },
-      onEndPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-          event.currentTarget.releasePointerCapture(event.pointerId)
-        }
-        const snapshot = captureSnapshot()
-        if (snapshot !== undefined) {
-          commitBufferedEdit(snapshot)
-        } else {
-          cancelBufferedEdit()
-        }
-        setDraggingHandle(undefined)
-      },
+      onStartPointerDown: startHandlePointerHandlers.onPointerDown,
+      onStartPointerMove: startHandlePointerHandlers.onPointerMove,
+      onStartPointerUp: startHandlePointerHandlers.onPointerUp,
+      onEndPointerDown: endHandlePointerHandlers.onPointerDown,
+      onEndPointerMove: endHandlePointerHandlers.onPointerMove,
+      onEndPointerUp: endHandlePointerHandlers.onPointerUp,
     },
     gridProps: {
       onSelectClosestHandleToFret: setClosestHandleToFret,

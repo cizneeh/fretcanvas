@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/react/shallow'
 import {
   getMajorDiatonicSeventhChordOptions,
   NOTE_LABELS,
@@ -10,22 +11,45 @@ import { useFretboardStore } from '../stores/fretboardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 
 export const ControlPanel = () => {
-  const keyPc = useFretboardStore((state) => state.keyPc)
-  const noteLabelMode = useFretboardStore((state) => state.noteLabelMode)
-  const selectedScale = useFretboardStore((state) => state.selectedScale)
-  const selectedChord = useFretboardStore((state) => state.selectedChord)
-  const setKeyPc = useFretboardStore((state) => state.setKeyPc)
-  const setNoteLabelMode = useFretboardStore((state) => state.setNoteLabelMode)
-  const setSelectedScale = useFretboardStore((state) => state.setSelectedScale)
-  const setSelectedChord = useFretboardStore((state) => state.setSelectedChord)
-  const addScaleNotes = useFretboardStore((state) => state.addScaleNotes)
-  const addSelectedChordNotes = useFretboardStore((state) => state.addSelectedChordNotes)
-  const clearHighlightedNotes = useFretboardStore((state) => state.clearHighlightedNotes)
-  const addScaleWithinExportRange = useSettingsStore((state) => state.addScaleWithinExportRange)
-  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
-  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
-  const setAddScaleWithinExportRange = useSettingsStore(
-    (state) => state.setAddScaleWithinExportRange,
+  const {
+    keyPc,
+    noteLabelMode,
+    selectedScale,
+    selectedChord,
+    setKeyPc,
+    setNoteLabelMode,
+    setSelectedScale,
+    setSelectedChord,
+    addScaleNotes,
+    addSelectedChordNotes,
+    clearHighlightedNotes,
+  } = useFretboardStore(
+    useShallow((state) => ({
+      keyPc: state.keyPc,
+      noteLabelMode: state.noteLabelMode,
+      selectedScale: state.selectedScale,
+      selectedChord: state.selectedChord,
+      setKeyPc: state.setKeyPc,
+      setNoteLabelMode: state.setNoteLabelMode,
+      setSelectedScale: state.setSelectedScale,
+      setSelectedChord: state.setSelectedChord,
+      addScaleNotes: state.addScaleNotes,
+      addSelectedChordNotes: state.addSelectedChordNotes,
+      clearHighlightedNotes: state.clearHighlightedNotes,
+    })),
+  )
+  const {
+    addScaleWithinExportRange,
+    exportFretStart,
+    exportFretEnd,
+    setAddScaleWithinExportRange,
+  } = useSettingsStore(
+    useShallow((state) => ({
+      addScaleWithinExportRange: state.addScaleWithinExportRange,
+      exportFretStart: state.exportFretStart,
+      exportFretEnd: state.exportFretEnd,
+      setAddScaleWithinExportRange: state.setAddScaleWithinExportRange,
+    })),
   )
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
   const selectedChordOptionId =

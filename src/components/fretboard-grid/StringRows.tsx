@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import {
   FRET_NUMBERS,
   getChordToneLabel,
@@ -45,13 +46,21 @@ export const StringRows = ({
   onNoteContextMenu,
   onNotePointerUp,
 }: StringRowsProps) => {
-  const keyPc = useFretboardStore((state) => state.keyPc)
-  const noteLabelMode = useFretboardStore((state) => state.noteLabelMode)
-  const selectedChord = useFretboardStore((state) => state.selectedChord)
-  const selectedScale = useFretboardStore((state) => state.selectedScale)
-  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
-  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
-  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
+  const { keyPc, noteLabelMode, selectedChord, selectedScale, displayedNotes } = useFretboardStore(
+    useShallow((state) => ({
+      keyPc: state.keyPc,
+      noteLabelMode: state.noteLabelMode,
+      selectedChord: state.selectedChord,
+      selectedScale: state.selectedScale,
+      displayedNotes: state.displayedNotes,
+    })),
+  )
+  const { exportFretStart, exportFretEnd } = useSettingsStore(
+    useShallow((state) => ({
+      exportFretStart: state.exportFretStart,
+      exportFretEnd: state.exportFretEnd,
+    })),
+  )
   const startHighlightFret = Math.max(0, exportFretStart - 1)
   const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
   const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'

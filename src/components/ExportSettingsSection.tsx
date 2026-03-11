@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import {
   type ExportTransparentPngInput,
   exportTransparentPng,
@@ -10,23 +11,47 @@ import { useSettingsStore } from '../stores/settingsStore'
 import { ExportPanel } from './ExportPanel'
 
 export const ExportSettingsSection = () => {
-  const keyPc = useFretboardStore((state) => state.keyPc)
-  const noteLabelMode = useFretboardStore((state) => state.noteLabelMode)
-  const selectedScale = useFretboardStore((state) => state.selectedScale)
-  const selectedChord = useFretboardStore((state) => state.selectedChord)
-  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
-  const connectionsById = useFretboardStore((state) => state.connections)
-  const bendsById = useFretboardStore((state) => state.bends)
-  const exportFretStart = useSettingsStore((state) => state.exportFretStart)
-  const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
-  const backgroundOpacityPercent = useSettingsStore((state) => state.backgroundOpacityPercent)
-  const handleBackgroundOpacityPercentChange = useSettingsStore(
-    (state) => state.handleBackgroundOpacityPercentChange,
+  const {
+    keyPc,
+    noteLabelMode,
+    selectedScale,
+    selectedChord,
+    displayedNotes,
+    connectionsById,
+    bendsById,
+  } = useFretboardStore(
+    useShallow((state) => ({
+      keyPc: state.keyPc,
+      noteLabelMode: state.noteLabelMode,
+      selectedScale: state.selectedScale,
+      selectedChord: state.selectedChord,
+      displayedNotes: state.displayedNotes,
+      connectionsById: state.connections,
+      bendsById: state.bends,
+    })),
   )
-  const beginBufferedEdit = useHistoryStore((state) => state.beginBufferedEdit)
-  const commitBufferedEdit = useHistoryStore((state) => state.commitBufferedEdit)
-  const cancelBufferedEdit = useHistoryStore((state) => state.cancelBufferedEdit)
-  const captureSnapshot = useHistoryStore((state) => state.captureSnapshot)
+  const {
+    exportFretStart,
+    exportFretEnd,
+    backgroundOpacityPercent,
+    handleBackgroundOpacityPercentChange,
+  } = useSettingsStore(
+    useShallow((state) => ({
+      exportFretStart: state.exportFretStart,
+      exportFretEnd: state.exportFretEnd,
+      backgroundOpacityPercent: state.backgroundOpacityPercent,
+      handleBackgroundOpacityPercentChange: state.handleBackgroundOpacityPercentChange,
+    })),
+  )
+  const { beginBufferedEdit, commitBufferedEdit, cancelBufferedEdit, captureSnapshot } =
+    useHistoryStore(
+      useShallow((state) => ({
+        beginBufferedEdit: state.beginBufferedEdit,
+        commitBufferedEdit: state.commitBufferedEdit,
+        cancelBufferedEdit: state.cancelBufferedEdit,
+        captureSnapshot: state.captureSnapshot,
+      })),
+    )
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
 
   const exportInput = useMemo<ExportTransparentPngInput>(
