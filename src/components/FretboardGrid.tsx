@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react'
+import { useMemo } from 'react'
 import { type BendArrow, FRET_NUMBERS, OPEN_STRINGS, type PositionId } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
@@ -47,7 +47,6 @@ type FretboardGridProps = {
   onBoardPointerMove: (clientX: number, clientY: number) => void
   onBoardPointerUpOrCancel: () => void
   onBoardRefChange: (node: HTMLDivElement | undefined) => void
-  rangeTrack: ReactNode
 }
 
 export const FretboardGrid = ({
@@ -60,7 +59,6 @@ export const FretboardGrid = ({
   onBoardPointerMove,
   onBoardPointerUpOrCancel,
   onBoardRefChange,
-  rangeTrack,
 }: FretboardGridProps) => {
   const connectionsById = useFretboardStore((state) => state.connections)
   const bendsById = useFretboardStore((state) => state.bends)
@@ -111,8 +109,6 @@ export const FretboardGrid = ({
         />
 
         <FretMarkerRow onSelectClosestHandleToFret={onSelectClosestHandleToFret} />
-
-        {rangeTrack}
       </div>
     </div>
   )
