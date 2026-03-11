@@ -17,7 +17,7 @@ import {
   toPositionId,
 } from './model'
 
-type ExportTransparentPngInput = {
+export type ExportTransparentPngInput = {
   keyPc: PitchClass
   noteLabelMode: NoteLabelMode
   selectedScale: ScaleId | undefined
@@ -30,7 +30,7 @@ type ExportTransparentPngInput = {
   backgroundOpacityPercent: number
 }
 
-export const exportTransparentPng = ({
+export const renderExportPngCanvas = ({
   keyPc,
   noteLabelMode,
   selectedScale,
@@ -63,7 +63,7 @@ export const exportTransparentPng = ({
   canvas.height = canvasHeight
   const ctx = canvas.getContext('2d')
   if (ctx === null) {
-    return
+    return undefined
   }
 
   const boardLeft = paddingX + labelWidth
@@ -277,6 +277,17 @@ export const exportTransparentPng = ({
     }
   }
 
+  return canvas
+}
+
+export const exportTransparentPng = (input: ExportTransparentPngInput) => {
+  const canvas = renderExportPngCanvas(input)
+  if (canvas === undefined) {
+    return
+  }
+
+  const start = Math.min(input.exportFretStart, input.exportFretEnd)
+  const end = Math.max(input.exportFretStart, input.exportFretEnd)
   const filename = `fretmap-frets-${start}-${end}.png`
   canvas.toBlob(
     (blob) => {

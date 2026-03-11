@@ -45,10 +45,7 @@ export const ExportPanel = ({
       </div>
 
       <div className="mb-4">
-        <div className="mb-1 flex items-center justify-between text-xs text-zinc-300">
-          <span>Background Opacity</span>
-          <span>{backgroundOpacityPercent}%</span>
-        </div>
+        <div className="mb-1 text-xs text-zinc-300">Background Opacity</div>
         <div className="mb-2 grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] gap-2">
           <button
             type="button"
