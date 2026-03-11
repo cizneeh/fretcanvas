@@ -48,6 +48,12 @@ export const ControlPanel = () => {
     { value: 'scale', label: 'Scale' },
     { value: 'chord', label: 'Chord' },
   ]
+  const interactiveSurfaceClass =
+    'rounded-md border border-zinc-500 bg-zinc-700/90 text-zinc-50 transition-colors hover:bg-zinc-600'
+  const interactiveSelectClass = `${interactiveSurfaceClass} w-full px-3 py-2 outline-none ring-cyan-500 focus:ring-2`
+  const interactiveButtonClass = `${interactiveSurfaceClass} px-4 py-2 text-sm font-medium`
+  const primaryButtonClass =
+    'rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400'
 
   return (
     <section className="rounded-lg border border-zinc-600 bg-zinc-800/70 p-4 backdrop-blur-sm">
@@ -56,7 +62,7 @@ export const ControlPanel = () => {
           <label className="flex flex-col gap-2 text-sm">
             <span className="text-zinc-200">Key</span>
             <select
-              className="w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-3 py-2 text-zinc-50 outline-none ring-cyan-500 focus:ring-2"
+              className={interactiveSelectClass}
               value={keyPc}
               onChange={(event) => {
                 setKeyPc(Number(event.target.value) as PitchClass)
@@ -80,7 +86,7 @@ export const ControlPanel = () => {
                   aria-pressed={noteLabelMode === modeOption.value}
                   className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                     noteLabelMode === modeOption.value
-                      ? 'bg-cyan-500 text-slate-950'
+                      ? 'bg-zinc-600 text-zinc-50'
                       : 'text-zinc-100 hover:bg-zinc-600'
                   }`}
                   onClick={() => {
@@ -97,7 +103,7 @@ export const ControlPanel = () => {
             <span className="text-zinc-200">{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
             {noteLabelMode === 'scale' ? (
               <select
-                className="w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-3 py-2 text-zinc-50 outline-none ring-cyan-500 focus:ring-2"
+                className={interactiveSelectClass}
                 value={selectedScale ?? ''}
                 onChange={(event) => {
                   const value = event.target.value as ScaleId | ''
@@ -113,7 +119,7 @@ export const ControlPanel = () => {
               </select>
             ) : (
               <select
-                className="w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-3 py-2 text-zinc-50 outline-none ring-cyan-500 focus:ring-2"
+                className={interactiveSelectClass}
                 value={selectedChordOptionId}
                 onChange={(event) => {
                   const nextId = event.target.value
@@ -135,7 +141,7 @@ export const ControlPanel = () => {
         <div className="flex flex-col gap-2 lg:min-w-44 lg:justify-end">
           <button
             type="button"
-            className="rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${primaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`}
             onClick={() => {
               if (noteLabelMode === 'scale') {
                 addScaleNotes({ fretRange })
@@ -151,11 +157,7 @@ export const ControlPanel = () => {
             {noteLabelMode === 'scale' ? 'Add Scale Notes' : 'Add Chord Tones'}
           </button>
 
-          <button
-            type="button"
-            className="rounded-md border border-zinc-500 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
-            onClick={clearHighlightedNotes}
-          >
+          <button type="button" className={interactiveButtonClass} onClick={clearHighlightedNotes}>
             Clear
           </button>
         </div>
