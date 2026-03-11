@@ -44,107 +44,124 @@ export const ControlPanel = () => {
         end: exportFretEnd,
       }
     : undefined
+  const modeOptions: { value: NoteLabelMode; label: string }[] = [
+    { value: 'scale', label: 'Scale' },
+    { value: 'chord', label: 'Chord' },
+  ]
 
   return (
     <section className="rounded-lg border border-slate-700 bg-black p-4">
-      <div className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto_auto] md:items-end">
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-slate-300">Key</span>
-          <select
-            className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-            value={keyPc}
-            onChange={(event) => {
-              setKeyPc(Number(event.target.value) as PitchClass)
-            }}
-          >
-            {NOTE_LABELS.map((note, pitchClass) => (
-              <option key={note} value={pitchClass}>
-                {note}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-slate-300">Mode</span>
-          <select
-            className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-            value={noteLabelMode}
-            onChange={(event) => {
-              setNoteLabelMode(event.target.value as NoteLabelMode)
-            }}
-          >
-            <option value="scale">Scale</option>
-            <option value="chord">Chord</option>
-          </select>
-        </label>
-
-        <div className="flex flex-col gap-2 text-sm">
-          <span className="text-slate-300">{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
-          {noteLabelMode === 'scale' ? (
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="space-y-4">
+          <label className="flex flex-col gap-2 text-sm">
+            <span className="text-slate-300">Key</span>
             <select
-              className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-              value={selectedScale ?? ''}
+              className="w-full rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+              value={keyPc}
               onChange={(event) => {
-                const value = event.target.value as ScaleId | ''
-                setSelectedScale(value === '' ? undefined : value)
+                setKeyPc(Number(event.target.value) as PitchClass)
               }}
             >
-              <option value="">Select scale</option>
-              {Object.entries(SCALE_LABELS).map(([id, label]) => (
-                <option key={id} value={id}>
-                  {label}
+              {NOTE_LABELS.map((note, pitchClass) => (
+                <option key={note} value={pitchClass}>
+                  {note}
                 </option>
               ))}
             </select>
-          ) : (
-            <select
-              className="rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-              value={selectedChordOptionId}
-              onChange={(event) => {
-                const nextId = event.target.value
-                const nextOption = diatonicChordOptions.find((option) => option.id === nextId)
-                setSelectedChord(nextOption?.chord)
-              }}
-            >
-              <option value="">Select major diatonic 7th</option>
-              {diatonicChordOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
+          </label>
+
+          <div className="flex flex-col gap-2 text-sm">
+            <span className="text-slate-300">Mode</span>
+            <div className="inline-flex w-fit rounded-md border border-slate-700 bg-slate-950 p-1">
+              {modeOptions.map((modeOption) => (
+                <button
+                  key={modeOption.value}
+                  type="button"
+                  aria-pressed={noteLabelMode === modeOption.value}
+                  className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                    noteLabelMode === modeOption.value
+                      ? 'bg-cyan-500 text-slate-950'
+                      : 'text-slate-300 hover:bg-slate-900'
+                  }`}
+                  onClick={() => {
+                    setNoteLabelMode(modeOption.value)
+                  }}
+                >
+                  {modeOption.label}
+                </button>
               ))}
-            </select>
-          )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 text-sm">
+            <span className="text-slate-300">{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
+            {noteLabelMode === 'scale' ? (
+              <select
+                className="w-full rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+                value={selectedScale ?? ''}
+                onChange={(event) => {
+                  const value = event.target.value as ScaleId | ''
+                  setSelectedScale(value === '' ? undefined : value)
+                }}
+              >
+                <option value="">Select scale</option>
+                {Object.entries(SCALE_LABELS).map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <select
+                className="w-full rounded-md border border-slate-700 bg-black px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
+                value={selectedChordOptionId}
+                onChange={(event) => {
+                  const nextId = event.target.value
+                  const nextOption = diatonicChordOptions.find((option) => option.id === nextId)
+                  setSelectedChord(nextOption?.chord)
+                }}
+              >
+                <option value="">Select major diatonic 7th</option>
+                {diatonicChordOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
 
-        <button
-          type="button"
-          className="rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={() => {
-            if (noteLabelMode === 'scale') {
-              addScaleNotes({ fretRange })
-              return
-            }
+        <div className="flex flex-col gap-2 lg:min-w-44 lg:justify-end">
+          <button
+            type="button"
+            className="rounded-md border border-cyan-600 bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => {
+              if (noteLabelMode === 'scale') {
+                addScaleNotes({ fretRange })
+                return
+              }
 
-            if (canAddChordTones) {
-              addSelectedChordNotes({ fretRange })
-            }
-          }}
-          disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}
-        >
-          {noteLabelMode === 'scale' ? 'Add Scale Notes' : 'Add Chord Tones'}
-        </button>
+              if (canAddChordTones) {
+                addSelectedChordNotes({ fretRange })
+              }
+            }}
+            disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}
+          >
+            {noteLabelMode === 'scale' ? 'Add Scale Notes' : 'Add Chord Tones'}
+          </button>
 
-        <button
-          type="button"
-          className="rounded-md border border-slate-600 bg-black px-4 py-2 text-sm font-medium transition hover:bg-slate-900"
-          onClick={clearHighlightedNotes}
-        >
-          Clear
-        </button>
+          <button
+            type="button"
+            className="rounded-md border border-slate-600 bg-black px-4 py-2 text-sm font-medium transition hover:bg-slate-900"
+            onClick={clearHighlightedNotes}
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
-      <label className="mt-3 inline-flex items-center gap-2 text-xs text-slate-300">
+      <label className="mt-4 inline-flex items-center gap-2 text-xs text-slate-300">
         <input
           type="checkbox"
           className="h-4 w-4 rounded border border-slate-600 bg-black accent-cyan-500"
