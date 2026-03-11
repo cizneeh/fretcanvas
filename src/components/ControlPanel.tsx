@@ -85,7 +85,7 @@ export const ControlPanel = () => {
 
   return (
     <section className={`${m3CardClass} p-4`}>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(16rem,17.5rem)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(12rem,14rem)_max-content_minmax(14rem,1fr)_minmax(16rem,17.5rem)]">
         <label className="flex flex-col gap-2">
           <span className={m3FieldLabelClass}>Key</span>
           <select
@@ -103,7 +103,7 @@ export const ControlPanel = () => {
           </select>
         </label>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex w-fit flex-col gap-2">
           <span className={m3FieldLabelClass}>Mode</span>
           <div className={m3SegmentedContainerClass}>
             {modeOptions.map((modeOption) => (

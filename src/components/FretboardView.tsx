@@ -3,6 +3,7 @@ import { FRET_NUMBERS } from '../libs/model'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'
 import { NoteContextMenu } from './NoteContextMenu'
+import { m3CardClass, m3FieldLabelClass } from './ui/materialClasses'
 
 export const FretboardView = () => {
   const interaction = useFretboardInteractionState()
@@ -18,10 +19,8 @@ export const FretboardView = () => {
             />
           </div>
 
-          <div className="rounded-md border border-zinc-600 bg-zinc-800/80 p-3">
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-300">
-              Export Range
-            </div>
+          <div className={`${m3CardClass} p-3`}>
+            <div className={`mb-2 ${m3FieldLabelClass}`}>Export Range</div>
             <div
               className="grid"
               style={{
