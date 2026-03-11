@@ -1,6 +1,7 @@
 import { getBendId, type PositionId } from '../libs/model'
 import { getBendShortcutLabel, getDimShortcutLabel } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
+import { m3MenuContainerClass, m3MenuItemClass } from './ui/materialClasses'
 
 type NoteContextMenuProps = {
   positionId: PositionId
@@ -26,7 +27,7 @@ export const NoteContextMenu = ({
 
   return (
     <div
-      className="fixed z-50 min-w-[170px] rounded-md border border-zinc-600 bg-zinc-800/95 p-1 shadow-2xl"
+      className={m3MenuContainerClass}
       style={{
         left: x,
         top: y,
@@ -34,7 +35,7 @@ export const NoteContextMenu = ({
     >
       <button
         type="button"
-        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-zinc-100 hover:bg-zinc-700"
+        className={m3MenuItemClass}
         onClick={() => {
           toggleNoteDimmed(positionId)
           onClose()
@@ -42,16 +43,18 @@ export const NoteContextMenu = ({
       >
         <span className="flex items-center gap-2 pr-3">
           <span>Dim</span>
-          <span className="text-[11px] text-zinc-300">{shortcutLabel}</span>
+          <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+            {shortcutLabel}
+          </span>
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-zinc-300">
+        <span className="ml-2 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           {displayedNotes[positionId]?.isDimmed === true ? '✓' : ''}
         </span>
       </button>
 
       <button
         type="button"
-        className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-zinc-100 hover:bg-zinc-700"
+        className={m3MenuItemClass}
         onClick={() => {
           onToggleBend(positionId)
           onClose()
@@ -59,9 +62,11 @@ export const NoteContextMenu = ({
       >
         <span className="flex items-center gap-2 pr-3">
           <span>{hasBend ? 'Remove Bend' : 'Add Bend'}</span>
-          <span className="text-[11px] text-zinc-300">{bendShortcutLabel}</span>
+          <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+            {bendShortcutLabel}
+          </span>
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-zinc-300">
+        <span className="ml-2 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           {hasBend ? '✓' : ''}
         </span>
       </button>

@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react'
+import {
+  m3FieldLabelClass,
+  m3FilledButtonClass,
+  m3InputClass,
+  m3OutlinedButtonClass,
+} from './ui/materialClasses'
 
 type ExportPanelProps = {
   exportStart: number
@@ -33,23 +39,23 @@ export const ExportPanel = ({
 
   return (
     <div className="w-full max-w-[22rem]">
-      <div className="mb-3 flex items-center justify-between text-sm text-zinc-200">
+      <div className="mb-3 flex items-center justify-between text-sm text-[color:var(--md-sys-color-on-surface)]">
         <span>Export Range</span>
-        <span className="font-medium text-zinc-50">
+        <span className="font-medium text-[color:var(--md-sys-color-on-surface)]">
           Frets {exportStart} - {exportEnd}
         </span>
       </div>
 
-      <div className="mb-4 text-xs text-zinc-300">
+      <div className="mb-4 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
         S / E マーカーをドラッグ、またはバーをクリックして範囲を設定
       </div>
 
       <div className="mb-4">
-        <div className="mb-1 text-xs text-zinc-300">Background Opacity</div>
+        <div className={`mb-1 ${m3FieldLabelClass}`}>Background Opacity</div>
         <div className="mb-2 grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] gap-2">
           <button
             type="button"
-            className="h-10 rounded-md border border-zinc-500 bg-zinc-700/90 px-2.5 text-sm font-medium text-zinc-50 transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${m3OutlinedButtonClass} h-10 px-2.5`}
             onClick={() => {
               onBackgroundOpacityEditStart()
               applyOpacity(backgroundOpacityPercent - 1)
@@ -68,7 +74,7 @@ export const ExportPanel = ({
               max={100}
               step={1}
               inputMode="numeric"
-              className="h-10 w-full rounded-md border border-zinc-500 bg-zinc-700/90 px-2.5 pr-7 text-sm text-zinc-50 outline-none transition-colors hover:bg-zinc-600 focus:ring-2 focus:ring-cyan-500"
+              className={`${m3InputClass} h-10 pr-7`}
               value={draftOpacity}
               onFocus={onBackgroundOpacityEditStart}
               onBlur={() => {
@@ -93,14 +99,14 @@ export const ExportPanel = ({
               }}
               aria-label="Background opacity percentage"
             />
-            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-300">
+            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
               %
             </span>
           </div>
 
           <button
             type="button"
-            className="h-10 rounded-md border border-zinc-500 bg-zinc-700/90 px-2.5 text-sm font-medium text-zinc-50 transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${m3OutlinedButtonClass} h-10 px-2.5`}
             onClick={() => {
               onBackgroundOpacityEditStart()
               applyOpacity(backgroundOpacityPercent + 1)
@@ -118,10 +124,10 @@ export const ExportPanel = ({
             <button
               key={value}
               type="button"
-              className={`h-8 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
+              className={`h-8 rounded-[var(--md-shape-sm)] border px-2 py-1 text-[11px] font-medium transition-colors ${
                 backgroundOpacityPercent === value
-                  ? 'border-cyan-400/80 bg-cyan-500/20 text-cyan-200'
-                  : 'border-zinc-500 bg-zinc-700/80 text-zinc-200 hover:bg-zinc-600'
+                  ? 'm3-state-tonal border-transparent bg-[color:var(--md-sys-color-secondary-container)] text-[color:var(--md-sys-color-on-secondary-container)]'
+                  : 'm3-state-surface border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] text-[color:var(--md-sys-color-on-surface-variant)]'
               }`}
               onClick={() => {
                 onBackgroundOpacityEditStart()
@@ -135,7 +141,7 @@ export const ExportPanel = ({
         </div>
 
         <input
-          className="range-thumb h-2 w-full appearance-none rounded-full bg-zinc-700"
+          className="range-thumb h-2 w-full appearance-none rounded-full bg-[color:var(--md-sys-color-outline-variant)]"
           type="range"
           min={0}
           max={100}
@@ -153,7 +159,7 @@ export const ExportPanel = ({
 
       <button
         type="button"
-        className="w-full rounded-md border border-emerald-400/80 bg-emerald-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
+        className={`w-full ${m3FilledButtonClass}`}
         onClick={onExportTransparentPng}
       >
         Export Transparent PNG

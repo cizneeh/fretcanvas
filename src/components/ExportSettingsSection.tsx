@@ -9,6 +9,12 @@ import { useFretboardStore } from '../stores/fretboardStore'
 import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { ExportPanel } from './ExportPanel'
+import {
+  m3CardClass,
+  m3CardElevatedClass,
+  m3FieldLabelClass,
+  m3OutlinedButtonClass,
+} from './ui/materialClasses'
 
 const checkerboardStyle = {
   backgroundColor: '#27272a',
@@ -157,14 +163,12 @@ const ExpandedExportSettingsContent = () => {
           }}
         />
 
-        <div className="rounded-xl border border-zinc-600 bg-zinc-900/60 p-3">
-          <div className="mb-2 text-sm font-medium text-zinc-100">Preview</div>
+        <div className={`${m3CardElevatedClass} p-3`}>
+          <div className={`mb-2 ${m3FieldLabelClass}`}>Preview</div>
           <button
             type="button"
-            className={`w-full rounded-md border border-zinc-600 p-2 text-left transition-colors ${
-              previewUrl !== undefined
-                ? 'cursor-zoom-in hover:border-zinc-500 hover:bg-zinc-700/20'
-                : 'cursor-not-allowed opacity-80'
+            className={`m3-state-surface w-full rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline)] p-2 text-left transition-colors ${
+              previewUrl !== undefined ? 'cursor-zoom-in' : 'cursor-not-allowed opacity-80'
             }`}
             onClick={() => {
               if (previewUrl === undefined) {
@@ -193,7 +197,9 @@ const ExpandedExportSettingsContent = () => {
               ) : undefined}
             </div>
           </button>
-          <div className="mt-2 text-xs text-zinc-400">クリックで拡大表示</div>
+          <div className="mt-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+            クリックで拡大表示
+          </div>
         </div>
       </div>
 
@@ -207,12 +213,14 @@ const ExpandedExportSettingsContent = () => {
               setIsPreviewModalOpen(false)
             }}
           />
-          <div className="relative w-full max-w-6xl rounded-lg border border-zinc-600 bg-zinc-900 p-4">
+          <div className={`${m3CardElevatedClass} relative w-full max-w-6xl p-4`}>
             <div className="mb-3 flex items-center justify-between">
-              <div className="text-sm font-medium text-zinc-100">Export Preview</div>
+              <div className="text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
+                Export Preview
+              </div>
               <button
                 type="button"
-                className="rounded-md border border-zinc-500 bg-zinc-800 px-3 py-1.5 text-xs text-zinc-100 transition-colors hover:bg-zinc-700"
+                className={`${m3OutlinedButtonClass} min-h-8 px-3 py-1.5 text-xs`}
                 onClick={() => {
                   setIsPreviewModalOpen(false)
                 }}
@@ -222,7 +230,7 @@ const ExpandedExportSettingsContent = () => {
             </div>
 
             <div
-              className="max-h-[80vh] overflow-auto rounded-md border border-zinc-600 p-2"
+              className="max-h-[80vh] overflow-auto rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline)] p-2"
               style={checkerboardStyle}
             >
               <img
@@ -244,20 +252,22 @@ export const ExportSettingsSection = () => {
   const contentId = 'export-settings-content'
 
   return (
-    <section className="overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80">
+    <section className={`${m3CardClass} overflow-hidden`}>
       <button
         type="button"
-        className="group flex min-h-12 w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors hover:bg-zinc-700/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80"
+        className="m3-focus-ring m3-state-surface group flex min-h-12 w-full items-center justify-between gap-4 px-4 py-3 text-left"
         aria-expanded={isExpanded}
         aria-controls={contentId}
         onClick={() => {
           setIsExpanded((previous) => !previous)
         }}
       >
-        <div className="text-sm font-medium tracking-[0.01em] text-zinc-100">Export Settings</div>
+        <div className="text-sm font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-surface)]">
+          Export Settings
+        </div>
 
         <svg
-          className={`h-5 w-5 text-zinc-300 transition-transform duration-200 ease-out ${
+          className={`h-5 w-5 text-[color:var(--md-sys-color-on-surface-variant)] transition-transform duration-200 ease-out ${
             isExpanded ? 'rotate-180' : ''
           }`}
           viewBox="0 0 20 20"
