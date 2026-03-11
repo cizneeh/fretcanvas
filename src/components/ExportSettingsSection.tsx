@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   type ExportTransparentPngInput,
   exportTransparentPng,
@@ -27,14 +27,7 @@ export const ExportSettingsSection = () => {
   const commitBufferedEdit = useHistoryStore((state) => state.commitBufferedEdit)
   const cancelBufferedEdit = useHistoryStore((state) => state.cancelBufferedEdit)
   const captureSnapshot = useHistoryStore((state) => state.captureSnapshot)
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined)
-  const [previewStatus, setPreviewStatus] = useState<'rendering' | 'ready' | 'error'>('rendering')
-  const [previewError, setPreviewError] = useState<string | undefined>(undefined)
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
-  const rafIdRef = useRef<number | undefined>(undefined)
-  const renderIdRef = useRef(0)
-  const latestInputRef = useRef<ExportTransparentPngInput | undefined>(undefined)
-  const previewUrlRef = useRef<string | undefined>(undefined)
 
   const exportInput = useMemo<ExportTransparentPngInput>(
     () => ({
@@ -63,74 +56,30 @@ export const ExportSettingsSection = () => {
     ],
   )
 
-  useEffect(() => {
-    latestInputRef.current = exportInput
-    if (rafIdRef.current !== undefined) {
-      return
+  const preview = useMemo(() => {
+    const canvas = renderExportPngCanvas(exportInput)
+    if (canvas === undefined) {
+      return {
+        url: undefined,
+        error: 'Preview render failed',
+      }
     }
 
-    setPreviewStatus('rendering')
-    setPreviewError(undefined)
-    rafIdRef.current = requestAnimationFrame(() => {
-      rafIdRef.current = undefined
-      const input = latestInputRef.current
-      if (input === undefined) {
-        return
+    try {
+      return {
+        url: canvas.toDataURL('image/png', 1),
+        error: undefined,
       }
-
-      const nextRenderId = renderIdRef.current + 1
-      renderIdRef.current = nextRenderId
-      const canvas = renderExportPngCanvas(input)
-      if (canvas === undefined) {
-        if (renderIdRef.current !== nextRenderId) {
-          return
-        }
-        setPreviewStatus('error')
-        setPreviewError('Preview render failed')
-        return
+    } catch {
+      return {
+        url: undefined,
+        error: 'Failed to create preview image',
       }
-
-      canvas.toBlob(
-        (blob) => {
-          if (renderIdRef.current !== nextRenderId) {
-            return
-          }
-
-          if (blob === null) {
-            setPreviewStatus('error')
-            setPreviewError('Failed to create preview image')
-            return
-          }
-
-          const nextUrl = URL.createObjectURL(blob)
-          const previousUrl = previewUrlRef.current
-          previewUrlRef.current = nextUrl
-          if (previousUrl !== undefined) {
-            URL.revokeObjectURL(previousUrl)
-          }
-          setPreviewUrl(nextUrl)
-          setPreviewStatus('ready')
-          setPreviewError(undefined)
-        },
-        'image/png',
-        1,
-      )
-    })
+    }
   }, [exportInput])
 
-  useEffect(() => {
-    return () => {
-      if (rafIdRef.current !== undefined) {
-        cancelAnimationFrame(rafIdRef.current)
-      }
-      renderIdRef.current += 1
-      const url = previewUrlRef.current
-      if (url !== undefined) {
-        URL.revokeObjectURL(url)
-        previewUrlRef.current = undefined
-      }
-    }
-  }, [])
+  const previewUrl = preview.url
+  const previewError = preview.error
 
   useEffect(() => {
     if (!isPreviewModalOpen) {
@@ -210,14 +159,9 @@ export const ExportSettingsSection = () => {
                   draggable={false}
                 />
               ) : undefined}
-              {previewStatus === 'rendering' ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25 text-xs text-zinc-200">
-                  Rendering preview...
-                </div>
-              ) : undefined}
-              {previewStatus === 'error' ? (
+              {previewError !== undefined ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 px-3 text-center text-xs text-rose-200">
-                  {previewError ?? 'Preview render failed'}
+                  {previewError}
                 </div>
               ) : undefined}
             </div>
