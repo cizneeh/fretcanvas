@@ -240,16 +240,7 @@ const ExpandedExportSettingsContent = () => {
 }
 
 export const ExportSettingsSection = () => {
-  const { exportFretStart, exportFretEnd, backgroundOpacityPercent } = useSettingsStore(
-    useShallow((state) => ({
-      exportFretStart: state.exportFretStart,
-      exportFretEnd: state.exportFretEnd,
-      backgroundOpacityPercent: state.backgroundOpacityPercent,
-    })),
-  )
   const [isExpanded, setIsExpanded] = useState(false)
-  const exportStart = Math.min(exportFretStart, exportFretEnd)
-  const exportEnd = Math.max(exportFretStart, exportFretEnd)
   const contentId = 'export-settings-content'
 
   return (
@@ -263,32 +254,22 @@ export const ExportSettingsSection = () => {
           setIsExpanded((previous) => !previous)
         }}
       >
-        <div className="min-w-0">
-          <div className="text-sm font-medium tracking-[0.01em] text-zinc-100">Export Settings</div>
-          <div className="mt-1 text-xs text-zinc-300">
-            Frets {exportStart} - {exportEnd} ・ Opacity {backgroundOpacityPercent}%
-          </div>
-        </div>
+        <div className="text-sm font-medium tracking-[0.01em] text-zinc-100">Export Settings</div>
 
-        <div className="flex items-center gap-3">
-          <span className="hidden text-xs text-zinc-300 sm:inline">
-            {isExpanded ? 'Collapse' : 'Expand'}
-          </span>
-          <svg
-            className={`h-5 w-5 text-zinc-300 transition-transform duration-200 ease-out ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.1 1.02l-4.25 4.5a.75.75 0 0 1-1.1 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
+        <svg
+          className={`h-5 w-5 text-zinc-300 transition-transform duration-200 ease-out ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.1 1.02l-4.25 4.5a.75.75 0 0 1-1.1 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+            clipRule="evenodd"
+          />
+        </svg>
       </button>
 
       <div
