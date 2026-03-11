@@ -86,7 +86,7 @@ export const ControlPanel = () => {
                   aria-pressed={noteLabelMode === modeOption.value}
                   className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                     noteLabelMode === modeOption.value
-                      ? 'bg-zinc-600 text-zinc-50'
+                      ? 'bg-cyan-500 text-slate-950'
                       : 'text-zinc-100 hover:bg-zinc-600'
                   }`}
                   onClick={() => {
