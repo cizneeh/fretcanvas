@@ -8,8 +8,8 @@ export const FretboardView = () => {
   const interaction = useFretboardInteractionState()
 
   return (
-    <section className="rounded-lg border border-zinc-800 bg-zinc-900/30">
-      <div className="overflow-x-auto p-4">
+    <section>
+      <div className="overflow-x-auto py-4">
         <div className="min-w-max space-y-3">
           <div className="rounded-md border border-zinc-700 bg-black p-3">
             <FretboardGrid
