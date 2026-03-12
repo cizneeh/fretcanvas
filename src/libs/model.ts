@@ -92,21 +92,6 @@ const SCALE_NAME_BY_ID: Record<ScaleId, string> = {
   pentatonicMinor: 'minor pentatonic',
 }
 
-const getScaleIntervalsFromC = (scaleId: ScaleId): number[] =>
-  Scale.get(`C ${SCALE_NAME_BY_ID[scaleId]}`)
-    .notes.map((noteName) => Note.chroma(noteName))
-    .filter((value): value is number => value !== undefined)
-
-/**
- * keyが0. keyからのInterval
- */
-export const SCALE_INTERVALS: Record<ScaleId, number[]> = {
-  major: getScaleIntervalsFromC('major'),
-  naturalMinor: getScaleIntervalsFromC('naturalMinor'),
-  pentatonicMajor: getScaleIntervalsFromC('pentatonicMajor'),
-  pentatonicMinor: getScaleIntervalsFromC('pentatonicMinor'),
-}
-
 export const SCALE_LABELS: Record<ScaleId, string> = {
   major: 'Major',
   naturalMinor: 'Natural Minor',
