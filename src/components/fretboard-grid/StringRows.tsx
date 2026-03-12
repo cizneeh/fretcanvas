@@ -12,6 +12,7 @@ import {
 } from '../../libs/model'
 import { useFretboardStore } from '../../stores/fretboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { RenderProfiler } from '../dev/RenderProfiler'
 import { FretCell } from './FretCell'
 
 type StringRowsProps = {
@@ -72,7 +73,7 @@ export const StringRows = ({
   const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
 
   return (
-    <>
+    <RenderProfiler id="StringRows">
       {OPEN_STRINGS.map((stringInfo, stringIndex) => (
         <Fragment key={stringInfo.id}>
           <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
@@ -124,6 +125,6 @@ export const StringRows = ({
           })}
         </Fragment>
       ))}
-    </>
+    </RenderProfiler>
   )
 }

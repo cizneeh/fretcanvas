@@ -1,5 +1,6 @@
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
 import { FRET_NUMBERS } from '../libs/model'
+import { RenderProfiler } from './dev/RenderProfiler'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'
 import { NoteContextMenu } from './NoteContextMenu'
@@ -13,10 +14,12 @@ export const FretboardView = () => {
       <div className="overflow-x-auto py-4">
         <div className="min-w-max space-y-3">
           <div className="rounded-md border border-zinc-700 bg-black p-3">
-            <FretboardGrid
-              previewConnection={interaction.previewConnection}
-              {...interaction.gridProps}
-            />
+            <RenderProfiler id="FretboardGrid">
+              <FretboardGrid
+                previewConnection={interaction.previewConnection}
+                {...interaction.gridProps}
+              />
+            </RenderProfiler>
           </div>
 
           <div className={`${m3CardClass} p-3`}>

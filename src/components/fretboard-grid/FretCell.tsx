@@ -1,4 +1,5 @@
 import type { PositionId } from '../../libs/model'
+import { isCellRenderLogEnabled } from '../../libs/renderProfiler'
 import { NoteChip } from '../NoteChip'
 
 type FretCellProps = {
@@ -57,6 +58,14 @@ export const FretCell = ({
   onNotePointerUp,
   onNoteContextMenu,
 }: FretCellProps) => {
+  if (isCellRenderLogEnabled()) {
+    console.debug('[CellRender]', positionId, {
+      isHighlighted,
+      isDimmed,
+      label,
+    })
+  }
+
   return (
     <button
       type="button"
