@@ -56,15 +56,19 @@ export const ControlPanel = () => {
   )
   const {
     addScaleWithinExportRange,
+    showExportRangeHighlight,
     exportFretStart,
     exportFretEnd,
     setAddScaleWithinExportRange,
+    setShowExportRangeHighlight,
   } = useSettingsStore(
     useShallow((state) => ({
       addScaleWithinExportRange: state.addScaleWithinExportRange,
+      showExportRangeHighlight: state.showExportRangeHighlight,
       exportFretStart: state.exportFretStart,
       exportFretEnd: state.exportFretEnd,
       setAddScaleWithinExportRange: state.setAddScaleWithinExportRange,
+      setShowExportRangeHighlight: state.setShowExportRangeHighlight,
     })),
   )
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
@@ -254,17 +258,31 @@ export const ControlPanel = () => {
         </div>
       </div>
 
-      <label className="mt-4 inline-flex items-center gap-2 border-t border-[color:var(--md-sys-color-outline-variant)] pt-4 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-        <input
-          type="checkbox"
-          className={m3CheckboxClass}
-          checked={addScaleWithinExportRange}
-          onChange={(event) => {
-            setAddScaleWithinExportRange(event.target.checked)
-          }}
-        />
-        Add notes within export range only
-      </label>
+      <div className="mt-4 flex flex-col gap-2 border-t border-[color:var(--md-sys-color-outline-variant)] pt-4">
+        <label className="flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+          <input
+            type="checkbox"
+            className={m3CheckboxClass}
+            checked={addScaleWithinExportRange}
+            onChange={(event) => {
+              setAddScaleWithinExportRange(event.target.checked)
+            }}
+          />
+          Add notes within export range only
+        </label>
+
+        <label className="flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+          <input
+            type="checkbox"
+            className={m3CheckboxClass}
+            checked={showExportRangeHighlight}
+            onChange={(event) => {
+              setShowExportRangeHighlight(event.target.checked)
+            }}
+          />
+          Show export range highlights
+        </label>
+      </div>
     </section>
   )
 }

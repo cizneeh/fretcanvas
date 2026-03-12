@@ -57,13 +57,14 @@ export const StringRows = ({
         displayedNotes: state.displayedNotes,
       })),
     )
-  const { exportFretStart, exportFretEnd } = useSettingsStore(
+  const { exportFretStart, exportFretEnd, showExportRangeHighlight } = useSettingsStore(
     useShallow((state) => ({
       exportFretStart: state.exportFretStart,
       exportFretEnd: state.exportFretEnd,
+      showExportRangeHighlight: state.showExportRangeHighlight,
     })),
   )
-  const startHighlightFret = Math.max(0, exportFretStart - 1)
+  const startHighlightFret = showExportRangeHighlight ? Math.max(0, exportFretStart - 1) : -1
   const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
   const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
   const scalePitchClasses =
@@ -96,8 +97,8 @@ export const StringRows = ({
               selectedChordSymbol,
             )
             const isStartFret = fret === startHighlightFret
-            const isEndFret = fret === exportFretEnd
-            const isStartAtNutLine = exportFretStart === 0 && fret === 0
+            const isEndFret = showExportRangeHighlight && fret === exportFretEnd
+            const isStartAtNutLine = showExportRangeHighlight && exportFretStart === 0 && fret === 0
 
             return (
               <FretCell

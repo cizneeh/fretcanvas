@@ -33,6 +33,7 @@ export const createHistorySnapshot = (
     exportFretEnd: settings.exportFretEnd,
     backgroundOpacityPercent: settings.backgroundOpacityPercent,
     addScaleWithinExportRange: settings.addScaleWithinExportRange,
+    showExportRangeHighlight: settings.showExportRangeHighlight,
   },
 })
 const recordsEqual = <T>(
@@ -97,7 +98,8 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
     left.settings.exportFretStart === right.settings.exportFretStart &&
     left.settings.exportFretEnd === right.settings.exportFretEnd &&
     left.settings.backgroundOpacityPercent === right.settings.backgroundOpacityPercent &&
-    left.settings.addScaleWithinExportRange === right.settings.addScaleWithinExportRange
+    left.settings.addScaleWithinExportRange === right.settings.addScaleWithinExportRange &&
+    left.settings.showExportRangeHighlight === right.settings.showExportRangeHighlight
   )
 }
 

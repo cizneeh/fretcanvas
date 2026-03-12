@@ -11,10 +11,12 @@ export type SettingsStoreState = {
   exportFretEnd: number
   backgroundOpacityPercent: number
   addScaleWithinExportRange: boolean
+  showExportRangeHighlight: boolean
 }
 
 export type SettingsStoreActions = {
   setAddScaleWithinExportRange: (nextValue: boolean, options?: SettingsUpdateOptions) => void
+  setShowExportRangeHighlight: (nextValue: boolean, options?: SettingsUpdateOptions) => void
   handleExportFretStartChange: (nextStart: number, options?: SettingsUpdateOptions) => void
   handleExportFretEndChange: (nextEnd: number, options?: SettingsUpdateOptions) => void
   handleBackgroundOpacityPercentChange: (
@@ -35,6 +37,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
     exportFretEnd: FRET_COUNT,
     backgroundOpacityPercent: 0,
     addScaleWithinExportRange: true,
+    showExportRangeHighlight: true,
 
     setAddScaleWithinExportRange: (nextValue, options) => {
       if (get().addScaleWithinExportRange === nextValue) {
@@ -46,6 +49,18 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
       }
 
       set({ addScaleWithinExportRange: nextValue })
+    },
+
+    setShowExportRangeHighlight: (nextValue, options) => {
+      if (get().showExportRangeHighlight === nextValue) {
+        return
+      }
+
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({ showExportRangeHighlight: nextValue })
     },
 
     handleExportFretStartChange: (nextStart, options) => {

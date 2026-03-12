@@ -60,6 +60,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         exportFretEnd: rawSettings.exportFretEnd ?? 24,
         backgroundOpacityPercent: rawSettings.backgroundOpacityPercent ?? 0,
         addScaleWithinExportRange: rawSettings.addScaleWithinExportRange ?? true,
+        showExportRangeHighlight: rawSettings.showExportRangeHighlight ?? true,
       },
     ),
   }
