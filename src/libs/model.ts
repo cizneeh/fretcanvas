@@ -1,7 +1,5 @@
 import { Chord, Key, Note, Scale } from 'tonal'
 
-Chord.get('Cmaj7').notes // ['C', 'E', 'G', 'B']
-
 // データ型定義、定数、ロジック
 
 /** number of 0~11. 0 is C, 1 is C#, 2 is D, 3 is Eb, 4 is E, 5 is F, 6 is F#, 7 is G, 8 is Ab, 9 is A, 10 is Bb, 11 is B. */
