@@ -4,10 +4,10 @@ import {
   FRET_NUMBERS,
   getDisplayedNoteLabel,
   getDisplayRootPc,
+  getScalePitchClasses,
   normalizePc,
   OPEN_STRINGS,
   type PositionId,
-  SCALE_INTERVALS,
   toPositionId,
 } from '../../libs/model'
 import { useFretboardStore } from '../../stores/fretboardStore'
@@ -46,15 +46,16 @@ export const StringRows = ({
   onNoteContextMenu,
   onNotePointerUp,
 }: StringRowsProps) => {
-  const { keyPc, noteLabelMode, selectedChord, selectedScale, displayedNotes } = useFretboardStore(
-    useShallow((state) => ({
-      keyPc: state.keyPc,
-      noteLabelMode: state.noteLabelMode,
-      selectedChord: state.selectedChord,
-      selectedScale: state.selectedScale,
-      displayedNotes: state.displayedNotes,
-    })),
-  )
+  const { keyPc, noteLabelMode, selectedChordSymbol, selectedScale, displayedNotes } =
+    useFretboardStore(
+      useShallow((state) => ({
+        keyPc: state.keyPc,
+        noteLabelMode: state.noteLabelMode,
+        selectedChordSymbol: state.selectedChordSymbol,
+        selectedScale: state.selectedScale,
+        displayedNotes: state.displayedNotes,
+      })),
+    )
   const { exportFretStart, exportFretEnd } = useSettingsStore(
     useShallow((state) => ({
       exportFretStart: state.exportFretStart,
@@ -65,10 +66,8 @@ export const StringRows = ({
   const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
   const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
   const scalePitchClasses =
-    selectedScale === undefined
-      ? undefined
-      : new Set(SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)))
-  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChord)
+    selectedScale === undefined ? undefined : new Set(getScalePitchClasses(keyPc, selectedScale))
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
 
   return (
     <>
@@ -88,7 +87,12 @@ export const StringRows = ({
             const isRoot = intervalFromDisplayRoot === 0
             const isOutOfScale =
               scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
-            const label = getDisplayedNoteLabel(pitchClass, noteLabelMode, keyPc, selectedChord)
+            const label = getDisplayedNoteLabel(
+              pitchClass,
+              noteLabelMode,
+              keyPc,
+              selectedChordSymbol,
+            )
             const isStartFret = fret === startHighlightFret
             const isEndFret = fret === exportFretEnd
             const isStartAtNutLine = exportFretStart === 0 && fret === 0

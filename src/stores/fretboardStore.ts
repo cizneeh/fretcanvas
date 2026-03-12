@@ -8,15 +8,14 @@ import {
   getBendId,
   getChordPitchClasses,
   getConnectionId,
+  getScalePitchClasses,
   type HighlightedNote,
   type NoteLabelMode,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
-  SCALE_INTERVALS,
   type ScaleId,
-  type SelectedChord,
   toPositionId,
 } from '../libs/model'
 import { useHistoryStore } from './historyStore'
@@ -34,7 +33,7 @@ export type FretboardStoreState = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
   noteLabelMode: NoteLabelMode
-  selectedChord: SelectedChord | undefined
+  selectedChordSymbol: string | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
   bends: Record<BendId, BendArrow>
@@ -44,7 +43,7 @@ export type FretboardStoreActions = {
   setKeyPc: (nextKeyPc: PitchClass) => void
   setSelectedScale: (nextScale: ScaleId | undefined) => void
   setNoteLabelMode: (nextMode: NoteLabelMode) => void
-  setSelectedChord: (nextChord: SelectedChord | undefined) => void
+  setSelectedChordSymbol: (nextChordSymbol: string | undefined) => void
   addScaleNotes: (options?: AddNotesOptions) => void
   addSelectedChordNotes: (options?: AddNotesOptions) => void
   clearHighlightedNotes: () => void
@@ -63,21 +62,6 @@ export type FretboardStore = FretboardStoreState & FretboardStoreActions
 export const useFretboardStore = create<FretboardStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
     useHistoryStore.getState().pushBeforeChange()
-  }
-
-  const areSameChord = (
-    left: SelectedChord | undefined,
-    right: SelectedChord | undefined,
-  ): boolean => {
-    if (left === undefined && right === undefined) {
-      return true
-    }
-
-    if (left === undefined || right === undefined) {
-      return false
-    }
-
-    return left.rootPc === right.rootPc && left.quality === right.quality
   }
 
   const addPitchClassNotes = (
@@ -129,7 +113,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     keyPc: 0,
     selectedScale: 'major',
     noteLabelMode: 'scale',
-    selectedChord: undefined,
+    selectedChordSymbol: undefined,
     displayedNotes: {},
     connections: {},
     bends: {},
@@ -141,7 +125,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       }
 
       pushHistoryBeforeChange()
-      set({ keyPc: nextKeyPc, selectedChord: undefined })
+      set({ keyPc: nextKeyPc, selectedChordSymbol: undefined })
     },
 
     setSelectedScale: (nextScale) => {
@@ -164,14 +148,14 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ noteLabelMode: nextMode })
     },
 
-    setSelectedChord: (nextChord) => {
+    setSelectedChordSymbol: (nextChordSymbol) => {
       const current = get()
-      if (areSameChord(current.selectedChord, nextChord)) {
+      if (current.selectedChordSymbol === nextChordSymbol) {
         return
       }
 
       pushHistoryBeforeChange()
-      set({ selectedChord: nextChord })
+      set({ selectedChordSymbol: nextChordSymbol })
     },
 
     addScaleNotes: (options) => {
@@ -180,9 +164,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         return
       }
 
-      const pcsToAdd = new Set(
-        SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)),
-      )
+      const pcsToAdd = new Set(getScalePitchClasses(keyPc, selectedScale))
       const next = addPitchClassNotes(pcsToAdd, displayedNotes, options)
       if (next === undefined) {
         return
@@ -193,12 +175,12 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     },
 
     addSelectedChordNotes: (options) => {
-      const { selectedChord, displayedNotes } = get()
-      if (selectedChord === undefined) {
+      const { selectedChordSymbol, displayedNotes } = get()
+      if (selectedChordSymbol === undefined) {
         return
       }
 
-      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(selectedChord))
+      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(selectedChordSymbol))
       const next = addPitchClassNotes(pitchClasses, displayedNotes, options)
       if (next === undefined) {
         return

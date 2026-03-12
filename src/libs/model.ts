@@ -1,14 +1,13 @@
+import { Chord, Key, Note, Scale } from 'tonal'
+
+Chord.get('Cmaj7').notes // ['C', 'E', 'G', 'B']
+
 // データ型定義、定数、ロジック
 
 /** number of 0~11. 0 is C, 1 is C#, 2 is D, 3 is Eb, 4 is E, 5 is F, 6 is F#, 7 is G, 8 is Ab, 9 is A, 10 is Bb, 11 is B. */
 export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
-export type ChordQuality = 'maj7' | 'm7' | '7' | 'm7b5'
 export type NoteLabelMode = 'scale' | 'chord'
-export type SelectedChord = {
-  rootPc: PitchClass
-  quality: ChordQuality
-}
 /**
  * 指板上の1マスごとのid
  * 例: "1:3" は1弦3フレット
@@ -62,6 +61,21 @@ export const DEGREE_LABELS = [
   'M7',
 ]
 export const NOTE_LABELS = ['C', 'C#/Db', 'D', 'Eb', 'E', 'F', 'F#/Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+const SHARP_NOTE_LABELS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+const MAJOR_KEY_TONIC_CANDIDATES: Record<PitchClass, string[]> = {
+  0: ['C'],
+  1: ['Db', 'C#'],
+  2: ['D'],
+  3: ['Eb', 'D#'],
+  4: ['E'],
+  5: ['F'],
+  6: ['F#', 'Gb'],
+  7: ['G'],
+  8: ['Ab', 'G#'],
+  9: ['A'],
+  10: ['Bb', 'A#'],
+  11: ['B', 'Cb'],
+}
 
 // midiというのは音高のこと。半音上がるごとに +1される数字。絶対的な音の高さ。
 export const OPEN_STRINGS: StringInfo[] = [
@@ -73,14 +87,26 @@ export const OPEN_STRINGS: StringInfo[] = [
   { id: '6', name: 'E', midi: 40 },
 ]
 
+const SCALE_NAME_BY_ID: Record<ScaleId, string> = {
+  major: 'major',
+  naturalMinor: 'minor',
+  pentatonicMajor: 'major pentatonic',
+  pentatonicMinor: 'minor pentatonic',
+}
+
+const getScaleIntervalsFromC = (scaleId: ScaleId): number[] =>
+  Scale.get(`C ${SCALE_NAME_BY_ID[scaleId]}`)
+    .notes.map((noteName) => Note.chroma(noteName))
+    .filter((value): value is number => value !== undefined)
+
 /**
  * keyが0. keyからのInterval
  */
 export const SCALE_INTERVALS: Record<ScaleId, number[]> = {
-  major: [0, 2, 4, 5, 7, 9, 11],
-  naturalMinor: [0, 2, 3, 5, 7, 8, 10],
-  pentatonicMajor: [0, 2, 4, 7, 9],
-  pentatonicMinor: [0, 3, 5, 7, 10],
+  major: getScaleIntervalsFromC('major'),
+  naturalMinor: getScaleIntervalsFromC('naturalMinor'),
+  pentatonicMajor: getScaleIntervalsFromC('pentatonicMajor'),
+  pentatonicMinor: getScaleIntervalsFromC('pentatonicMinor'),
 }
 
 export const SCALE_LABELS: Record<ScaleId, string> = {
@@ -90,39 +116,9 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
   pentatonicMinor: 'Pentatonic Minor',
 }
 
-const CHORD_QUALITY_INTERVALS: Record<ChordQuality, number[]> = {
-  maj7: [0, 4, 7, 11],
-  m7: [0, 3, 7, 10],
-  '7': [0, 4, 7, 10],
-  m7b5: [0, 3, 6, 10],
-}
-
-const CHORD_QUALITY_LABELS: Record<ChordQuality, string> = {
-  maj7: 'maj7',
-  m7: 'm7',
-  '7': '7',
-  m7b5: 'm7b5',
-}
-
-const MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS: {
-  id: string
-  label: string
-  intervalFromKey: number
-  quality: ChordQuality
-}[] = [
-  { id: 'Imaj7', label: 'Imaj7', intervalFromKey: 0, quality: 'maj7' },
-  { id: 'iim7', label: 'iim7', intervalFromKey: 2, quality: 'm7' },
-  { id: 'iiim7', label: 'iiim7', intervalFromKey: 4, quality: 'm7' },
-  { id: 'IVmaj7', label: 'IVmaj7', intervalFromKey: 5, quality: 'maj7' },
-  { id: 'V7', label: 'V7', intervalFromKey: 7, quality: '7' },
-  { id: 'vim7', label: 'vim7', intervalFromKey: 9, quality: 'm7' },
-  { id: 'viim7b5', label: 'viim7b5', intervalFromKey: 11, quality: 'm7b5' },
-]
-
 export type MajorDiatonicSeventhChordOption = {
-  id: string
+  symbol: string
   label: string
-  chord: SelectedChord
 }
 
 export const POSITION_MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24] as const
@@ -138,9 +134,25 @@ export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= 
 export const normalizePc = (value: number): PitchClass => ((value % 12) + 12) % 12
 export const getLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
   DEGREE_LABELS[normalizePc(pitchClass - rootPc)]
-export const getChordToneLabel = (pitchClass: PitchClass, selectedChord: SelectedChord): string => {
-  const intervalFromRoot = normalizePc(pitchClass - selectedChord.rootPc)
-  if (selectedChord.quality === 'm7b5' && intervalFromRoot === 6) {
+
+const getChordRootPc = (chordSymbol: string): PitchClass | undefined => {
+  const tonic = Chord.get(chordSymbol).tonic
+  if (tonic === null) {
+    return undefined
+  }
+  const chroma = Note.chroma(tonic)
+  return chroma === undefined ? undefined : normalizePc(chroma)
+}
+
+export const getChordToneLabel = (pitchClass: PitchClass, chordSymbol: string): string => {
+  const rootPc = getChordRootPc(chordSymbol)
+  if (rootPc === undefined) {
+    return DEGREE_LABELS[normalizePc(pitchClass)]
+  }
+
+  const intervalFromRoot = normalizePc(pitchClass - rootPc)
+  const isHalfDiminished = Chord.get(chordSymbol).intervals.includes('5d')
+  if (isHalfDiminished && intervalFromRoot === 6) {
     return 'b5'
   }
   return DEGREE_LABELS[intervalFromRoot]
@@ -148,39 +160,53 @@ export const getChordToneLabel = (pitchClass: PitchClass, selectedChord: Selecte
 export const getDisplayRootPc = (
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
-  selectedChord: SelectedChord | undefined,
+  selectedChordSymbol: string | undefined,
 ): PitchClass =>
-  noteLabelMode === 'chord' && selectedChord !== undefined ? selectedChord.rootPc : keyPc
+  noteLabelMode === 'chord' && selectedChordSymbol !== undefined
+    ? (getChordRootPc(selectedChordSymbol) ?? keyPc)
+    : keyPc
 export const getDisplayedNoteLabel = (
   pitchClass: PitchClass,
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
-  selectedChord: SelectedChord | undefined,
+  selectedChordSymbol: string | undefined,
 ): string =>
-  noteLabelMode === 'chord' && selectedChord !== undefined
-    ? getChordToneLabel(pitchClass, selectedChord)
+  noteLabelMode === 'chord' && selectedChordSymbol !== undefined
+    ? getChordToneLabel(pitchClass, selectedChordSymbol)
     : getLabelFromRoot(pitchClass, keyPc)
-export const getChordPitchClasses = (selectedChord: SelectedChord): PitchClass[] =>
-  CHORD_QUALITY_INTERVALS[selectedChord.quality].map((interval) =>
-    normalizePc(selectedChord.rootPc + interval),
-  )
+
+export const getScalePitchClasses = (keyPc: PitchClass, scaleId: ScaleId): PitchClass[] =>
+  Scale.get(`${SHARP_NOTE_LABELS[normalizePc(keyPc)]} ${SCALE_NAME_BY_ID[scaleId]}`)
+    .notes.map((noteName) => Note.chroma(noteName))
+    .filter((value): value is number => value !== undefined)
+    .map((value) => normalizePc(value))
+
+export const getChordPitchClasses = (chordSymbol: string): PitchClass[] =>
+  Chord.get(chordSymbol)
+    .notes.map((noteName) => Note.chroma(noteName))
+    .filter((value): value is number => value !== undefined)
+    .map((value) => normalizePc(value))
+
+const getMajorKeyAccidentalCount = (tonic: string): number => {
+  const signature = Key.majorKey(tonic).keySignature
+  return (signature.match(/[b#]/g) ?? []).length
+}
+const getPreferredMajorKeyTonic = (keyPc: PitchClass): string => {
+  const candidates = MAJOR_KEY_TONIC_CANDIDATES[normalizePc(keyPc)] ?? ['C']
+  return [...candidates].sort((left, right) => {
+    return getMajorKeyAccidentalCount(left) - getMajorKeyAccidentalCount(right)
+  })[0]
+}
 export const getMajorDiatonicSeventhChordOptions = (
   keyPc: PitchClass,
-): MajorDiatonicSeventhChordOption[] =>
-  MAJOR_DIATONIC_SEVENTH_CHORD_DEFINITIONS.map((definition) => {
-    const rootPc = normalizePc(keyPc + definition.intervalFromKey)
-    const rootLabel = NOTE_LABELS[rootPc].split('/')[0]
-    const qualityLabel = CHORD_QUALITY_LABELS[definition.quality]
-
-    return {
-      id: definition.id,
-      label: `${rootLabel}${qualityLabel}`,
-      chord: {
-        rootPc,
-        quality: definition.quality,
-      },
-    }
-  })
+): MajorDiatonicSeventhChordOption[] => {
+  const tonic = getPreferredMajorKeyTonic(keyPc)
+  const chordSymbols = Key.majorKey(tonic).chords.filter((chordSymbol) => chordSymbol.length > 0)
+  return chordSymbols.map((symbol) => ({
+    symbol,
+    label: symbol,
+  }))
+}
 export const toPositionId = (position: Position): PositionId =>
   `${position.stringIndex}:${position.fret}`
 export const parsePositionId = (positionId: PositionId): Position | undefined => {

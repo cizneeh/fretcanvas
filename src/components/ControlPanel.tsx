@@ -25,11 +25,11 @@ export const ControlPanel = () => {
     keyPc,
     noteLabelMode,
     selectedScale,
-    selectedChord,
+    selectedChordSymbol,
     setKeyPc,
     setNoteLabelMode,
     setSelectedScale,
-    setSelectedChord,
+    setSelectedChordSymbol,
     addScaleNotes,
     addSelectedChordNotes,
     clearHighlightedNotes,
@@ -38,11 +38,11 @@ export const ControlPanel = () => {
       keyPc: state.keyPc,
       noteLabelMode: state.noteLabelMode,
       selectedScale: state.selectedScale,
-      selectedChord: state.selectedChord,
+      selectedChordSymbol: state.selectedChordSymbol,
       setKeyPc: state.setKeyPc,
       setNoteLabelMode: state.setNoteLabelMode,
       setSelectedScale: state.setSelectedScale,
-      setSelectedChord: state.setSelectedChord,
+      setSelectedChordSymbol: state.setSelectedChordSymbol,
       addScaleNotes: state.addScaleNotes,
       addSelectedChordNotes: state.addSelectedChordNotes,
       clearHighlightedNotes: state.clearHighlightedNotes,
@@ -62,16 +62,7 @@ export const ControlPanel = () => {
     })),
   )
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
-  const selectedChordOptionId =
-    selectedChord === undefined
-      ? ''
-      : (diatonicChordOptions.find((option) => {
-          return (
-            option.chord.rootPc === selectedChord.rootPc &&
-            option.chord.quality === selectedChord.quality
-          )
-        })?.id ?? '')
-  const canAddChordTones = selectedChordOptionId !== ''
+  const canAddChordTones = selectedChordSymbol !== undefined
   const fretRange = addScaleWithinExportRange
     ? {
         start: exportFretStart,
@@ -143,16 +134,15 @@ export const ControlPanel = () => {
           ) : (
             <select
               className={m3SelectClass}
-              value={selectedChordOptionId}
+              value={selectedChordSymbol ?? ''}
               onChange={(event) => {
-                const nextId = event.target.value
-                const nextOption = diatonicChordOptions.find((option) => option.id === nextId)
-                setSelectedChord(nextOption?.chord)
+                const nextSymbol = event.target.value
+                setSelectedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
               }}
             >
               <option value="">Select major diatonic 7th</option>
               {diatonicChordOptions.map((option) => (
-                <option key={option.id} value={option.id}>
+                <option key={option.symbol} value={option.symbol}>
                   {option.label}
                 </option>
               ))}

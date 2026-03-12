@@ -46,7 +46,10 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         keyPc: rawFretboard.keyPc ?? 0,
         selectedScale: rawFretboard.selectedScale,
         noteLabelMode: rawFretboard.noteLabelMode ?? 'scale',
-        selectedChord: rawFretboard.selectedChord,
+        selectedChordSymbol:
+          typeof rawFretboard.selectedChordSymbol === 'string'
+            ? rawFretboard.selectedChordSymbol
+            : undefined,
         displayedNotes: rawFretboard.displayedNotes ?? {},
         connections: rawFretboard.connections ?? {},
         bends: rawFretboard.bends ?? {},

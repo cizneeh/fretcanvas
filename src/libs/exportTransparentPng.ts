@@ -4,6 +4,7 @@ import {
   type Connection,
   getDisplayedNoteLabel,
   getDisplayRootPc,
+  getScalePitchClasses,
   type HighlightedNote,
   MARKER_FRETS,
   type NoteLabelMode,
@@ -12,9 +13,7 @@ import {
   type PitchClass,
   type PositionId,
   parsePositionId,
-  SCALE_INTERVALS,
   type ScaleId,
-  type SelectedChord,
   toPositionId,
 } from './model'
 
@@ -22,7 +21,7 @@ export type ExportTransparentPngInput = {
   keyPc: PitchClass
   noteLabelMode: NoteLabelMode
   selectedScale: ScaleId | undefined
-  selectedChord: SelectedChord | undefined
+  selectedChordSymbol: string | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   bends: BendArrow[]
@@ -35,7 +34,7 @@ export const renderExportPngCanvas = ({
   keyPc,
   noteLabelMode,
   selectedScale,
-  selectedChord,
+  selectedChordSymbol,
   displayedNotes,
   connections,
   bends,
@@ -80,10 +79,8 @@ export const renderExportPngCanvas = ({
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   const scalePitchClasses =
-    selectedScale === undefined
-      ? undefined
-      : new Set(SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)))
-  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChord)
+    selectedScale === undefined ? undefined : new Set(getScalePitchClasses(keyPc, selectedScale))
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
 
   const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
     const positionId = toPositionId({
@@ -99,7 +96,7 @@ export const renderExportPngCanvas = ({
     const intervalFromDisplayRoot = normalizePc(pitchClass - displayRootPc)
     const isRoot = intervalFromDisplayRoot === 0
     const isOutOfScale = scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
-    const label = getDisplayedNoteLabel(pitchClass, noteLabelMode, keyPc, selectedChord)
+    const label = getDisplayedNoteLabel(pitchClass, noteLabelMode, keyPc, selectedChordSymbol)
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
     const noteOpacity = displayedNote.isDimmed ? 0.35 : 1
