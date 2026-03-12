@@ -1,4 +1,10 @@
-import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react'
+import {
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/model'
 import { isBendShortcutPressed, isDimShortcutPressed } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
@@ -6,8 +12,6 @@ import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 
 export const useFretboardInteractionState = () => {
-  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
-  const bends = useFretboardStore((state) => state.bends)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
@@ -57,7 +61,7 @@ export const useFretboardInteractionState = () => {
     return clampFret(Math.round(ratio * fretCellCount - 0.5))
   }
 
-  const toBoardPoint = (clientX: number, clientY: number) => {
+  const toBoardPoint = useCallback((clientX: number, clientY: number) => {
     const board = boardRef.current
     if (board === undefined) {
       return undefined
@@ -68,13 +72,13 @@ export const useFretboardInteractionState = () => {
       x: clientX - rect.left,
       y: clientY - rect.top,
     }
-  }
+  }, [])
 
-  const resetConnectionDrag = () => {
+  const resetConnectionDrag = useCallback(() => {
     setPendingConnectStart(undefined)
     setDragConnectFrom(undefined)
     setDragPointer(undefined)
-  }
+  }, [])
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -207,137 +211,145 @@ export const useFretboardInteractionState = () => {
     handleExportFretEndChange(fret)
   }
 
-  const handleNotePointerDown = (
-    positionId: PositionId,
-    isHighlighted: boolean,
-    button: number,
-    isMetaKey: boolean,
-    isCtrlKey: boolean,
-    isAltKey: boolean,
-    clientX: number,
-    clientY: number,
-  ) => {
-    if (
-      button !== 0 ||
-      isDimShortcutPressed(isMetaKey, isCtrlKey) ||
-      isBendShortcutPressed(isAltKey)
-    ) {
-      return
-    }
+  const handleNotePointerDown = useCallback(
+    (
+      positionId: PositionId,
+      isHighlighted: boolean,
+      button: number,
+      isMetaKey: boolean,
+      isCtrlKey: boolean,
+      isAltKey: boolean,
+      clientX: number,
+      clientY: number,
+    ) => {
+      if (
+        button !== 0 ||
+        isDimShortcutPressed(isMetaKey, isCtrlKey) ||
+        isBendShortcutPressed(isAltKey)
+      ) {
+        return
+      }
 
-    if (!isHighlighted) {
-      togglePosition(positionId)
-      suppressNextClickToggleForPositionRef.current = positionId
-    }
+      if (!isHighlighted) {
+        togglePosition(positionId)
+        suppressNextClickToggleForPositionRef.current = positionId
+      }
 
-    setPendingConnectStart({
-      positionId,
-      clientX,
-      clientY,
-    })
-  }
+      setPendingConnectStart({
+        positionId,
+        clientX,
+        clientY,
+      })
+    },
+    [togglePosition],
+  )
 
-  const handleBoardPointerMove = (clientX: number, clientY: number) => {
-    if (dragConnectFrom !== undefined) {
+  const handleBoardPointerMove = useCallback(
+    (clientX: number, clientY: number) => {
+      if (dragConnectFrom !== undefined) {
+        const nextPoint = toBoardPoint(clientX, clientY)
+        if (nextPoint === undefined) {
+          return
+        }
+        setDragPointer(nextPoint)
+        return
+      }
+
+      if (pendingConnectStart === undefined) {
+        return
+      }
+
+      const distanceX = clientX - pendingConnectStart.clientX
+      const distanceY = clientY - pendingConnectStart.clientY
+      const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2)
+      if (distance < 5) {
+        return
+      }
+
       const nextPoint = toBoardPoint(clientX, clientY)
       if (nextPoint === undefined) {
         return
       }
+
+      setDragConnectFrom(pendingConnectStart.positionId)
+      setPendingConnectStart(undefined)
       setDragPointer(nextPoint)
-      return
-    }
+    },
+    [dragConnectFrom, pendingConnectStart, toBoardPoint],
+  )
 
-    if (pendingConnectStart === undefined) {
-      return
-    }
+  const handleNotePointerUp = useCallback(
+    (positionId: PositionId) => {
+      if (dragConnectFrom === undefined) {
+        return
+      }
 
-    const distanceX = clientX - pendingConnectStart.clientX
-    const distanceY = clientY - pendingConnectStart.clientY
-    const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2)
-    if (distance < 5) {
-      return
-    }
+      if (useFretboardStore.getState().displayedNotes[positionId] === undefined) {
+        togglePosition(positionId)
+      }
 
-    const nextPoint = toBoardPoint(clientX, clientY)
-    if (nextPoint === undefined) {
-      return
-    }
+      connectPositions(dragConnectFrom, positionId)
+      resetConnectionDrag()
+    },
+    [connectPositions, dragConnectFrom, resetConnectionDrag, togglePosition],
+  )
 
-    setDragConnectFrom(pendingConnectStart.positionId)
-    setPendingConnectStart(undefined)
-    setDragPointer(nextPoint)
-  }
+  const handleBoardPointerUpOrCancel = useCallback(() => {
+    resetConnectionDrag()
+  }, [resetConnectionDrag])
 
-  const handleNotePointerUp = (positionId: PositionId) => {
-    if (dragConnectFrom === undefined) {
-      return
-    }
+  const handleNoteClick = useCallback(
+    (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean, isAltKey: boolean) => {
+      if (isDimShortcutPressed(isMetaKey, isCtrlKey)) {
+        toggleNoteDimmed(positionId)
+        return
+      }
 
-    if (displayedNotes[positionId] === undefined) {
+      if (isBendShortcutPressed(isAltKey)) {
+        if (useFretboardStore.getState().bends[getBendId(positionId)] !== undefined) {
+          removeBendByFromPosition(positionId)
+          return
+        }
+        upsertBendFromPosition(positionId)
+        return
+      }
+
+      if (suppressNextClickToggleForPositionRef.current === positionId) {
+        suppressNextClickToggleForPositionRef.current = undefined
+        return
+      }
+
       togglePosition(positionId)
-    }
+    },
+    [removeBendByFromPosition, toggleNoteDimmed, togglePosition, upsertBendFromPosition],
+  )
 
-    connectPositions(dragConnectFrom, positionId)
-    resetConnectionDrag()
-  }
+  const handleNoteContextMenu = useCallback(
+    (positionId: PositionId, isHighlighted: boolean, clientX: number, clientY: number) => {
+      if (!isHighlighted) {
+        setNoteContextMenu(undefined)
+        return
+      }
 
-  const handleBoardPointerUpOrCancel = () => {
-    resetConnectionDrag()
-  }
+      setNoteContextMenu({
+        positionId,
+        x: clientX,
+        y: clientY,
+      })
+    },
+    [],
+  )
 
-  const handleNoteClick = (
-    positionId: PositionId,
-    isMetaKey: boolean,
-    isCtrlKey: boolean,
-    isAltKey: boolean,
-  ) => {
-    if (isDimShortcutPressed(isMetaKey, isCtrlKey)) {
-      toggleNoteDimmed(positionId)
-      return
-    }
-
-    if (isBendShortcutPressed(isAltKey)) {
-      if (bends[getBendId(positionId)] !== undefined) {
+  const handleToggleBendFromContextMenu = useCallback(
+    (positionId: PositionId) => {
+      if (useFretboardStore.getState().bends[getBendId(positionId)] !== undefined) {
         removeBendByFromPosition(positionId)
         return
       }
       upsertBendFromPosition(positionId)
-      return
-    }
-
-    if (suppressNextClickToggleForPositionRef.current === positionId) {
-      suppressNextClickToggleForPositionRef.current = undefined
-      return
-    }
-
-    togglePosition(positionId)
-  }
-
-  const handleNoteContextMenu = (
-    positionId: PositionId,
-    isHighlighted: boolean,
-    clientX: number,
-    clientY: number,
-  ) => {
-    if (!isHighlighted) {
-      setNoteContextMenu(undefined)
-      return
-    }
-
-    setNoteContextMenu({
-      positionId,
-      x: clientX,
-      y: clientY,
-    })
-  }
-
-  const handleToggleBendFromContextMenu = (positionId: PositionId) => {
-    if (bends[getBendId(positionId)] !== undefined) {
-      removeBendByFromPosition(positionId)
-      return
-    }
-    upsertBendFromPosition(positionId)
-  }
+    },
+    [removeBendByFromPosition, upsertBendFromPosition],
+  )
 
   const createRangeHandlePointerHandlers = (handle: 'start' | 'end') => ({
     onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
