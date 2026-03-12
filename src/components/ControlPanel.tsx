@@ -3,6 +3,7 @@ import {
   getMajorDiatonicSeventhChordOptions,
   NOTE_LABELS,
   type NoteLabelMode,
+  type NoteTextMode,
   type PitchClass,
   SCALE_LABELS,
   type ScaleId,
@@ -24,10 +25,12 @@ export const ControlPanel = () => {
   const {
     keyPc,
     noteLabelMode,
+    noteTextMode,
     selectedScale,
     selectedChordSymbol,
     setKeyPc,
     setNoteLabelMode,
+    setNoteTextMode,
     setSelectedScale,
     setSelectedChordSymbol,
     addScaleNotes,
@@ -37,10 +40,12 @@ export const ControlPanel = () => {
     useShallow((state) => ({
       keyPc: state.keyPc,
       noteLabelMode: state.noteLabelMode,
+      noteTextMode: state.noteTextMode,
       selectedScale: state.selectedScale,
       selectedChordSymbol: state.selectedChordSymbol,
       setKeyPc: state.setKeyPc,
       setNoteLabelMode: state.setNoteLabelMode,
+      setNoteTextMode: state.setNoteTextMode,
       setSelectedScale: state.setSelectedScale,
       setSelectedChordSymbol: state.setSelectedChordSymbol,
       addScaleNotes: state.addScaleNotes,
@@ -73,6 +78,10 @@ export const ControlPanel = () => {
     { value: 'scale', label: 'Scale' },
     { value: 'chord', label: 'Chord' },
   ]
+  const labelOptions: { value: NoteTextMode; label: string }[] = [
+    { value: 'interval', label: 'Interval' },
+    { value: 'absolute', label: 'Absolute' },
+  ]
 
   return (
     <section className={`${m3CardClass} p-4`}>
@@ -94,22 +103,43 @@ export const ControlPanel = () => {
           </select>
         </label>
 
-        <div className="flex w-fit flex-col gap-2">
-          <span className={m3FieldLabelClass}>Mode</span>
-          <div className={m3SegmentedContainerClass}>
-            {modeOptions.map((modeOption) => (
-              <button
-                key={modeOption.value}
-                type="button"
-                aria-pressed={noteLabelMode === modeOption.value}
-                className={m3SegmentedButtonClass(noteLabelMode === modeOption.value)}
-                onClick={() => {
-                  setNoteLabelMode(modeOption.value)
-                }}
-              >
-                {modeOption.label}
-              </button>
-            ))}
+        <div className="flex w-fit flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <span className={m3FieldLabelClass}>Mode</span>
+            <div className={m3SegmentedContainerClass}>
+              {modeOptions.map((modeOption) => (
+                <button
+                  key={modeOption.value}
+                  type="button"
+                  aria-pressed={noteLabelMode === modeOption.value}
+                  className={m3SegmentedButtonClass(noteLabelMode === modeOption.value)}
+                  onClick={() => {
+                    setNoteLabelMode(modeOption.value)
+                  }}
+                >
+                  {modeOption.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className={m3FieldLabelClass}>Labels</span>
+            <div className={m3SegmentedContainerClass}>
+              {labelOptions.map((labelOption) => (
+                <button
+                  key={labelOption.value}
+                  type="button"
+                  aria-pressed={noteTextMode === labelOption.value}
+                  className={m3SegmentedButtonClass(noteTextMode === labelOption.value)}
+                  onClick={() => {
+                    setNoteTextMode(labelOption.value)
+                  }}
+                >
+                  {labelOption.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

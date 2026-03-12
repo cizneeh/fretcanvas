@@ -6,6 +6,7 @@ import { Chord, Key, Note, Scale } from 'tonal'
 export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
 export type NoteLabelMode = 'scale' | 'chord'
+export type NoteTextMode = 'interval' | 'absolute'
 /**
  * 指板上の1マスごとのid
  * 例: "1:3" は1弦3フレット
@@ -60,6 +61,7 @@ export const DEGREE_LABELS = [
 ]
 export const NOTE_LABELS = ['C', 'C#/Db', 'D', 'Eb', 'E', 'F', 'F#/Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 const SHARP_NOTE_LABELS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+const FLAT_NOTE_LABELS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 const MAJOR_KEY_TONIC_CANDIDATES: Record<PitchClass, string[]> = {
   0: ['C'],
   1: ['Db', 'C#'],
@@ -140,6 +142,30 @@ export const getChordToneLabel = (pitchClass: PitchClass, chordSymbol: string): 
   }
   return DEGREE_LABELS[intervalFromRoot]
 }
+
+const getAccidentalPreferenceByKey = (keyPc: PitchClass): 'sharp' | 'flat' => {
+  const tonic = getPreferredMajorKeyTonic(keyPc)
+  const keySignature = Key.majorKey(tonic).keySignature
+  if (keySignature.includes('b')) {
+    return 'flat'
+  }
+  if (keySignature.includes('#')) {
+    return 'sharp'
+  }
+  if (tonic.includes('b')) {
+    return 'flat'
+  }
+  return 'sharp'
+}
+
+export const getAbsoluteNoteLabelByKey = (pitchClass: PitchClass, keyPc: PitchClass): string => {
+  const normalizedPitchClass = normalizePc(pitchClass)
+  const preference = getAccidentalPreferenceByKey(keyPc)
+  return preference === 'flat'
+    ? FLAT_NOTE_LABELS[normalizedPitchClass]
+    : SHARP_NOTE_LABELS[normalizedPitchClass]
+}
+
 export const getDisplayRootPc = (
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
@@ -150,13 +176,16 @@ export const getDisplayRootPc = (
     : keyPc
 export const getDisplayedNoteLabel = (
   pitchClass: PitchClass,
+  noteTextMode: NoteTextMode,
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
   selectedChordSymbol: string | undefined,
 ): string =>
-  noteLabelMode === 'chord' && selectedChordSymbol !== undefined
-    ? getChordToneLabel(pitchClass, selectedChordSymbol)
-    : getLabelFromRoot(pitchClass, keyPc)
+  noteTextMode === 'absolute'
+    ? getAbsoluteNoteLabelByKey(pitchClass, keyPc)
+    : noteLabelMode === 'chord' && selectedChordSymbol !== undefined
+      ? getChordToneLabel(pitchClass, selectedChordSymbol)
+      : getLabelFromRoot(pitchClass, keyPc)
 
 export const getScalePitchClasses = (keyPc: PitchClass, scaleId: ScaleId): PitchClass[] =>
   Scale.get(`${SHARP_NOTE_LABELS[normalizePc(keyPc)]} ${SCALE_NAME_BY_ID[scaleId]}`)

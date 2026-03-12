@@ -27,6 +27,7 @@ const ExpandedExportSettingsContent = () => {
   const {
     keyPc,
     noteLabelMode,
+    noteTextMode,
     selectedScale,
     selectedChordSymbol,
     displayedNotes,
@@ -36,6 +37,7 @@ const ExpandedExportSettingsContent = () => {
     useShallow((state) => ({
       keyPc: state.keyPc,
       noteLabelMode: state.noteLabelMode,
+      noteTextMode: state.noteTextMode,
       selectedScale: state.selectedScale,
       selectedChordSymbol: state.selectedChordSymbol,
       displayedNotes: state.displayedNotes,
@@ -71,6 +73,7 @@ const ExpandedExportSettingsContent = () => {
     () => ({
       keyPc,
       noteLabelMode,
+      noteTextMode,
       selectedScale,
       selectedChordSymbol,
       displayedNotes,
@@ -83,6 +86,7 @@ const ExpandedExportSettingsContent = () => {
     [
       keyPc,
       noteLabelMode,
+      noteTextMode,
       selectedScale,
       selectedChordSymbol,
       displayedNotes,

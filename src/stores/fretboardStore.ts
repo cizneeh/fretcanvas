@@ -11,6 +11,7 @@ import {
   getScalePitchClasses,
   type HighlightedNote,
   type NoteLabelMode,
+  type NoteTextMode,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
@@ -33,6 +34,7 @@ export type FretboardStoreState = {
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
   noteLabelMode: NoteLabelMode
+  noteTextMode: NoteTextMode
   selectedChordSymbol: string | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
@@ -43,6 +45,7 @@ export type FretboardStoreActions = {
   setKeyPc: (nextKeyPc: PitchClass) => void
   setSelectedScale: (nextScale: ScaleId | undefined) => void
   setNoteLabelMode: (nextMode: NoteLabelMode) => void
+  setNoteTextMode: (nextMode: NoteTextMode) => void
   setSelectedChordSymbol: (nextChordSymbol: string | undefined) => void
   addScaleNotes: (options?: AddNotesOptions) => void
   addSelectedChordNotes: (options?: AddNotesOptions) => void
@@ -113,6 +116,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     keyPc: 0,
     selectedScale: 'major',
     noteLabelMode: 'scale',
+    noteTextMode: 'interval',
     selectedChordSymbol: undefined,
     displayedNotes: {},
     connections: {},
@@ -146,6 +150,16 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
       pushHistoryBeforeChange()
       set({ noteLabelMode: nextMode })
+    },
+
+    setNoteTextMode: (nextMode) => {
+      const current = get()
+      if (current.noteTextMode === nextMode) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ noteTextMode: nextMode })
     },
 
     setSelectedChordSymbol: (nextChordSymbol) => {

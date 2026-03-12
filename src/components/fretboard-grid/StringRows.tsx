@@ -46,11 +46,12 @@ export const StringRows = ({
   onNoteContextMenu,
   onNotePointerUp,
 }: StringRowsProps) => {
-  const { keyPc, noteLabelMode, selectedChordSymbol, selectedScale, displayedNotes } =
+  const { keyPc, noteLabelMode, noteTextMode, selectedChordSymbol, selectedScale, displayedNotes } =
     useFretboardStore(
       useShallow((state) => ({
         keyPc: state.keyPc,
         noteLabelMode: state.noteLabelMode,
+        noteTextMode: state.noteTextMode,
         selectedChordSymbol: state.selectedChordSymbol,
         selectedScale: state.selectedScale,
         displayedNotes: state.displayedNotes,
@@ -89,6 +90,7 @@ export const StringRows = ({
               scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
             const label = getDisplayedNoteLabel(
               pitchClass,
+              noteTextMode,
               noteLabelMode,
               keyPc,
               selectedChordSymbol,

@@ -21,6 +21,7 @@ export const createHistorySnapshot = (
   fretboard: {
     keyPc: fretboard.keyPc,
     noteLabelMode: fretboard.noteLabelMode,
+    noteTextMode: fretboard.noteTextMode,
     selectedScale: fretboard.selectedScale,
     selectedChordSymbol: fretboard.selectedChordSymbol,
     displayedNotes: { ...fretboard.displayedNotes },
@@ -87,6 +88,7 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
   return (
     left.fretboard.keyPc === right.fretboard.keyPc &&
     left.fretboard.noteLabelMode === right.fretboard.noteLabelMode &&
+    left.fretboard.noteTextMode === right.fretboard.noteTextMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
     left.fretboard.selectedChordSymbol === right.fretboard.selectedChordSymbol &&
     notesEqual(left.fretboard.displayedNotes, right.fretboard.displayedNotes) &&

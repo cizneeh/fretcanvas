@@ -46,6 +46,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         keyPc: rawFretboard.keyPc ?? 0,
         selectedScale: rawFretboard.selectedScale,
         noteLabelMode: rawFretboard.noteLabelMode ?? 'scale',
+        noteTextMode: rawFretboard.noteTextMode ?? 'interval',
         selectedChordSymbol:
           typeof rawFretboard.selectedChordSymbol === 'string'
             ? rawFretboard.selectedChordSymbol

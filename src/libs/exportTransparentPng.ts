@@ -8,6 +8,7 @@ import {
   type HighlightedNote,
   MARKER_FRETS,
   type NoteLabelMode,
+  type NoteTextMode,
   normalizePc,
   OPEN_STRINGS,
   type PitchClass,
@@ -20,6 +21,7 @@ import {
 export type ExportTransparentPngInput = {
   keyPc: PitchClass
   noteLabelMode: NoteLabelMode
+  noteTextMode: NoteTextMode
   selectedScale: ScaleId | undefined
   selectedChordSymbol: string | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
@@ -33,6 +35,7 @@ export type ExportTransparentPngInput = {
 export const renderExportPngCanvas = ({
   keyPc,
   noteLabelMode,
+  noteTextMode,
   selectedScale,
   selectedChordSymbol,
   displayedNotes,
@@ -96,7 +99,13 @@ export const renderExportPngCanvas = ({
     const intervalFromDisplayRoot = normalizePc(pitchClass - displayRootPc)
     const isRoot = intervalFromDisplayRoot === 0
     const isOutOfScale = scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
-    const label = getDisplayedNoteLabel(pitchClass, noteLabelMode, keyPc, selectedChordSymbol)
+    const label = getDisplayedNoteLabel(
+      pitchClass,
+      noteTextMode,
+      noteLabelMode,
+      keyPc,
+      selectedChordSymbol,
+    )
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
     const noteOpacity = displayedNote.isDimmed ? 0.35 : 1
