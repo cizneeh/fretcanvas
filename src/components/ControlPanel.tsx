@@ -85,7 +85,7 @@ export const ControlPanel = () => {
 
   return (
     <section className={`${m3CardClass} p-4`}>
-      <div className="grid gap-4 xl:grid-cols-[minmax(12rem,14rem)_max-content_minmax(14rem,1fr)_minmax(16rem,17.5rem)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(12rem,14rem)_minmax(10.5rem,11.5rem)_minmax(14rem,1fr)_minmax(16rem,17.5rem)]">
         <label className="flex flex-col gap-2">
           <span className={m3FieldLabelClass}>Key</span>
           <select
@@ -103,16 +103,16 @@ export const ControlPanel = () => {
           </select>
         </label>
 
-        <div className="flex w-fit flex-col gap-3">
+        <div className="flex w-full max-w-[11.5rem] flex-col gap-3">
           <div className="flex flex-col gap-2">
             <span className={m3FieldLabelClass}>Mode</span>
-            <div className={m3SegmentedContainerClass}>
+            <div className={`${m3SegmentedContainerClass} w-full`}>
               {modeOptions.map((modeOption) => (
                 <button
                   key={modeOption.value}
                   type="button"
                   aria-pressed={noteLabelMode === modeOption.value}
-                  className={m3SegmentedButtonClass(noteLabelMode === modeOption.value)}
+                  className={`${m3SegmentedButtonClass(noteLabelMode === modeOption.value)} flex-1 text-center`}
                   onClick={() => {
                     setNoteLabelMode(modeOption.value)
                   }}
@@ -124,14 +124,14 @@ export const ControlPanel = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className={m3FieldLabelClass}>Labels</span>
-            <div className={m3SegmentedContainerClass}>
+            <span className={m3FieldLabelClass}>Note Labels</span>
+            <div className={`${m3SegmentedContainerClass} w-full`}>
               {labelOptions.map((labelOption) => (
                 <button
                   key={labelOption.value}
                   type="button"
                   aria-pressed={noteTextMode === labelOption.value}
-                  className={m3SegmentedButtonClass(noteTextMode === labelOption.value)}
+                  className={`${m3SegmentedButtonClass(noteTextMode === labelOption.value)} flex-1 text-center`}
                   onClick={() => {
                     setNoteTextMode(labelOption.value)
                   }}
