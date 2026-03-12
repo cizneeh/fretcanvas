@@ -347,6 +347,7 @@ export const useFretboardInteractionState = () => {
       if (snapshot !== undefined) {
         beginBufferedEdit(snapshot)
       }
+      setHoverPreview(undefined)
       setDraggingHandle(handle)
       updateHandleFromClientX(event.clientX, handle, true)
     },
@@ -393,7 +394,7 @@ export const useFretboardInteractionState = () => {
       startHandlePercent: toPercentFromFretCenter(exportFretStart),
       endHandlePercent: toPercentFromFretCenter(exportFretEnd),
       hoverPreview:
-        hoverPreview === undefined
+        draggingHandle !== undefined || hoverPreview === undefined
           ? undefined
           : {
               handle: hoverPreview.handle,
