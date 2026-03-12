@@ -18,6 +18,7 @@ import {
   m3OutlinedButtonClass,
   m3SegmentedButtonClass,
   m3SegmentedContainerClass,
+  m3SelectChevronClass,
   m3SelectClass,
 } from './ui/materialClasses'
 
@@ -88,19 +89,35 @@ export const ControlPanel = () => {
       <div className="grid gap-4 xl:grid-cols-[minmax(12rem,14rem)_minmax(10.5rem,11.5rem)_minmax(14rem,1fr)_minmax(16rem,17.5rem)]">
         <label className="flex flex-col gap-2">
           <span className={m3FieldLabelClass}>Key</span>
-          <select
-            className={m3SelectClass}
-            value={keyPc}
-            onChange={(event) => {
-              setKeyPc(Number(event.target.value) as PitchClass)
-            }}
-          >
-            {NOTE_LABELS.map((note, pitchClass) => (
-              <option key={note} value={pitchClass}>
-                {note}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              className={m3SelectClass}
+              value={keyPc}
+              onChange={(event) => {
+                setKeyPc(Number(event.target.value) as PitchClass)
+              }}
+            >
+              {NOTE_LABELS.map((note, pitchClass) => (
+                <option key={note} value={pitchClass}>
+                  {note}
+                </option>
+              ))}
+            </select>
+            <svg
+              className={m3SelectChevronClass}
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 6.5L8 10L12 6.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         </label>
 
         <div className="flex w-full max-w-[11.5rem] flex-col gap-3">
@@ -146,37 +163,69 @@ export const ControlPanel = () => {
         <div className="flex flex-col gap-2">
           <span className={m3FieldLabelClass}>{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
           {noteLabelMode === 'scale' ? (
-            <select
-              className={m3SelectClass}
-              value={selectedScale ?? ''}
-              onChange={(event) => {
-                const value = event.target.value as ScaleId | ''
-                setSelectedScale(value === '' ? undefined : value)
-              }}
-            >
-              <option value="">Select scale</option>
-              {Object.entries(SCALE_LABELS).map(([id, label]) => (
-                <option key={id} value={id}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                className={m3SelectClass}
+                value={selectedScale ?? ''}
+                onChange={(event) => {
+                  const value = event.target.value as ScaleId | ''
+                  setSelectedScale(value === '' ? undefined : value)
+                }}
+              >
+                <option value="">Select scale</option>
+                {Object.entries(SCALE_LABELS).map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className={m3SelectChevronClass}
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 6.5L8 10L12 6.5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           ) : (
-            <select
-              className={m3SelectClass}
-              value={selectedChordSymbol ?? ''}
-              onChange={(event) => {
-                const nextSymbol = event.target.value
-                setSelectedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
-              }}
-            >
-              <option value="">Select major diatonic 7th</option>
-              {diatonicChordOptions.map((option) => (
-                <option key={option.symbol} value={option.symbol}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                className={m3SelectClass}
+                value={selectedChordSymbol ?? ''}
+                onChange={(event) => {
+                  const nextSymbol = event.target.value
+                  setSelectedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
+                }}
+              >
+                <option value="">Select major diatonic 7th</option>
+                {diatonicChordOptions.map((option) => (
+                  <option key={option.symbol} value={option.symbol}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className={m3SelectChevronClass}
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 6.5L8 10L12 6.5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           )}
         </div>
 

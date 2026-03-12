@@ -8,7 +8,10 @@ export const m3FieldLabelClass =
   'text-xs font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-surface-variant)]'
 
 export const m3SelectClass =
-  'm3-state-surface m3-focus-ring w-full rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 text-sm text-[color:var(--md-sys-color-on-surface)] outline-none'
+  'm3-state-surface m3-focus-ring w-full appearance-none rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 pr-10 text-sm text-[color:var(--md-sys-color-on-surface)] outline-none'
+
+export const m3SelectChevronClass =
+  'pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400/85'
 
 export const m3InputClass =
   'm3-state-surface m3-focus-ring w-full rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 text-sm text-[color:var(--md-sys-color-on-surface)] outline-none'
