@@ -71,10 +71,10 @@ export const ExportRangeTrack = ({
         />
         {hoverPreview !== undefined ? (
           <span
-            className={`pointer-events-none absolute top-1/2 z-20 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border text-[11px] font-semibold text-white/85 ${
+            className={`pointer-events-none absolute top-1/2 z-20 flex h-6 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-dashed text-[11px] font-semibold text-white ${
               hoverPreview.handle === 'start'
-                ? 'border-cyan-200/60 bg-cyan-400/30'
-                : 'border-emerald-200/60 bg-emerald-400/30'
+                ? 'border-cyan-200/45 bg-cyan-400/15'
+                : 'border-emerald-200/45 bg-emerald-400/15'
             }`}
             style={{ left: `${hoverPreview.percent}%` }}
           >
