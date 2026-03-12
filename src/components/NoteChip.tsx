@@ -13,16 +13,21 @@ export const NoteChip = ({
   isDimmed,
   label,
 }: NoteChipProps) => {
+  const highlightedToneClass = isRoot
+    ? 'border-rose-200/80 bg-rose-700/80 text-white'
+    : isOutOfScale
+      ? 'border-orange-200/75 bg-orange-500/80 text-white'
+      : 'border-cyan-100/70 bg-cyan-600/80 text-white'
+  const previewToneClass = isRoot
+    ? 'border-rose-200/65 bg-rose-500/35 text-rose-50'
+    : isOutOfScale
+      ? 'border-orange-200/65 bg-orange-400/35 text-orange-50'
+      : 'border-cyan-100/65 bg-cyan-500/35 text-cyan-50'
+
   if (!isHighlighted) {
     return (
       <span
-        className={`pointer-events-none absolute z-10 flex h-8 w-8 translate-y-px items-center justify-center rounded-full border text-[13px] font-semibold leading-none opacity-0 transition-opacity duration-150 group-hover:opacity-[0.35] ${
-          isRoot
-            ? 'border-rose-200/80 bg-rose-700/80 text-white'
-            : isOutOfScale
-              ? 'border-orange-200/75 bg-orange-500/80 text-white'
-              : 'border-cyan-100/70 bg-cyan-600/80 text-white'
-        }`}
+        className={`pointer-events-none absolute z-10 flex h-8 w-8 translate-y-px items-center justify-center rounded-full border border-dashed text-[13px] font-semibold leading-none opacity-0 transition-opacity duration-150 group-hover:opacity-[0.38] ${previewToneClass}`}
         style={{
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.65)',
         }}
@@ -34,15 +39,9 @@ export const NoteChip = ({
 
   return (
     <span
-      className={`relative z-10 flex h-8 w-8 translate-y-px items-center justify-center rounded-full border text-[13px] font-semibold leading-none transition-transform duration-150 group-hover:scale-110 ${
-        isRoot
-          ? 'border-rose-200/80 bg-rose-700/80 text-white'
-          : isOutOfScale
-            ? 'border-orange-200/75 bg-orange-500/80 text-white'
-            : 'border-cyan-100/70 bg-cyan-600/80 text-white'
-      }`}
+      className={`relative z-10 flex h-8 w-8 translate-y-px items-center justify-center rounded-full border text-[13px] font-semibold leading-none transition-transform duration-150 group-hover:scale-110 ${highlightedToneClass}`}
       style={{
-        opacity: isDimmed ? 0.35 : 1,
+        opacity: isDimmed ? 0.42 : 1,
         textShadow: '0 1px 2px rgba(0, 0, 0, 0.65)',
       }}
     >
