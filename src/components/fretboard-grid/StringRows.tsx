@@ -2,8 +2,8 @@ import { Fragment } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import {
   FRET_NUMBERS,
-  getChordToneLabel,
-  getLabelFromRoot,
+  getDisplayedNoteLabel,
+  getDisplayRootPc,
   normalizePc,
   OPEN_STRINGS,
   type PositionId,
@@ -68,6 +68,7 @@ export const StringRows = ({
     selectedScale === undefined
       ? undefined
       : new Set(SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)))
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChord)
 
   return (
     <>
@@ -83,14 +84,11 @@ export const StringRows = ({
             const pitchClass = normalizePc(stringInfo.midi + fret)
             const displayedNote = displayedNotes[positionId]
             const isHighlighted = displayedNote !== undefined
-            const intervalFromKey = normalizePc(pitchClass - keyPc)
-            const isRoot = intervalFromKey === 0
+            const intervalFromDisplayRoot = normalizePc(pitchClass - displayRootPc)
+            const isRoot = intervalFromDisplayRoot === 0
             const isOutOfScale =
               scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
-            const label =
-              noteLabelMode === 'chord' && selectedChord !== undefined
-                ? getChordToneLabel(pitchClass, selectedChord)
-                : getLabelFromRoot(pitchClass, keyPc)
+            const label = getDisplayedNoteLabel(pitchClass, noteLabelMode, keyPc, selectedChord)
             const isStartFret = fret === startHighlightFret
             const isEndFret = fret === exportFretEnd
             const isStartAtNutLine = exportFretStart === 0 && fret === 0

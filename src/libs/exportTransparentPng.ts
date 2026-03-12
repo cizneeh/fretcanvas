@@ -2,8 +2,8 @@ import { createBendGeometry } from './bendGeometry'
 import {
   type BendArrow,
   type Connection,
-  getChordToneLabel,
-  getLabelFromRoot,
+  getDisplayedNoteLabel,
+  getDisplayRootPc,
   type HighlightedNote,
   MARKER_FRETS,
   type NoteLabelMode,
@@ -83,6 +83,7 @@ export const renderExportPngCanvas = ({
     selectedScale === undefined
       ? undefined
       : new Set(SCALE_INTERVALS[selectedScale].map((interval) => normalizePc(keyPc + interval)))
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChord)
 
   const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
     const positionId = toPositionId({
@@ -95,13 +96,10 @@ export const renderExportPngCanvas = ({
     }
 
     const pitchClass = normalizePc(midiBase + fret)
-    const intervalFromKey = normalizePc(pitchClass - keyPc)
-    const isRoot = intervalFromKey === 0
+    const intervalFromDisplayRoot = normalizePc(pitchClass - displayRootPc)
+    const isRoot = intervalFromDisplayRoot === 0
     const isOutOfScale = scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
-    const label =
-      noteLabelMode === 'chord' && selectedChord !== undefined
-        ? getChordToneLabel(pitchClass, selectedChord)
-        : getLabelFromRoot(pitchClass, keyPc)
+    const label = getDisplayedNoteLabel(pitchClass, noteLabelMode, keyPc, selectedChord)
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
 
     const noteOpacity = displayedNote.isDimmed ? 0.35 : 1

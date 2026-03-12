@@ -145,6 +145,21 @@ export const getChordToneLabel = (pitchClass: PitchClass, selectedChord: Selecte
   }
   return DEGREE_LABELS[intervalFromRoot]
 }
+export const getDisplayRootPc = (
+  noteLabelMode: NoteLabelMode,
+  keyPc: PitchClass,
+  selectedChord: SelectedChord | undefined,
+): PitchClass =>
+  noteLabelMode === 'chord' && selectedChord !== undefined ? selectedChord.rootPc : keyPc
+export const getDisplayedNoteLabel = (
+  pitchClass: PitchClass,
+  noteLabelMode: NoteLabelMode,
+  keyPc: PitchClass,
+  selectedChord: SelectedChord | undefined,
+): string =>
+  noteLabelMode === 'chord' && selectedChord !== undefined
+    ? getChordToneLabel(pitchClass, selectedChord)
+    : getLabelFromRoot(pitchClass, keyPc)
 export const getChordPitchClasses = (selectedChord: SelectedChord): PitchClass[] =>
   CHORD_QUALITY_INTERVALS[selectedChord.quality].map((interval) =>
     normalizePc(selectedChord.rootPc + interval),
