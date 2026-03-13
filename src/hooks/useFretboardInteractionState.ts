@@ -8,7 +8,12 @@ import {
 } from 'react'
 import { getPositionBounds } from '../components/fretboard-grid/constants'
 import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/model'
-import { isBendShortcutPressed, isDimShortcutPressed } from '../libs/shortcut'
+import {
+  isBendShortcutPressed,
+  isDimShortcutPressed,
+  isEditableTarget,
+  isSelectionDeleteShortcutPressed,
+} from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
@@ -559,6 +564,26 @@ export const useFretboardInteractionState = () => {
     setNotesDimmed(selectedPositionIds, false)
     setSelectionContextMenu(undefined)
   }, [selectedPositionIds, setNotesDimmed])
+
+  useEffect(() => {
+    const handleDeleteShortcut = (event: KeyboardEvent) => {
+      if (selectedPositionIds.length === 0 || isEditableTarget(event.target)) {
+        return
+      }
+
+      if (!isSelectionDeleteShortcutPressed(event.key)) {
+        return
+      }
+
+      event.preventDefault()
+      handleDeleteSelectedNotes()
+    }
+
+    window.addEventListener('keydown', handleDeleteShortcut)
+    return () => {
+      window.removeEventListener('keydown', handleDeleteShortcut)
+    }
+  }, [handleDeleteSelectedNotes, selectedPositionIds.length])
 
   const createRangeHandlePointerHandlers = (handle: 'start' | 'end') => ({
     onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {

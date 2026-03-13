@@ -1,3 +1,4 @@
+import { getSelectionDeleteShortcutLabel } from '../libs/shortcut'
 import { m3MenuContainerClass, m3MenuItemClass } from './ui/materialClasses'
 
 type SelectionContextMenuProps = {
@@ -33,6 +34,9 @@ export const SelectionContextMenu = ({
 
       <button type="button" className={m3MenuItemClass} onClick={onDelete}>
         <span>Delete</span>
+        <span className="pl-4 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+          {getSelectionDeleteShortcutLabel()}
+        </span>
       </button>
     </div>
   )

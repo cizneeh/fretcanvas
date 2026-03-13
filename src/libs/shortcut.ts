@@ -86,3 +86,8 @@ export const isEditableTarget = (target: EventTarget | null): boolean => {
   const tagName = target.tagName.toLowerCase()
   return tagName === 'input' || tagName === 'textarea' || tagName === 'select'
 }
+
+export const isSelectionDeleteShortcutPressed = (key: string): boolean =>
+  key === 'Backspace' || key === 'Delete'
+
+export const getSelectionDeleteShortcutLabel = (): string => 'Backspace'
