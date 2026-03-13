@@ -11,6 +11,7 @@ type FretCellProps = {
   isRoot: boolean
   isOutOfScale: boolean
   isSelected: boolean
+  disablePreview: boolean
   isStartAtNutLine: boolean
   isStartFret: boolean
   isEndFret: boolean
@@ -49,6 +50,7 @@ export const FretCell = memo(
     isRoot,
     isOutOfScale,
     isSelected,
+    disablePreview,
     isStartAtNutLine,
     isStartFret,
     isEndFret,
@@ -123,6 +125,7 @@ export const FretCell = memo(
           isOutOfScale={isOutOfScale}
           isDimmed={isDimmed}
           isSelected={isSelected}
+          disablePreview={disablePreview}
           label={label}
         />
       </button>

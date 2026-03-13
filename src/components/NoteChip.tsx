@@ -4,6 +4,7 @@ type NoteChipProps = {
   isOutOfScale: boolean
   isDimmed: boolean
   isSelected: boolean
+  disablePreview: boolean
   label: string
 }
 
@@ -13,6 +14,7 @@ export const NoteChip = ({
   isOutOfScale,
   isDimmed,
   isSelected,
+  disablePreview,
   label,
 }: NoteChipProps) => {
   const highlightedToneClass = isRoot
@@ -29,7 +31,9 @@ export const NoteChip = ({
   if (!isHighlighted) {
     return (
       <span
-        className={`pointer-events-none absolute z-10 flex h-8 w-8 translate-y-px items-center justify-center rounded-full border border-dashed text-[13px] font-semibold leading-none opacity-0 transition-opacity duration-150 group-hover:opacity-[0.38] ${previewToneClass}`}
+        className={`pointer-events-none absolute z-10 flex h-8 w-8 translate-y-px items-center justify-center rounded-full border border-dashed text-[13px] font-semibold leading-none opacity-0 transition-opacity duration-150 ${
+          disablePreview ? '' : 'group-hover:opacity-[0.38]'
+        } ${previewToneClass}`}
         style={{
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.65)',
         }}

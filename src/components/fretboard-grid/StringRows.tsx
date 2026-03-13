@@ -17,6 +17,7 @@ import { FretCell } from './FretCell'
 
 type StringRowsProps = {
   selectedPositionIds: Set<PositionId>
+  disableCellPreview: boolean
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
@@ -45,6 +46,7 @@ type StringRowsProps = {
 export const StringRows = memo(
   ({
     selectedPositionIds,
+    disableCellPreview,
     onNotePointerDown,
     onNoteClick,
     onNoteContextMenu,
@@ -111,6 +113,7 @@ export const StringRows = memo(
                   isRoot={isRoot}
                   isOutOfScale={isOutOfScale}
                   isSelected={selectedPositionIds.has(positionId)}
+                  disablePreview={disableCellPreview}
                   isStartAtNutLine={isStartAtNutLine}
                   isStartFret={isStartFret}
                   isEndFret={isEndFret}

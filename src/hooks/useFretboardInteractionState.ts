@@ -646,6 +646,10 @@ export const useFretboardInteractionState = () => {
     },
     gridProps: {
       selectedPositionIds: selectedPositionIdSet,
+      disableCellPreview:
+        selectionRect !== undefined ||
+        pendingSelectionStart !== undefined ||
+        selectedPositionIds.length > 0,
       selectionRect,
       onSelectClosestHandleToFret: setClosestHandleToFret,
       onBoardPointerDown: handleBoardPointerDown,

@@ -31,6 +31,7 @@ type FretboardGridProps = {
       }
     | undefined
   selectedPositionIds: Set<PositionId>
+  disableCellPreview: boolean
   onSelectClosestHandleToFret: (fret: number) => void
   onBoardPointerDown: (clientX: number, clientY: number, target: EventTarget | null) => void
   onNotePointerDown: (
@@ -65,6 +66,7 @@ export const FretboardGrid = ({
   previewConnection,
   selectionRect,
   selectedPositionIds,
+  disableCellPreview,
   onSelectClosestHandleToFret,
   onBoardPointerDown,
   onNotePointerDown,
@@ -135,6 +137,7 @@ export const FretboardGrid = ({
 
         <StringRows
           selectedPositionIds={selectedPositionIds}
+          disableCellPreview={disableCellPreview}
           onNotePointerDown={onNotePointerDown}
           onNoteClick={onNoteClick}
           onNoteContextMenu={onNoteContextMenu}
