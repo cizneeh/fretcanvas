@@ -6,7 +6,7 @@ export const HEADER_ROW_HEIGHT = 32
 export const STRING_ROW_HEIGHT = 48
 export const FRET_CELL_WIDTH = 56
 export const BOARD_PADDING_X = 20
-export const BOARD_PADDING_Y = 16
+export const BOARD_PADDING_Y = 32
 
 export const getPositionPoint = (positionId: PositionId): { x: number; y: number } | undefined => {
   const parsed = parsePositionId(positionId)
