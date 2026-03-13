@@ -92,7 +92,7 @@ export const FretboardGrid = ({
       ref={(node) => {
         onBoardRefChange(node ?? undefined)
       }}
-      className="relative w-full min-w-max px-5 py-4"
+      className="relative inline-block min-w-full px-5 py-4"
       onPointerDown={(event) => {
         onBoardPointerDown(event.clientX, event.clientY, event.target)
       }}

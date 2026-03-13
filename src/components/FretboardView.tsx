@@ -13,8 +13,8 @@ export const FretboardView = () => {
   return (
     <section className="select-none">
       <div className="overflow-x-auto py-4">
-        <div className="w-full min-w-max space-y-3">
-          <div className="rounded-md border border-zinc-700 bg-black">
+        <div className="space-y-3">
+          <div className="rounded-md bg-black ring-1 ring-inset ring-zinc-700">
             <RenderProfiler id="FretboardGrid">
               <FretboardGrid
                 previewConnection={interaction.previewConnection}
