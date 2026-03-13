@@ -394,9 +394,12 @@ export const useFretboardInteractionState = () => {
         }
 
         suppressNextClickToggleRef.current = true
-        setSelectionRect(
-          getRectFromPoints({ x: pendingSelectionStart.x, y: pendingSelectionStart.y }, nextPoint),
+        const nextRect = getRectFromPoints(
+          { x: pendingSelectionStart.x, y: pendingSelectionStart.y },
+          nextPoint,
         )
+        setSelectionRect(nextRect)
+        setSelectedPositionIds(getSelectedIdsInRect(nextRect))
         return
       }
 
@@ -420,7 +423,14 @@ export const useFretboardInteractionState = () => {
       setPendingConnectStart(undefined)
       setDragPointer(nextPoint)
     },
-    [dragConnectFrom, getRectFromPoints, pendingConnectStart, pendingSelectionStart, toBoardPoint],
+    [
+      dragConnectFrom,
+      getRectFromPoints,
+      getSelectedIdsInRect,
+      pendingConnectStart,
+      pendingSelectionStart,
+      toBoardPoint,
+    ],
   )
 
   const handleNotePointerUp = useCallback(
