@@ -12,7 +12,12 @@ type ExportPanelProps = {
   exportEnd: number
   backgroundOpacityPercent: number
   showExportTitle: boolean
-  onBackgroundOpacityPercentChange: (nextOpacity: number) => void
+  onBackgroundOpacityPercentChange: (
+    nextOpacity: number,
+    options?: {
+      skipHistory?: boolean
+    },
+  ) => void
   onShowExportTitleChange: (nextValue: boolean) => void
   onBackgroundOpacityEditStart: () => void
   onBackgroundOpacityEditEnd: () => void
@@ -37,8 +42,13 @@ export const ExportPanel = ({
   }, [backgroundOpacityPercent])
 
   const clampOpacity = (value: number) => Math.max(0, Math.min(Math.round(value), 100))
-  const applyOpacity = (value: number) => {
-    onBackgroundOpacityPercentChange(clampOpacity(value))
+  const applyOpacity = (
+    value: number,
+    options?: {
+      skipHistory?: boolean
+    },
+  ) => {
+    onBackgroundOpacityPercentChange(clampOpacity(value), options)
   }
   const stepValues = [0, 25, 50, 75, 100]
 
@@ -75,7 +85,7 @@ export const ExportPanel = ({
             className={`${m3OutlinedButtonClass} h-10 px-2.5`}
             onClick={() => {
               onBackgroundOpacityEditStart()
-              applyOpacity(backgroundOpacityPercent - 1)
+              applyOpacity(backgroundOpacityPercent - 1, { skipHistory: true })
               onBackgroundOpacityEditEnd()
             }}
             disabled={backgroundOpacityPercent <= 0}
@@ -97,7 +107,7 @@ export const ExportPanel = ({
               onBlur={() => {
                 const parsed = Number(draftOpacity)
                 if (Number.isFinite(parsed)) {
-                  applyOpacity(parsed)
+                  applyOpacity(parsed, { skipHistory: true })
                 } else {
                   setDraftOpacity(String(backgroundOpacityPercent))
                 }
@@ -111,7 +121,7 @@ export const ExportPanel = ({
                 }
                 const parsed = Number(nextValue)
                 if (Number.isFinite(parsed)) {
-                  applyOpacity(parsed)
+                  applyOpacity(parsed, { skipHistory: true })
                 }
               }}
               aria-label="Background opacity percentage"
@@ -126,7 +136,7 @@ export const ExportPanel = ({
             className={`${m3OutlinedButtonClass} h-10 px-2.5`}
             onClick={() => {
               onBackgroundOpacityEditStart()
-              applyOpacity(backgroundOpacityPercent + 1)
+              applyOpacity(backgroundOpacityPercent + 1, { skipHistory: true })
               onBackgroundOpacityEditEnd()
             }}
             disabled={backgroundOpacityPercent >= 100}
@@ -148,7 +158,7 @@ export const ExportPanel = ({
               }`}
               onClick={() => {
                 onBackgroundOpacityEditStart()
-                applyOpacity(value)
+                applyOpacity(value, { skipHistory: true })
                 onBackgroundOpacityEditEnd()
               }}
             >
@@ -168,7 +178,7 @@ export const ExportPanel = ({
           onFocus={onBackgroundOpacityEditStart}
           onBlur={onBackgroundOpacityEditEnd}
           onChange={(event) => {
-            applyOpacity(Number(event.target.value))
+            applyOpacity(Number(event.target.value), { skipHistory: true })
           }}
           aria-label="Export background opacity"
         />
