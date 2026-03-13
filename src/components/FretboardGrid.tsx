@@ -3,6 +3,8 @@ import { type BendArrow, FRET_NUMBERS, OPEN_STRINGS, type PositionId } from '../
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
 import {
+  BOARD_PADDING_X,
+  BOARD_PADDING_Y,
   FRET_CELL_WIDTH,
   HEADER_ROW_HEIGHT,
   LABEL_WIDTH,
@@ -30,6 +32,7 @@ type FretboardGridProps = {
     | undefined
   selectedPositionIds: Set<PositionId>
   onSelectClosestHandleToFret: (fret: number) => void
+  onBoardPointerDown: (clientX: number, clientY: number, target: EventTarget | null) => void
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
@@ -63,6 +66,7 @@ export const FretboardGrid = ({
   selectionRect,
   selectedPositionIds,
   onSelectClosestHandleToFret,
+  onBoardPointerDown,
   onNotePointerDown,
   onNoteClick,
   onNoteContextMenu,
@@ -78,15 +82,20 @@ export const FretboardGrid = ({
   const connections = useMemo(() => Object.values(connectionsById), [connectionsById])
   const bends = useMemo(() => Object.values(bendsById) as BendArrow[], [bendsById])
 
-  const svgWidth = LABEL_WIDTH + FRET_NUMBERS.length * FRET_CELL_WIDTH
-  const svgHeight = HEADER_ROW_HEIGHT + OPEN_STRINGS.length * STRING_ROW_HEIGHT
+  const gridWidth = LABEL_WIDTH + FRET_NUMBERS.length * FRET_CELL_WIDTH
+  const gridHeight = HEADER_ROW_HEIGHT + OPEN_STRINGS.length * STRING_ROW_HEIGHT
+  const svgWidth = BOARD_PADDING_X * 2 + gridWidth
+  const svgHeight = BOARD_PADDING_Y * 2 + gridHeight
 
   return (
     <div
       ref={(node) => {
         onBoardRefChange(node ?? undefined)
       }}
-      className="relative"
+      className="relative w-full min-w-max px-5 py-4"
+      onPointerDown={(event) => {
+        onBoardPointerDown(event.clientX, event.clientY, event.target)
+      }}
       onPointerMove={(event) => {
         onBoardPointerMove(event.clientX, event.clientY)
       }}

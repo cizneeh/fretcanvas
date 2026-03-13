@@ -51,6 +51,7 @@ export const ConnectionLayer = ({
           <g key={connection.id}>
             <line
               className="pointer-events-auto cursor-pointer"
+              data-board-interactive="true"
               x1={fromPoint.x}
               y1={fromPoint.y}
               x2={toPoint.x}
@@ -104,6 +105,7 @@ export const ConnectionLayer = ({
           <g key={bend.id}>
             <path
               className="pointer-events-auto cursor-pointer"
+              data-board-interactive="true"
               d={path}
               fill="none"
               stroke="rgba(0, 0, 0, 0.001)"

@@ -43,7 +43,7 @@ export const useFretboardInteractionState = () => {
     { positionId: PositionId; clientX: number; clientY: number } | undefined
   >(undefined)
   const [pendingSelectionStart, setPendingSelectionStart] = useState<
-    { positionId: PositionId; clientX: number; clientY: number; x: number; y: number } | undefined
+    { clientX: number; clientY: number; x: number; y: number } | undefined
   >(undefined)
   const [dragConnectFrom, setDragConnectFrom] = useState<PositionId | undefined>(undefined)
   const [dragPointer, setDragPointer] = useState<{ x: number; y: number } | undefined>(undefined)
@@ -315,7 +315,6 @@ export const useFretboardInteractionState = () => {
 
         clearSelection()
         setPendingSelectionStart({
-          positionId,
           clientX,
           clientY,
           x: startPoint.x,
@@ -334,6 +333,35 @@ export const useFretboardInteractionState = () => {
       })
     },
     [clearSelection, toBoardPoint],
+  )
+
+  const handleBoardPointerDown = useCallback(
+    (clientX: number, clientY: number, target: EventTarget | null) => {
+      if (!(target instanceof Element)) {
+        return
+      }
+
+      if (target.closest('[data-fret-cell="true"], [data-board-interactive="true"]') !== null) {
+        return
+      }
+
+      const startPoint = toBoardPoint(clientX, clientY)
+      if (startPoint === undefined) {
+        return
+      }
+
+      setNoteContextMenu(undefined)
+      setSelectionContextMenu(undefined)
+      clearSelection()
+      setPendingSelectionStart({
+        clientX,
+        clientY,
+        x: startPoint.x,
+        y: startPoint.y,
+      })
+      resetConnectionDrag()
+    },
+    [clearSelection, resetConnectionDrag, toBoardPoint],
   )
 
   const handleBoardPointerMove = useCallback(
@@ -503,18 +531,19 @@ export const useFretboardInteractionState = () => {
 
   const handleDeleteSelectedNotes = useCallback(() => {
     removePositions(selectedPositionIds)
+    setSelectionContextMenu(undefined)
     clearSelection()
   }, [clearSelection, removePositions, selectedPositionIds])
 
   const handleDimSelectedNotes = useCallback(() => {
     setNotesDimmed(selectedPositionIds, true)
-    clearSelection()
-  }, [clearSelection, selectedPositionIds, setNotesDimmed])
+    setSelectionContextMenu(undefined)
+  }, [selectedPositionIds, setNotesDimmed])
 
   const handleUndimSelectedNotes = useCallback(() => {
     setNotesDimmed(selectedPositionIds, false)
-    clearSelection()
-  }, [clearSelection, selectedPositionIds, setNotesDimmed])
+    setSelectionContextMenu(undefined)
+  }, [selectedPositionIds, setNotesDimmed])
 
   const createRangeHandlePointerHandlers = (handle: 'start' | 'end') => ({
     onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -604,6 +633,7 @@ export const useFretboardInteractionState = () => {
       selectedPositionIds: selectedPositionIdSet,
       selectionRect,
       onSelectClosestHandleToFret: setClosestHandleToFret,
+      onBoardPointerDown: handleBoardPointerDown,
       onNotePointerDown: handleNotePointerDown,
       onNoteClick: handleNoteClick,
       onNoteContextMenu: handleNoteContextMenu,
