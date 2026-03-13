@@ -188,12 +188,17 @@ export const getDisplayedNoteLabel = (
       : getLabelFromRoot(pitchClass, keyPc)
 
 export const getExportTitle = (
+  keyPc: PitchClass,
   noteLabelMode: NoteLabelMode,
   selectedScale: ScaleId | undefined,
   selectedChordSymbol: string | undefined,
 ): string | undefined => {
   if (noteLabelMode === 'scale') {
-    return selectedScale === undefined ? undefined : SCALE_LABELS[selectedScale]
+    if (selectedScale === undefined) {
+      return undefined
+    }
+
+    return `${getAbsoluteNoteLabelByKey(keyPc, keyPc)} ${SCALE_LABELS[selectedScale]} Scale`
   }
 
   return selectedChordSymbol

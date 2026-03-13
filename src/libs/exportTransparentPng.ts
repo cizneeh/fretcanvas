@@ -51,12 +51,12 @@ export const renderExportPngCanvas = ({
   const start = Math.min(exportFretStart, exportFretEnd)
   const end = Math.max(exportFretStart, exportFretEnd)
   const fretCountInRange = end - start + 1
-  const exportTitle = getExportTitle(noteLabelMode, selectedScale, selectedChordSymbol)
+  const exportTitle = getExportTitle(keyPc, noteLabelMode, selectedScale, selectedChordSymbol)
 
   const paddingX = 12
   const paddingY = 12
   const labelWidth = 34
-  const titleHeight = showExportTitle && exportTitle !== undefined ? 18 : 0
+  const titleHeight = showExportTitle && exportTitle !== undefined ? 26 : 0
   const headerHeight = 26
   const rowHeight = 44
   const markerHeight = 20
@@ -75,16 +75,6 @@ export const renderExportPngCanvas = ({
   }
 
   const boardLeft = paddingX + labelWidth
-  if (showExportTitle && exportTitle !== undefined) {
-    ctx.fillStyle = 'rgba(241, 245, 249, 0.92)'
-    ctx.font = '600 12px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
-    ctx.textAlign = 'left'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(exportTitle, paddingX, paddingY + titleHeight / 2)
-  }
-
-  const boardTop = paddingY + titleHeight + headerHeight
-  ctx.textAlign = 'center'
 
   // Background is intentionally transparent.
   ctx.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -92,6 +82,17 @@ export const renderExportPngCanvas = ({
     ctx.fillStyle = `rgba(0, 0, 0, ${(backgroundOpacityPercent / 100).toFixed(3)})`
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
   }
+
+  if (showExportTitle && exportTitle !== undefined) {
+    ctx.fillStyle = 'rgba(241, 245, 249, 0.92)'
+    ctx.font = '700 24px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(exportTitle, boardLeft + cellWidth * 0.28, paddingY + titleHeight / 2 + 1)
+  }
+
+  const boardTop = paddingY + titleHeight + headerHeight
+  ctx.textAlign = 'center'
   ctx.font = '12px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
