@@ -45,7 +45,9 @@ export const NoteChip = ({
       style={{
         opacity: isDimmed ? 0.42 : 1,
         textShadow: '0 1px 2px rgba(0, 0, 0, 0.65)',
-        boxShadow: isSelected ? '0 0 0 2px rgba(248, 250, 252, 0.95)' : undefined,
+        boxShadow: isSelected
+          ? '0 0 0 2px rgba(248, 250, 252, 0.96), 0 0 0 5px rgba(34, 211, 238, 0.22)'
+          : undefined,
       }}
     >
       {label}

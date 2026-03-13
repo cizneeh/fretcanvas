@@ -11,7 +11,7 @@ export const FretboardView = () => {
   const interaction = useFretboardInteractionState()
 
   return (
-    <section>
+    <section className="select-none">
       <div className="overflow-x-auto py-4">
         <div className="w-full min-w-max space-y-3">
           <div className="rounded-md border border-zinc-700 bg-black">

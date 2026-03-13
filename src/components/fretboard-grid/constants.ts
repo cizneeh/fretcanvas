@@ -25,3 +25,19 @@ export const getPositionPoint = (positionId: PositionId): { x: number; y: number
       BOARD_PADDING_Y + HEADER_ROW_HEIGHT + stringIndex * STRING_ROW_HEIGHT + STRING_ROW_HEIGHT / 2,
   }
 }
+
+export const getPositionBounds = (
+  positionId: PositionId,
+): { left: number; top: number; right: number; bottom: number } | undefined => {
+  const point = getPositionPoint(positionId)
+  if (point === undefined) {
+    return undefined
+  }
+
+  return {
+    left: point.x - FRET_CELL_WIDTH / 2,
+    top: point.y - STRING_ROW_HEIGHT / 2,
+    right: point.x + FRET_CELL_WIDTH / 2,
+    bottom: point.y + STRING_ROW_HEIGHT / 2,
+  }
+}

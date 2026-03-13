@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { getPositionPoint } from '../components/fretboard-grid/constants'
+import { getPositionBounds } from '../components/fretboard-grid/constants'
 import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/model'
 import { isBendShortcutPressed, isDimShortcutPressed } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
@@ -138,12 +138,17 @@ export const useFretboardInteractionState = () => {
       const bottom = rect.top + rect.height
 
       return Object.keys(useFretboardStore.getState().displayedNotes).filter((positionId) => {
-        const point = getPositionPoint(positionId)
-        if (point === undefined) {
+        const bounds = getPositionBounds(positionId)
+        if (bounds === undefined) {
           return false
         }
 
-        return point.x >= rect.left && point.x <= right && point.y >= rect.top && point.y <= bottom
+        return (
+          bounds.left <= right &&
+          bounds.right >= rect.left &&
+          bounds.top <= bottom &&
+          bounds.bottom >= rect.top
+        )
       })
     },
     [],
