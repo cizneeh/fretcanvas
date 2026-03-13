@@ -52,6 +52,8 @@ export type FretboardStoreActions = {
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
+  removePositions: (positionIds: PositionId[]) => void
+  setNotesDimmed: (positionIds: PositionId[], isDimmed: boolean) => void
   connectPositions: (from: PositionId, to: PositionId) => void
   removeConnection: (connectionId: ConnectionId) => void
   removeConnectionsByPosition: (positionId: PositionId) => void
@@ -65,6 +67,28 @@ export type FretboardStore = FretboardStoreState & FretboardStoreActions
 export const useFretboardStore = create<FretboardStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
     useHistoryStore.getState().pushBeforeChange()
+  }
+
+  const getNextConnectionsWithoutPositions = (
+    connections: Record<ConnectionId, Connection>,
+    positionIds: Set<PositionId>,
+  ): Record<ConnectionId, Connection> => {
+    return Object.fromEntries(
+      Object.entries(connections).filter(([, connection]) => {
+        return !positionIds.has(connection.from) && !positionIds.has(connection.to)
+      }),
+    ) as Record<ConnectionId, Connection>
+  }
+
+  const getNextBendsWithoutPositions = (
+    bends: Record<BendId, BendArrow>,
+    positionIds: Set<PositionId>,
+  ): Record<BendId, BendArrow> => {
+    return Object.fromEntries(
+      Object.entries(bends).filter(([, bend]) => {
+        return !positionIds.has(bend.from)
+      }),
+    ) as Record<BendId, BendArrow>
   }
 
   const addPitchClassNotes = (
@@ -262,6 +286,67 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
       pushHistoryBeforeChange()
       set({ displayedNotes: next })
+    },
+
+    removePositions: (positionIds) => {
+      if (positionIds.length === 0) {
+        return
+      }
+
+      const current = get()
+      const positionIdSet = new Set(positionIds)
+      const nextDisplayedNotes = { ...current.displayedNotes }
+      let didChange = false
+
+      for (const positionId of positionIdSet) {
+        if (nextDisplayedNotes[positionId] === undefined) {
+          continue
+        }
+
+        delete nextDisplayedNotes[positionId]
+        didChange = true
+      }
+
+      if (!didChange) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({
+        displayedNotes: nextDisplayedNotes,
+        connections: getNextConnectionsWithoutPositions(current.connections, positionIdSet),
+        bends: getNextBendsWithoutPositions(current.bends, positionIdSet),
+      })
+    },
+
+    setNotesDimmed: (positionIds, isDimmed) => {
+      if (positionIds.length === 0) {
+        return
+      }
+
+      const current = get()
+      const nextDisplayedNotes = { ...current.displayedNotes }
+      let didChange = false
+
+      for (const positionId of positionIds) {
+        const currentNote = nextDisplayedNotes[positionId]
+        if (currentNote === undefined || currentNote.isDimmed === isDimmed) {
+          continue
+        }
+
+        nextDisplayedNotes[positionId] = {
+          ...currentNote,
+          isDimmed,
+        }
+        didChange = true
+      }
+
+      if (!didChange) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ displayedNotes: nextDisplayedNotes })
     },
 
     connectPositions: (from, to) => {

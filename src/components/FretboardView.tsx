@@ -4,6 +4,7 @@ import { RenderProfiler } from './dev/RenderProfiler'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'
 import { NoteContextMenu } from './NoteContextMenu'
+import { SelectionContextMenu } from './SelectionContextMenu'
 import { m3CardClass, m3FieldLabelClass } from './ui/materialClasses'
 
 export const FretboardView = () => {
@@ -50,6 +51,20 @@ export const FretboardView = () => {
             onClose={() => {
               interaction.setNoteContextMenu(undefined)
             }}
+          />
+        </div>
+      ) : interaction.selectionContextMenu !== undefined ? (
+        <div
+          ref={(node) => {
+            interaction.contextMenuRef.current = node ?? undefined
+          }}
+        >
+          <SelectionContextMenu
+            x={interaction.selectionContextMenu.x}
+            y={interaction.selectionContextMenu.y}
+            onDelete={interaction.handleDeleteSelectedNotes}
+            onDim={interaction.handleDimSelectedNotes}
+            onUndim={interaction.handleUndimSelectedNotes}
           />
         </div>
       ) : undefined}

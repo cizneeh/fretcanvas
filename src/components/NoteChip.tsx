@@ -3,6 +3,7 @@ type NoteChipProps = {
   isRoot: boolean
   isOutOfScale: boolean
   isDimmed: boolean
+  isSelected: boolean
   label: string
 }
 
@@ -11,6 +12,7 @@ export const NoteChip = ({
   isRoot,
   isOutOfScale,
   isDimmed,
+  isSelected,
   label,
 }: NoteChipProps) => {
   const highlightedToneClass = isRoot
@@ -43,6 +45,7 @@ export const NoteChip = ({
       style={{
         opacity: isDimmed ? 0.42 : 1,
         textShadow: '0 1px 2px rgba(0, 0, 0, 0.65)',
+        boxShadow: isSelected ? '0 0 0 2px rgba(248, 250, 252, 0.95)' : undefined,
       }}
     >
       {label}

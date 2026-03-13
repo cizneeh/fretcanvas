@@ -16,6 +16,7 @@ import { RenderProfiler } from '../dev/RenderProfiler'
 import { FretCell } from './FretCell'
 
 type StringRowsProps = {
+  selectedPositionIds: Set<PositionId>
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
@@ -42,7 +43,13 @@ type StringRowsProps = {
 }
 
 export const StringRows = memo(
-  ({ onNotePointerDown, onNoteClick, onNoteContextMenu, onNotePointerUp }: StringRowsProps) => {
+  ({
+    selectedPositionIds,
+    onNotePointerDown,
+    onNoteClick,
+    onNoteContextMenu,
+    onNotePointerUp,
+  }: StringRowsProps) => {
     const { keyPc, noteLabelMode, noteTextMode, selectedChordSymbol, selectedScale } =
       useFretboardStore(
         useShallow((state) => ({
@@ -103,6 +110,7 @@ export const StringRows = memo(
                   label={label}
                   isRoot={isRoot}
                   isOutOfScale={isOutOfScale}
+                  isSelected={selectedPositionIds.has(positionId)}
                   isStartAtNutLine={isStartAtNutLine}
                   isStartFret={isStartFret}
                   isEndFret={isEndFret}

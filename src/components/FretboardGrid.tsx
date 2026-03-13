@@ -20,6 +20,15 @@ type FretboardGridProps = {
         toY: number
       }
     | undefined
+  selectionRect:
+    | {
+        left: number
+        top: number
+        width: number
+        height: number
+      }
+    | undefined
+  selectedPositionIds: Set<PositionId>
   onSelectClosestHandleToFret: (fret: number) => void
   onNotePointerDown: (
     positionId: PositionId,
@@ -51,6 +60,8 @@ type FretboardGridProps = {
 
 export const FretboardGrid = ({
   previewConnection,
+  selectionRect,
+  selectedPositionIds,
   onSelectClosestHandleToFret,
   onNotePointerDown,
   onNoteClick,
@@ -93,6 +104,18 @@ export const FretboardGrid = ({
         onRemoveBend={removeBend}
       />
 
+      {selectionRect !== undefined ? (
+        <div
+          className="pointer-events-none absolute z-[6] rounded-sm border border-dashed border-cyan-200/80 bg-cyan-200/10"
+          style={{
+            left: selectionRect.left,
+            top: selectionRect.top,
+            width: selectionRect.width,
+            height: selectionRect.height,
+          }}
+        />
+      ) : undefined}
+
       <div
         className="grid"
         style={{
@@ -102,6 +125,7 @@ export const FretboardGrid = ({
         <FretHeaderRow />
 
         <StringRows
+          selectedPositionIds={selectedPositionIds}
           onNotePointerDown={onNotePointerDown}
           onNoteClick={onNoteClick}
           onNoteContextMenu={onNoteContextMenu}

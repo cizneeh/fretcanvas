@@ -10,6 +10,7 @@ type FretCellProps = {
   label: string
   isRoot: boolean
   isOutOfScale: boolean
+  isSelected: boolean
   isStartAtNutLine: boolean
   isStartFret: boolean
   isEndFret: boolean
@@ -47,6 +48,7 @@ export const FretCell = memo(
     label,
     isRoot,
     isOutOfScale,
+    isSelected,
     isStartAtNutLine,
     isStartFret,
     isEndFret,
@@ -72,6 +74,7 @@ export const FretCell = memo(
     return (
       <button
         type="button"
+        data-fret-cell="true"
         className={`group relative flex h-12 items-center justify-center border-r focus-visible:outline-none ${
           isNut ? 'border-r-[3px] border-slate-200/85' : 'border-slate-400/55'
         }`}
@@ -119,6 +122,7 @@ export const FretCell = memo(
           isRoot={isRoot}
           isOutOfScale={isOutOfScale}
           isDimmed={isDimmed}
+          isSelected={isSelected}
           label={label}
         />
       </button>
