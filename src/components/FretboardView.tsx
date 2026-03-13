@@ -63,8 +63,8 @@ export const FretboardView = () => {
             x={interaction.selectionContextMenu.x}
             y={interaction.selectionContextMenu.y}
             onDelete={interaction.handleDeleteSelectedNotes}
-            onDim={interaction.handleDimSelectedNotes}
-            onUndim={interaction.handleUndimSelectedNotes}
+            onToggleDim={interaction.handleToggleDimSelectedNotes}
+            isDimmed={interaction.areAllSelectedNotesDimmed}
           />
         </div>
       ) : undefined}

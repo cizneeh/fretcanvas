@@ -19,6 +19,7 @@ import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 
 export const useFretboardInteractionState = () => {
+  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
@@ -160,6 +161,12 @@ export const useFretboardInteractionState = () => {
   )
 
   const selectedPositionIdSet = useMemo(() => new Set(selectedPositionIds), [selectedPositionIds])
+  const areAllSelectedNotesDimmed = useMemo(
+    () =>
+      selectedPositionIds.length > 0 &&
+      selectedPositionIds.every((positionId) => displayedNotes[positionId]?.isDimmed === true),
+    [displayedNotes, selectedPositionIds],
+  )
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -474,6 +481,10 @@ export const useFretboardInteractionState = () => {
   const handleNoteClick = useCallback(
     (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean, isAltKey: boolean) => {
       if (isDimShortcutPressed(isMetaKey, isCtrlKey)) {
+        if (selectedPositionIds.length > 0 && selectedPositionIdSet.has(positionId)) {
+          setNotesDimmed(selectedPositionIds, !areAllSelectedNotesDimmed)
+          return
+        }
         toggleNoteDimmed(positionId)
         return
       }
@@ -499,9 +510,13 @@ export const useFretboardInteractionState = () => {
       togglePosition(positionId)
     },
     [
+      areAllSelectedNotesDimmed,
       clearSelection,
       removeBendByFromPosition,
+      selectedPositionIdSet,
       selectedPositionIds.length,
+      selectedPositionIds,
+      setNotesDimmed,
       toggleNoteDimmed,
       togglePosition,
       upsertBendFromPosition,
@@ -555,15 +570,10 @@ export const useFretboardInteractionState = () => {
     clearSelection()
   }, [clearSelection, removePositions, selectedPositionIds])
 
-  const handleDimSelectedNotes = useCallback(() => {
-    setNotesDimmed(selectedPositionIds, true)
+  const handleToggleDimSelectedNotes = useCallback(() => {
+    setNotesDimmed(selectedPositionIds, !areAllSelectedNotesDimmed)
     setSelectionContextMenu(undefined)
-  }, [selectedPositionIds, setNotesDimmed])
-
-  const handleUndimSelectedNotes = useCallback(() => {
-    setNotesDimmed(selectedPositionIds, false)
-    setSelectionContextMenu(undefined)
-  }, [selectedPositionIds, setNotesDimmed])
+  }, [areAllSelectedNotesDimmed, selectedPositionIds, setNotesDimmed])
 
   useEffect(() => {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
@@ -625,8 +635,8 @@ export const useFretboardInteractionState = () => {
     setSelectionContextMenu,
     handleToggleBendFromContextMenu,
     handleDeleteSelectedNotes,
-    handleDimSelectedNotes,
-    handleUndimSelectedNotes,
+    handleToggleDimSelectedNotes,
+    areAllSelectedNotesDimmed,
     selectedPositionIds,
     selectedPositionIdSet,
     selectionRect,
