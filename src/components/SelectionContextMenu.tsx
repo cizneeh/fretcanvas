@@ -25,20 +25,18 @@ export const SelectionContextMenu = ({
       }}
     >
       <button type="button" className={m3MenuItemClass} onClick={onToggleDim}>
-        <span className="flex items-center gap-2 pr-3">
-          <span>Dim</span>
-          <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
-            {getDimShortcutLabel()}
-          </span>
+        <span className="min-w-0 flex-1 text-left">Dim</span>
+        <span className="shrink-0 text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+          {getDimShortcutLabel()}
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+        <span className="ml-3 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           {isDimmed ? '✓' : ''}
         </span>
       </button>
 
       <button type="button" className={m3MenuItemClass} onClick={onDelete}>
-        <span>Delete</span>
-        <span className="pl-4 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+        <span className="min-w-0 flex-1 text-left">Delete</span>
+        <span className="shrink-0 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
           {getSelectionDeleteShortcutLabel()}
         </span>
       </button>

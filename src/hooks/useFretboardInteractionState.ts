@@ -174,8 +174,16 @@ export const useFretboardInteractionState = () => {
       if (menu !== undefined && event.target instanceof Node && menu.contains(event.target)) {
         return
       }
+
+      const board = boardRef.current
+      const clickedInsideBoard =
+        board !== undefined && event.target instanceof Node && board.contains(event.target)
+
       setNoteContextMenu(undefined)
       setSelectionContextMenu(undefined)
+      if (!clickedInsideBoard) {
+        clearSelection()
+      }
     }
 
     const handleEscape = (event: KeyboardEvent) => {

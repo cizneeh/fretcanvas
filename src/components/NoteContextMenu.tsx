@@ -41,13 +41,11 @@ export const NoteContextMenu = ({
           onClose()
         }}
       >
-        <span className="flex items-center gap-2 pr-3">
-          <span>Dim</span>
-          <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
-            {shortcutLabel}
-          </span>
+        <span className="min-w-0 flex-1 text-left">Dim</span>
+        <span className="shrink-0 text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+          {shortcutLabel}
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+        <span className="ml-3 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           {displayedNotes[positionId]?.isDimmed === true ? '✓' : ''}
         </span>
       </button>
@@ -60,13 +58,11 @@ export const NoteContextMenu = ({
           onClose()
         }}
       >
-        <span className="flex items-center gap-2 pr-3">
-          <span>{hasBend ? 'Remove Bend' : 'Add Bend'}</span>
-          <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
-            {bendShortcutLabel}
-          </span>
+        <span className="min-w-0 flex-1 text-left">{hasBend ? 'Remove Bend' : 'Add Bend'}</span>
+        <span className="shrink-0 text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+          {bendShortcutLabel}
         </span>
-        <span className="ml-2 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+        <span className="ml-3 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           {hasBend ? '✓' : ''}
         </span>
       </button>
