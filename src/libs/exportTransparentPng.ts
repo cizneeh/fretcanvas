@@ -4,6 +4,7 @@ import {
   type Connection,
   getDisplayedNoteLabel,
   getDisplayRootPc,
+  getExportTitle,
   getScalePitchClasses,
   type HighlightedNote,
   MARKER_FRETS,
@@ -30,6 +31,7 @@ export type ExportTransparentPngInput = {
   exportFretStart: number
   exportFretEnd: number
   backgroundOpacityPercent: number
+  showExportTitle: boolean
 }
 
 export const renderExportPngCanvas = ({
@@ -44,14 +46,17 @@ export const renderExportPngCanvas = ({
   exportFretStart,
   exportFretEnd,
   backgroundOpacityPercent,
+  showExportTitle,
 }: ExportTransparentPngInput) => {
   const start = Math.min(exportFretStart, exportFretEnd)
   const end = Math.max(exportFretStart, exportFretEnd)
   const fretCountInRange = end - start + 1
+  const exportTitle = getExportTitle(noteLabelMode, selectedScale, selectedChordSymbol)
 
   const paddingX = 12
   const paddingY = 12
   const labelWidth = 34
+  const titleHeight = showExportTitle && exportTitle !== undefined ? 18 : 0
   const headerHeight = 26
   const rowHeight = 44
   const markerHeight = 20
@@ -59,7 +64,7 @@ export const renderExportPngCanvas = ({
   const boardHeight = OPEN_STRINGS.length * rowHeight
 
   const canvasWidth = paddingX * 2 + labelWidth + fretCountInRange * cellWidth
-  const canvasHeight = paddingY * 2 + headerHeight + boardHeight + markerHeight
+  const canvasHeight = paddingY * 2 + titleHeight + headerHeight + boardHeight + markerHeight
 
   const canvas = document.createElement('canvas')
   canvas.width = canvasWidth
@@ -70,7 +75,16 @@ export const renderExportPngCanvas = ({
   }
 
   const boardLeft = paddingX + labelWidth
-  const boardTop = paddingY + headerHeight
+  if (showExportTitle && exportTitle !== undefined) {
+    ctx.fillStyle = 'rgba(241, 245, 249, 0.92)'
+    ctx.font = '600 12px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(exportTitle, paddingX, paddingY + titleHeight / 2)
+  }
+
+  const boardTop = paddingY + titleHeight + headerHeight
+  ctx.textAlign = 'center'
 
   // Background is intentionally transparent.
   ctx.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -149,7 +163,7 @@ export const renderExportPngCanvas = ({
   for (let fret = start; fret <= end; fret += 1) {
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
     ctx.fillStyle = 'rgba(226, 232, 240, 0.98)'
-    ctx.fillText(String(fret), xCenter, paddingY + headerHeight / 2)
+    ctx.fillText(String(fret), xCenter, paddingY + titleHeight + headerHeight / 2)
 
     const lineX = boardLeft + (fret - start + 1) * cellWidth
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.78)'

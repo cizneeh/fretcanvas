@@ -49,13 +49,17 @@ const ExpandedExportSettingsContent = () => {
     exportFretStart,
     exportFretEnd,
     backgroundOpacityPercent,
+    showExportTitle,
     handleBackgroundOpacityPercentChange,
+    setShowExportTitle,
   } = useSettingsStore(
     useShallow((state) => ({
       exportFretStart: state.exportFretStart,
       exportFretEnd: state.exportFretEnd,
       backgroundOpacityPercent: state.backgroundOpacityPercent,
+      showExportTitle: state.showExportTitle,
       handleBackgroundOpacityPercentChange: state.handleBackgroundOpacityPercentChange,
+      setShowExportTitle: state.setShowExportTitle,
     })),
   )
   const { beginBufferedEdit, commitBufferedEdit, cancelBufferedEdit, captureSnapshot } =
@@ -82,6 +86,7 @@ const ExpandedExportSettingsContent = () => {
       exportFretStart,
       exportFretEnd,
       backgroundOpacityPercent,
+      showExportTitle,
     }),
     [
       keyPc,
@@ -95,6 +100,7 @@ const ExpandedExportSettingsContent = () => {
       exportFretStart,
       exportFretEnd,
       backgroundOpacityPercent,
+      showExportTitle,
     ],
   )
 
@@ -147,7 +153,9 @@ const ExpandedExportSettingsContent = () => {
           exportStart={Math.min(exportFretStart, exportFretEnd)}
           exportEnd={Math.max(exportFretStart, exportFretEnd)}
           backgroundOpacityPercent={backgroundOpacityPercent}
+          showExportTitle={showExportTitle}
           onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
+          onShowExportTitleChange={setShowExportTitle}
           onBackgroundOpacityEditStart={() => {
             const snapshot = captureSnapshot()
             if (snapshot !== undefined) {

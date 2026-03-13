@@ -187,6 +187,18 @@ export const getDisplayedNoteLabel = (
       ? getChordToneLabel(pitchClass, selectedChordSymbol)
       : getLabelFromRoot(pitchClass, keyPc)
 
+export const getExportTitle = (
+  noteLabelMode: NoteLabelMode,
+  selectedScale: ScaleId | undefined,
+  selectedChordSymbol: string | undefined,
+): string | undefined => {
+  if (noteLabelMode === 'scale') {
+    return selectedScale === undefined ? undefined : SCALE_LABELS[selectedScale]
+  }
+
+  return selectedChordSymbol
+}
+
 export const getScalePitchClasses = (keyPc: PitchClass, scaleId: ScaleId): PitchClass[] =>
   Scale.get(`${SHARP_NOTE_LABELS[normalizePc(keyPc)]} ${SCALE_NAME_BY_ID[scaleId]}`)
     .notes.map((noteName) => Note.chroma(noteName))

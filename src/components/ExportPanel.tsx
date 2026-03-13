@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  m3CheckboxClass,
   m3FieldLabelClass,
   m3FilledButtonClass,
   m3InputClass,
@@ -10,7 +11,9 @@ type ExportPanelProps = {
   exportStart: number
   exportEnd: number
   backgroundOpacityPercent: number
+  showExportTitle: boolean
   onBackgroundOpacityPercentChange: (nextOpacity: number) => void
+  onShowExportTitleChange: (nextValue: boolean) => void
   onBackgroundOpacityEditStart: () => void
   onBackgroundOpacityEditEnd: () => void
   onExportTransparentPng: () => void
@@ -20,7 +23,9 @@ export const ExportPanel = ({
   exportStart,
   exportEnd,
   backgroundOpacityPercent,
+  showExportTitle,
   onBackgroundOpacityPercentChange,
+  onShowExportTitleChange,
   onBackgroundOpacityEditStart,
   onBackgroundOpacityEditEnd,
   onExportTransparentPng,
@@ -49,6 +54,18 @@ export const ExportPanel = ({
       <div className="mb-4 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
         S / E マーカーをドラッグ、またはバーをクリックして範囲を設定
       </div>
+
+      <label className="mb-4 flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+        <input
+          type="checkbox"
+          className={m3CheckboxClass}
+          checked={showExportTitle}
+          onChange={(event) => {
+            onShowExportTitleChange(event.target.checked)
+          }}
+        />
+        Show scale/chord name in export image
+      </label>
 
       <div className="mb-4">
         <div className={`mb-1 ${m3FieldLabelClass}`}>Background Opacity</div>

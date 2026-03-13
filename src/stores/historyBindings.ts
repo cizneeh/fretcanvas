@@ -61,6 +61,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         backgroundOpacityPercent: rawSettings.backgroundOpacityPercent ?? 0,
         addScaleWithinExportRange: rawSettings.addScaleWithinExportRange ?? true,
         showExportRangeHighlight: rawSettings.showExportRangeHighlight ?? true,
+        showExportTitle: rawSettings.showExportTitle ?? false,
       },
     ),
   }
