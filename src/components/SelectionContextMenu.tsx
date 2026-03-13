@@ -16,6 +16,8 @@ export const SelectionContextMenu = ({
   onToggleDim,
   isDimmed,
 }: SelectionContextMenuProps) => {
+  const dimLabel = isDimmed ? 'Undim' : 'Dim'
+
   return (
     <div
       className={m3MenuContainerClass}
@@ -25,19 +27,20 @@ export const SelectionContextMenu = ({
       }}
     >
       <button type="button" className={m3MenuItemClass} onClick={onToggleDim}>
-        <span className="min-w-0 flex-1 text-left">Dim</span>
-        <span className="shrink-0 text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
-          {getDimShortcutLabel()}
-        </span>
-        <span className="ml-3 w-4 shrink-0 text-center text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
-          {isDimmed ? '✓' : ''}
+        <span className="flex w-full items-center gap-3">
+          <span className="min-w-0 flex-1 text-left">{dimLabel}</span>
+          <span className="ml-auto text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+            {getDimShortcutLabel()}
+          </span>
         </span>
       </button>
 
       <button type="button" className={m3MenuItemClass} onClick={onDelete}>
-        <span className="min-w-0 flex-1 text-left">Delete</span>
-        <span className="shrink-0 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-          {getSelectionDeleteShortcutLabel()}
+        <span className="flex w-full items-center gap-3">
+          <span className="min-w-0 flex-1 text-left">Delete</span>
+          <span className="ml-auto text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+            {getSelectionDeleteShortcutLabel()}
+          </span>
         </span>
       </button>
     </div>
