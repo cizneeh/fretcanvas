@@ -166,7 +166,7 @@ export const ControlPanel = () => {
           </div>
 
           <div className="flex max-w-[12rem] flex-col gap-2">
-            <span className={m3FieldLabelClass}>Display Mode</span>
+            <span className={m3FieldLabelClass}>Mode</span>
             <div className={`${m3SegmentedContainerClass} w-full`}>
               {modeOptions.map((modeOption) => (
                 <button
