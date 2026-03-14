@@ -43,9 +43,6 @@ function App() {
       <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Fretmap</h1>
-          <p className="text-sm text-zinc-300">
-            Key基準の度数でノートを表示します。クリックで手動追加、スケールは一括追加です。
-          </p>
         </header>
 
         <ControlPanel />
