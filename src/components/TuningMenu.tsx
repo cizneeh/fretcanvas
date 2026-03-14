@@ -305,7 +305,9 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
               onClick={() => {
                 if (
                   typeof window !== 'undefined' &&
-                  window.confirm(t('tuning.deletePresetConfirm')) === false
+                  window.confirm(
+                    t('tuning.deletePresetConfirm', { name: selectedCustomPreset.name }),
+                  ) === false
                 ) {
                   return
                 }
