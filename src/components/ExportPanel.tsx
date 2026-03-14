@@ -69,7 +69,7 @@ export const ExportPanel = ({
   return (
     <div className="w-full max-w-[22rem]">
       <div className="mb-3 space-y-2">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[15px]">
           <span className="text-[color:var(--md-sys-color-on-surface-variant)]">
             {t('export.range')}
           </span>
@@ -79,7 +79,7 @@ export const ExportPanel = ({
         </div>
       </div>
 
-      <label className="mb-4 flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+      <label className="mb-4 flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
         <input
           type="checkbox"
           className={m3CheckboxClass}
@@ -140,7 +140,7 @@ export const ExportPanel = ({
               }}
               aria-label={t('export.opacityPercentageAria')}
             />
-            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
               %
             </span>
           </div>
@@ -165,7 +165,7 @@ export const ExportPanel = ({
             <button
               key={value}
               type="button"
-              className={`h-8 rounded-[var(--md-shape-sm)] border px-2 py-1 text-[11px] font-medium transition-colors ${
+              className={`h-8 rounded-[var(--md-shape-sm)] border px-2 py-1 text-xs font-medium transition-colors ${
                 backgroundOpacityPercent === value
                   ? 'm3-state-tonal border-transparent bg-[color:var(--md-sys-color-secondary-container)] text-[color:var(--md-sys-color-on-secondary-container)]'
                   : 'm3-state-surface border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] text-[color:var(--md-sys-color-on-surface-variant)]'

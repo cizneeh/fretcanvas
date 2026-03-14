@@ -30,7 +30,7 @@ const messages = {
     'control.manualInput': 'Manual Input',
     'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Cmaj7/B...',
     'control.manualInputTooltip':
-      'Examples:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nC7#9b13',
+      'Examples:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nBdim7\nDsus4\nC7#9b13',
     'control.interval': 'Interval',
     'control.key': 'Key',
     'control.mode': 'Mode',
@@ -100,7 +100,8 @@ const messages = {
     'control.examples': '例',
     'control.manualInput': '手動入力',
     'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Cmaj7/B...',
-    'control.manualInputTooltip': '例:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nC7#9b13',
+    'control.manualInputTooltip':
+      '例:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nBdim7\nDsus4\nC7#9b13',
     'control.interval': '度数',
     'control.key': 'キー',
     'control.mode': 'モード',

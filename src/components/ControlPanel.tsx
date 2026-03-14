@@ -309,7 +309,7 @@ export const ControlPanel = () => {
                           <circle cx="8" cy="4.4" r="0.8" fill="currentColor" />
                         </svg>
                       </button>
-                      <div className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-[17rem] rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-high)] px-3 py-2 text-[11px] leading-5 text-[color:var(--md-sys-color-on-surface-variant)] opacity-0 shadow-[var(--md-elevation-2)] transition duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                      <div className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-[18rem] rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-high)] px-3 py-2.5 text-xs leading-5 text-[color:var(--md-sys-color-on-surface-variant)] opacity-0 shadow-[var(--md-elevation-2)] transition duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                         <div className="whitespace-pre-line">{manualInputTooltip}</div>
                       </div>
                     </div>
@@ -340,17 +340,17 @@ export const ControlPanel = () => {
                     </button>
                   </div>
                   {chordInputError !== undefined ? (
-                    <div className="text-xs text-rose-300">{chordInputError}</div>
+                    <div className="text-sm text-rose-300">{chordInputError}</div>
                   ) : undefined}
                   {/* 入力欄の文字列そのものではなく、Apply 済みの appliedChordSymbol を表示する。 */}
                   <div className="rounded-[var(--md-shape-md)] border border-transparent bg-[color:var(--md-sys-color-secondary-container)] px-3 py-2">
-                    <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
+                    <div className="text-[12px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
                       {t('control.appliedChord')}
                     </div>
                     <div
                       className={`mt-0.5 ${
                         appliedChordSymbol === undefined
-                          ? 'text-xs font-medium text-[color:var(--md-sys-color-on-secondary-container)]/60'
+                          ? 'text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]/55'
                           : 'text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]'
                       }`}
                     >
@@ -416,7 +416,7 @@ export const ControlPanel = () => {
       </div>
 
       <div className="mt-4 flex flex-col gap-2 border-t border-[color:var(--md-sys-color-outline-variant)] pt-4">
-        <label className="flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+        <label className="flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           <input
             type="checkbox"
             className={m3CheckboxClass}
@@ -428,7 +428,7 @@ export const ControlPanel = () => {
           {t('control.addNotesWithinExportRangeOnly')}
         </label>
 
-        <label className="flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+        <label className="flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           <input
             type="checkbox"
             className={m3CheckboxClass}

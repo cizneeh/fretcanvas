@@ -236,13 +236,13 @@ const ExpandedExportSettingsContent = () => {
                 />
               ) : undefined}
               {previewError !== undefined ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 px-3 text-center text-xs text-rose-200">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 px-3 text-center text-sm text-rose-200">
                   {previewError}
                 </div>
               ) : undefined}
             </div>
           </button>
-          <div className="mt-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+          <div className="mt-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
             {t('export.viewFullSize')}
           </div>
         </div>
@@ -306,7 +306,7 @@ export const ExportSettingsSection = () => {
         }}
         aria-expanded={isExpanded}
       >
-        <div className="text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
+        <div className="text-[15px] font-medium text-[color:var(--md-sys-color-on-surface)]">
           {t('export.settings')}
         </div>
         <svg
