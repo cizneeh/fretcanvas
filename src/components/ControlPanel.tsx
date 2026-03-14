@@ -2,6 +2,10 @@ import { useShallow } from 'zustand/react/shallow'
 import { getChordInputErrorMessage, getScaleLabel } from '../i18n/config'
 import { useI18n } from '../i18n/useI18n'
 import {
+  getAbsoluteNoteLabelByKey,
+  getChordPitchClasses,
+  getChordToneLabel,
+  getChordTonePitchClasses,
   getMajorDiatonicSeventhChordOptions,
   NOTE_LABELS,
   type NoteLabelMode,
@@ -10,6 +14,7 @@ import {
   parseChordInput,
   type ScaleId,
 } from '../libs/model'
+import { getNotePalette } from '../libs/notePalette'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import {
@@ -111,6 +116,22 @@ export const ControlPanel = () => {
     { value: 'absolute', label: t('control.absolute') },
   ]
   const scaleOptions: ScaleId[] = ['major', 'naturalMinor', 'pentatonicMajor', 'pentatonicMinor']
+  const chordTonePitchClasses =
+    appliedChordSymbol === undefined
+      ? new Set<PitchClass>()
+      : new Set(getChordTonePitchClasses(appliedChordSymbol))
+  const appliedChordNotes =
+    appliedChordSymbol === undefined
+      ? []
+      : Array.from(new Set(getChordPitchClasses(appliedChordSymbol))).map((pitchClass) => ({
+          pitchClass,
+          absoluteLabel: getAbsoluteNoteLabelByKey(pitchClass, keyPc),
+          intervalLabel: getChordToneLabel(pitchClass, appliedChordSymbol),
+          isChordTone: chordTonePitchClasses.has(pitchClass),
+        }))
+  const rootTonePalette = getNotePalette('root')
+  const defaultTonePalette = getNotePalette('default')
+  const tensionTonePalette = getNotePalette('tension')
 
   return (
     <section className={`${m3CardClass} p-4`}>
@@ -295,6 +316,31 @@ export const ControlPanel = () => {
                       {appliedChordSymbol ?? t('control.noChordApplied')}
                     </div>
                   </div>
+                  {appliedChordNotes.length > 0 ? (
+                    <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
+                      <div className={`mb-2 ${m3FieldLabelClass}`}>{t('control.chordNotes')}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {appliedChordNotes.map((note) => {
+                          const palette =
+                            note.intervalLabel === 'R'
+                              ? rootTonePalette
+                              : note.isChordTone
+                                ? defaultTonePalette
+                                : tensionTonePalette
+
+                          return (
+                            <span
+                              key={`${note.pitchClass}-${note.intervalLabel}`}
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${palette.web.previewToneClass}`}
+                            >
+                              <span>{note.absoluteLabel}</span>
+                              <span className="text-[10px] opacity-80">{note.intervalLabel}</span>
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ) : undefined}
                 </div>
               </div>
             )}
