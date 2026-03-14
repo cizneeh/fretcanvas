@@ -36,6 +36,10 @@ export type FretboardStoreState = {
   selectedScale: ScaleId | undefined
   noteLabelMode: NoteLabelMode
   noteTextMode: NoteTextMode
+  // 入力欄の文字列をそのまま表示や追加処理の基準にすると、打ちかけの不完全な文字列や
+  // 一時的なパース失敗で UI 全体が不安定になる。
+  // そのため、編集中の chordInput と、表示・色分け・export・Add Chord Tones の基準になる
+  // 確定済みの activeChordSymbol を分けて持つ。
   activeChordSymbol: string | undefined
   chordInput: string
   displayedNotes: Record<PositionId, HighlightedNote>
@@ -222,6 +226,8 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         return
       }
 
+      // chordInput を直接参照して各 UI を動かすのではなく、Apply を境に activeChordSymbol へ昇格させる。
+      // これで、入力途中でも現在の表示基準は維持される。
       pushHistoryBeforeChange()
       set({
         activeChordSymbol: parsed.symbol,
