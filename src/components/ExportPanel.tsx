@@ -188,8 +188,22 @@ export const ExportPanel = ({
         type="button"
         className={`w-full ${m3FilledButtonClass}`}
         onClick={onExportTransparentPng}
+        aria-label="Export PNG"
       >
-        Export PNG
+        <span className="flex items-center justify-center gap-2">
+          <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 2.5V9.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            <path
+              d="M5.5 7.5L8 10L10.5 7.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d="M3 12.5H13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          <span>PNG</span>
+        </span>
       </button>
     </div>
   )
