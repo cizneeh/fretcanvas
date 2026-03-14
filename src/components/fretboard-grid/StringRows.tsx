@@ -51,13 +51,13 @@ export const StringRows = memo(
     onNoteContextMenu,
     onNotePointerUp,
   }: StringRowsProps) => {
-    const { keyPc, noteLabelMode, noteTextMode, selectedChordSymbol, selectedScale } =
+    const { keyPc, noteLabelMode, noteTextMode, activeChordSymbol, selectedScale } =
       useFretboardStore(
         useShallow((state) => ({
           keyPc: state.keyPc,
           noteLabelMode: state.noteLabelMode,
           noteTextMode: state.noteTextMode,
-          selectedChordSymbol: state.selectedChordSymbol,
+          activeChordSymbol: state.activeChordSymbol,
           selectedScale: state.selectedScale,
         })),
       )
@@ -89,14 +89,14 @@ export const StringRows = memo(
                 noteLabelMode,
                 keyPc,
                 selectedScale,
-                selectedChordSymbol,
+                activeChordSymbol,
               })
               const label = getDisplayedNoteLabel(
                 pitchClass,
                 noteTextMode,
                 noteLabelMode,
                 keyPc,
-                selectedChordSymbol,
+                activeChordSymbol,
               )
               const isStartFret = fret === startHighlightFret
               const isEndFret = showExportRangeHighlight && fret === exportFretEnd

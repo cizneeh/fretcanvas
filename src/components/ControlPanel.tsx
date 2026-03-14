@@ -5,6 +5,7 @@ import {
   type NoteLabelMode,
   type NoteTextMode,
   type PitchClass,
+  parseChordInput,
   SCALE_LABELS,
   type ScaleId,
 } from '../libs/model'
@@ -15,6 +16,7 @@ import {
   m3CheckboxClass,
   m3FieldLabelClass,
   m3FilledButtonClass,
+  m3InputClass,
   m3OutlinedButtonClass,
   m3SegmentedButtonClass,
   m3SegmentedContainerClass,
@@ -28,14 +30,17 @@ export const ControlPanel = () => {
     noteLabelMode,
     noteTextMode,
     selectedScale,
-    selectedChordSymbol,
+    activeChordSymbol,
+    chordInput,
     setKeyPc,
     setNoteLabelMode,
     setNoteTextMode,
     setSelectedScale,
-    setSelectedChordSymbol,
+    setActiveChordSymbol,
+    setChordInput,
+    applyChordInput,
     addScaleNotes,
-    addSelectedChordNotes,
+    addActiveChordNotes,
     clearHighlightedNotes,
   } = useFretboardStore(
     useShallow((state) => ({
@@ -43,14 +48,17 @@ export const ControlPanel = () => {
       noteLabelMode: state.noteLabelMode,
       noteTextMode: state.noteTextMode,
       selectedScale: state.selectedScale,
-      selectedChordSymbol: state.selectedChordSymbol,
+      activeChordSymbol: state.activeChordSymbol,
+      chordInput: state.chordInput,
       setKeyPc: state.setKeyPc,
       setNoteLabelMode: state.setNoteLabelMode,
       setNoteTextMode: state.setNoteTextMode,
       setSelectedScale: state.setSelectedScale,
-      setSelectedChordSymbol: state.setSelectedChordSymbol,
+      setActiveChordSymbol: state.setActiveChordSymbol,
+      setChordInput: state.setChordInput,
+      applyChordInput: state.applyChordInput,
       addScaleNotes: state.addScaleNotes,
-      addSelectedChordNotes: state.addSelectedChordNotes,
+      addActiveChordNotes: state.addActiveChordNotes,
       clearHighlightedNotes: state.clearHighlightedNotes,
     })),
   )
@@ -72,7 +80,20 @@ export const ControlPanel = () => {
     })),
   )
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
-  const canAddChordTones = selectedChordSymbol !== undefined
+  const diatonicSelectValue =
+    activeChordSymbol !== undefined &&
+    diatonicChordOptions.some((option) => option.symbol === activeChordSymbol)
+      ? activeChordSymbol
+      : ''
+  const trimmedChordInput = chordInput.trim()
+  const parsedChordInput = trimmedChordInput === '' ? undefined : parseChordInput(trimmedChordInput)
+  const chordInputError =
+    parsedChordInput !== undefined && 'error' in parsedChordInput
+      ? parsedChordInput.error
+      : undefined
+  const canApplyChordInput =
+    parsedChordInput !== undefined && 'symbol' in parsedChordInput && chordInputError === undefined
+  const canAddChordTones = activeChordSymbol !== undefined
   const fretRange = addScaleWithinExportRange
     ? {
         start: exportFretStart,
@@ -199,36 +220,64 @@ export const ControlPanel = () => {
               </svg>
             </div>
           ) : (
-            <div className="relative">
-              <select
-                className={m3SelectClass}
-                value={selectedChordSymbol ?? ''}
-                onChange={(event) => {
-                  const nextSymbol = event.target.value
-                  setSelectedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
-                }}
-              >
-                <option value="">Select major diatonic 7th</option>
-                {diatonicChordOptions.map((option) => (
-                  <option key={option.symbol} value={option.symbol}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <svg
-                className={m3SelectChevronClass}
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M4 6.5L8 10L12 6.5"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+            <div className="flex flex-col gap-3">
+              <div className="relative">
+                <select
+                  className={m3SelectClass}
+                  value={diatonicSelectValue}
+                  onChange={(event) => {
+                    const nextSymbol = event.target.value
+                    setActiveChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
+                  }}
+                >
+                  <option value="">Select major diatonic 7th</option>
+                  {diatonicChordOptions.map((option) => (
+                    <option key={option.symbol} value={option.symbol}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <svg
+                  className={m3SelectChevronClass}
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 6.5L8 10L12 6.5"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className={m3FieldLabelClass}>Custom Chord</span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    className={m3InputClass}
+                    value={chordInput}
+                    placeholder="Cmaj7, Dm7b5, G7#11..."
+                    onChange={(event) => {
+                      setChordInput(event.target.value)
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={`${m3OutlinedButtonClass} shrink-0 whitespace-nowrap`}
+                    onClick={applyChordInput}
+                    disabled={!canApplyChordInput}
+                  >
+                    Apply
+                  </button>
+                </div>
+                {chordInputError !== undefined ? (
+                  <div className="text-xs text-rose-300">{chordInputError}</div>
+                ) : undefined}
+              </div>
             </div>
           )}
         </div>
@@ -244,7 +293,7 @@ export const ControlPanel = () => {
               }
 
               if (canAddChordTones) {
-                addSelectedChordNotes({ fretRange })
+                addActiveChordNotes({ fretRange })
               }
             }}
             disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}

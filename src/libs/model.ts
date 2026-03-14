@@ -186,25 +186,70 @@ export const getAbsoluteNoteLabelByKey = (pitchClass: PitchClass, keyPc: PitchCl
 export const getDisplayRootPc = (
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
-  selectedChordSymbol: string | undefined,
+  activeChordSymbol: string | undefined,
 ): PitchClass =>
-  noteLabelMode === 'chord' && selectedChordSymbol !== undefined
-    ? (getChordRootPc(selectedChordSymbol) ?? keyPc)
+  noteLabelMode === 'chord' && activeChordSymbol !== undefined
+    ? (getChordRootPc(activeChordSymbol) ?? keyPc)
     : keyPc
 export const getDisplayedNoteLabel = (
   pitchClass: PitchClass,
   noteTextMode: NoteTextMode,
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
-  selectedChordSymbol: string | undefined,
+  activeChordSymbol: string | undefined,
 ): string =>
   noteTextMode === 'absolute'
     ? getAbsoluteNoteLabelByKey(pitchClass, keyPc)
-    : noteLabelMode === 'chord' && selectedChordSymbol !== undefined
-      ? getChordToneLabel(pitchClass, selectedChordSymbol)
+    : noteLabelMode === 'chord' && activeChordSymbol !== undefined
+      ? getChordToneLabel(pitchClass, activeChordSymbol)
       : noteLabelMode === 'scale'
         ? getScaleIntervalLabelFromRoot(pitchClass, keyPc)
         : getChordIntervalLabelFromRoot(pitchClass, keyPc)
+
+export const parseChordInput = (input: string): { symbol: string } | { error: string } => {
+  const trimmedInput = input.trim()
+  const normalizedInput = trimmedInput.toLowerCase()
+  if (trimmedInput === '') {
+    return {
+      error: 'Enter a chord symbol.',
+    }
+  }
+
+  if (trimmedInput.includes('/')) {
+    return {
+      error: 'Slash chords are not supported yet.',
+    }
+  }
+
+  if (normalizedInput.includes('alt') || normalizedInput.includes('altered')) {
+    return {
+      error: 'Altered chords are not supported yet.',
+    }
+  }
+
+  const parsed = Chord.get(trimmedInput)
+  if (parsed.empty || parsed.tonic === null) {
+    return {
+      error: 'Could not parse that chord symbol.',
+    }
+  }
+
+  if (parsed.symbol.includes('/')) {
+    return {
+      error: 'Slash chords are not supported yet.',
+    }
+  }
+
+  if (parsed.symbol.toLowerCase().includes('alt')) {
+    return {
+      error: 'Altered chords are not supported yet.',
+    }
+  }
+
+  return {
+    symbol: parsed.symbol,
+  }
+}
 
 const getReferenceScalePitchClasses = (
   noteLabelMode: NoteLabelMode,
@@ -227,18 +272,18 @@ export const getNoteVisualRole = ({
   noteLabelMode,
   keyPc,
   selectedScale,
-  selectedChordSymbol,
+  activeChordSymbol,
 }: {
   pitchClass: PitchClass
   noteLabelMode: NoteLabelMode
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
-  selectedChordSymbol: string | undefined
+  activeChordSymbol: string | undefined
 }): NoteVisualRole => {
   const normalizedPitchClass = normalizePc(pitchClass)
 
-  if (noteLabelMode === 'chord' && selectedChordSymbol !== undefined) {
-    const chordRootPc = getChordRootPc(selectedChordSymbol)
+  if (noteLabelMode === 'chord' && activeChordSymbol !== undefined) {
+    const chordRootPc = getChordRootPc(activeChordSymbol)
     if (chordRootPc !== undefined && normalizedPitchClass === chordRootPc) {
       return 'root'
     }
@@ -255,15 +300,15 @@ export const getNoteVisualRole = ({
       return 'outOfKey'
     }
 
-    const chordPitchClasses = new Set(getChordPitchClasses(selectedChordSymbol))
-    if (chordPitchClasses.has(normalizedPitchClass)) {
+    const chordTonePitchClasses = new Set(getChordTonePitchClasses(activeChordSymbol))
+    if (chordTonePitchClasses.has(normalizedPitchClass)) {
       return 'default'
     }
 
     return 'tension'
   }
 
-  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, activeChordSymbol)
   if (normalizePc(normalizedPitchClass - displayRootPc) === 0) {
     return 'root'
   }
@@ -287,7 +332,7 @@ export const getExportTitle = (
   keyPc: PitchClass,
   noteLabelMode: NoteLabelMode,
   selectedScale: ScaleId | undefined,
-  selectedChordSymbol: string | undefined,
+  activeChordSymbol: string | undefined,
 ): string | undefined => {
   if (noteLabelMode === 'scale') {
     if (selectedScale === undefined) {
@@ -297,7 +342,7 @@ export const getExportTitle = (
     return `${getAbsoluteNoteLabelByKey(keyPc, keyPc)} ${SCALE_LABELS[selectedScale]} Scale`
   }
 
-  return selectedChordSymbol
+  return activeChordSymbol
 }
 
 export const getScalePitchClasses = (keyPc: PitchClass, scaleId: ScaleId): PitchClass[] =>
@@ -311,6 +356,22 @@ export const getChordPitchClasses = (chordSymbol: string): PitchClass[] =>
     .notes.map((noteName) => Note.chroma(noteName))
     .filter((value): value is number => value !== undefined)
     .map((value) => normalizePc(value))
+
+export const getChordTonePitchClasses = (chordSymbol: string): PitchClass[] => {
+  const parsed = Chord.get(chordSymbol)
+
+  return parsed.intervals
+    .map((interval, index) => ({
+      intervalDegree: Number.parseInt(interval, 10),
+      noteName: parsed.notes[index],
+    }))
+    .filter(({ intervalDegree, noteName }) => {
+      return [1, 3, 5, 7].includes(intervalDegree) && noteName !== undefined
+    })
+    .map(({ noteName }) => Note.chroma(noteName))
+    .filter((value): value is number => value !== undefined)
+    .map((value) => normalizePc(value))
+}
 
 const getMajorKeyAccidentalCount = (tonic: string): number => {
   const signature = Key.majorKey(tonic).keySignature

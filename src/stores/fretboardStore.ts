@@ -16,6 +16,7 @@ import {
   OPEN_STRINGS,
   type PitchClass,
   type PositionId,
+  parseChordInput,
   type ScaleId,
   toPositionId,
 } from '../libs/model'
@@ -35,7 +36,8 @@ export type FretboardStoreState = {
   selectedScale: ScaleId | undefined
   noteLabelMode: NoteLabelMode
   noteTextMode: NoteTextMode
-  selectedChordSymbol: string | undefined
+  activeChordSymbol: string | undefined
+  chordInput: string
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
   bends: Record<BendId, BendArrow>
@@ -46,9 +48,11 @@ export type FretboardStoreActions = {
   setSelectedScale: (nextScale: ScaleId | undefined) => void
   setNoteLabelMode: (nextMode: NoteLabelMode) => void
   setNoteTextMode: (nextMode: NoteTextMode) => void
-  setSelectedChordSymbol: (nextChordSymbol: string | undefined) => void
+  setActiveChordSymbol: (nextChordSymbol: string | undefined) => void
+  setChordInput: (nextChordInput: string) => void
+  applyChordInput: () => void
   addScaleNotes: (options?: AddNotesOptions) => void
-  addSelectedChordNotes: (options?: AddNotesOptions) => void
+  addActiveChordNotes: (options?: AddNotesOptions) => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
@@ -141,7 +145,8 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     selectedScale: 'major',
     noteLabelMode: 'scale',
     noteTextMode: 'interval',
-    selectedChordSymbol: undefined,
+    activeChordSymbol: undefined,
+    chordInput: '',
     displayedNotes: {},
     connections: {},
     bends: {},
@@ -153,7 +158,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       }
 
       pushHistoryBeforeChange()
-      set({ keyPc: nextKeyPc, selectedChordSymbol: undefined })
+      set({ keyPc: nextKeyPc })
     },
 
     setSelectedScale: (nextScale) => {
@@ -186,14 +191,42 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ noteTextMode: nextMode })
     },
 
-    setSelectedChordSymbol: (nextChordSymbol) => {
+    setActiveChordSymbol: (nextChordSymbol) => {
       const current = get()
-      if (current.selectedChordSymbol === nextChordSymbol) {
+      const nextChordInput = nextChordSymbol ?? ''
+      if (current.activeChordSymbol === nextChordSymbol && current.chordInput === nextChordInput) {
         return
       }
 
       pushHistoryBeforeChange()
-      set({ selectedChordSymbol: nextChordSymbol })
+      set({ activeChordSymbol: nextChordSymbol, chordInput: nextChordInput })
+    },
+
+    setChordInput: (nextChordInput) => {
+      const current = get()
+      if (current.chordInput === nextChordInput) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ chordInput: nextChordInput })
+    },
+
+    applyChordInput: () => {
+      const current = get()
+      const parsed = parseChordInput(current.chordInput)
+      if (
+        'error' in parsed ||
+        (current.activeChordSymbol === parsed.symbol && current.chordInput === parsed.symbol)
+      ) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({
+        activeChordSymbol: parsed.symbol,
+        chordInput: parsed.symbol,
+      })
     },
 
     addScaleNotes: (options) => {
@@ -212,13 +245,13 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ displayedNotes: next })
     },
 
-    addSelectedChordNotes: (options) => {
-      const { selectedChordSymbol, displayedNotes } = get()
-      if (selectedChordSymbol === undefined) {
+    addActiveChordNotes: (options) => {
+      const { activeChordSymbol, displayedNotes } = get()
+      if (activeChordSymbol === undefined) {
         return
       }
 
-      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(selectedChordSymbol))
+      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(activeChordSymbol))
       const next = addPitchClassNotes(pitchClasses, displayedNotes, options)
       if (next === undefined) {
         return
