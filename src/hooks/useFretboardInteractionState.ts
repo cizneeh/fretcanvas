@@ -28,6 +28,7 @@ export const useFretboardInteractionState = () => {
   const toggleNoteEmphasized = useFretboardStore((state) => state.toggleNoteEmphasized)
   const removePositions = useFretboardStore((state) => state.removePositions)
   const setNotesDimmed = useFretboardStore((state) => state.setNotesDimmed)
+  const setNotesEmphasized = useFretboardStore((state) => state.setNotesEmphasized)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
   const upsertBendFromPosition = useFretboardStore((state) => state.upsertBendFromPosition)
   const removeBendByFromPosition = useFretboardStore((state) => state.removeBendByFromPosition)
@@ -167,6 +168,12 @@ export const useFretboardInteractionState = () => {
     () =>
       selectedPositionIds.length > 0 &&
       selectedPositionIds.every((positionId) => displayedNotes[positionId]?.isDimmed === true),
+    [displayedNotes, selectedPositionIds],
+  )
+  const areAllSelectedNotesEmphasized = useMemo(
+    () =>
+      selectedPositionIds.length > 0 &&
+      selectedPositionIds.every((positionId) => displayedNotes[positionId]?.isEmphasized === true),
     [displayedNotes, selectedPositionIds],
   )
 
@@ -592,6 +599,11 @@ export const useFretboardInteractionState = () => {
     setSelectionContextMenu(undefined)
   }, [areAllSelectedNotesDimmed, selectedPositionIds, setNotesDimmed])
 
+  const handleToggleEmphasizeSelectedNotes = useCallback(() => {
+    setNotesEmphasized(selectedPositionIds, !areAllSelectedNotesEmphasized)
+    setSelectionContextMenu(undefined)
+  }, [areAllSelectedNotesEmphasized, selectedPositionIds, setNotesEmphasized])
+
   useEffect(() => {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
       if (selectedPositionIds.length === 0 || isEditableTarget(event.target)) {
@@ -653,7 +665,9 @@ export const useFretboardInteractionState = () => {
     handleToggleBendFromContextMenu,
     handleDeleteSelectedNotes,
     handleToggleDimSelectedNotes,
+    handleToggleEmphasizeSelectedNotes,
     areAllSelectedNotesDimmed,
+    areAllSelectedNotesEmphasized,
     selectedPositionIds,
     selectedPositionIdSet,
     selectionRect,

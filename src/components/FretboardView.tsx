@@ -70,7 +70,9 @@ export const FretboardView = () => {
             x={interaction.selectionContextMenu.x}
             y={interaction.selectionContextMenu.y}
             onDelete={interaction.handleDeleteSelectedNotes}
+            onToggleEmphasize={interaction.handleToggleEmphasizeSelectedNotes}
             onToggleDim={interaction.handleToggleDimSelectedNotes}
+            isEmphasized={interaction.areAllSelectedNotesEmphasized}
             isDimmed={interaction.areAllSelectedNotesDimmed}
           />
         </div>

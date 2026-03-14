@@ -63,6 +63,7 @@ export type FretboardStoreActions = {
   toggleNoteEmphasized: (positionId: PositionId) => void
   removePositions: (positionIds: PositionId[]) => void
   setNotesDimmed: (positionIds: PositionId[], isDimmed: boolean) => void
+  setNotesEmphasized: (positionIds: PositionId[], isEmphasized: boolean) => void
   connectPositions: (from: PositionId, to: PositionId) => void
   removeConnection: (connectionId: ConnectionId) => void
   removeConnectionsByPosition: (positionId: PositionId) => void
@@ -402,6 +403,37 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
           ...currentNote,
           isDimmed,
           isEmphasized: isDimmed ? false : currentNote.isEmphasized,
+        }
+        didChange = true
+      }
+
+      if (!didChange) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({ displayedNotes: nextDisplayedNotes })
+    },
+
+    setNotesEmphasized: (positionIds, isEmphasized) => {
+      if (positionIds.length === 0) {
+        return
+      }
+
+      const current = get()
+      const nextDisplayedNotes = { ...current.displayedNotes }
+      let didChange = false
+
+      for (const positionId of positionIds) {
+        const currentNote = nextDisplayedNotes[positionId]
+        if (currentNote === undefined || currentNote.isEmphasized === isEmphasized) {
+          continue
+        }
+
+        nextDisplayedNotes[positionId] = {
+          ...currentNote,
+          isDimmed: isEmphasized ? false : currentNote.isDimmed,
+          isEmphasized,
         }
         didChange = true
       }

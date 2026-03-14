@@ -287,12 +287,32 @@ export const ControlPanel = () => {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <span className={m3FieldLabelClass}>{t('control.manualInput')}</span>
-                    <span
-                      className="cursor-help text-[11px] font-medium text-[color:var(--md-sys-color-on-surface-variant)]/80 underline decoration-dotted underline-offset-2"
-                      title={manualInputTooltip}
-                    >
-                      {t('control.examples')}
-                    </span>
+                    <div className="group relative inline-flex">
+                      <button
+                        type="button"
+                        aria-label={t('control.examples')}
+                        className="m3-focus-ring inline-flex h-4 w-4 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline-variant)] text-[color:var(--md-sys-color-on-surface-variant)]/88 transition-colors hover:border-[color:var(--md-sys-color-outline)] hover:text-[color:var(--md-sys-color-on-surface)] focus-visible:border-[color:var(--md-sys-color-primary)] focus-visible:text-[color:var(--md-sys-color-on-surface)]"
+                      >
+                        <svg
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          className="h-3.5 w-3.5"
+                          aria-hidden="true"
+                        >
+                          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.2" />
+                          <path
+                            d="M8 6.4V11"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                          />
+                          <circle cx="8" cy="4.4" r="0.8" fill="currentColor" />
+                        </svg>
+                      </button>
+                      <div className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-[17rem] rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-high)] px-3 py-2 text-[11px] leading-5 text-[color:var(--md-sys-color-on-surface-variant)] opacity-0 shadow-[var(--md-elevation-2)] transition duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                        <div className="whitespace-pre-line">{manualInputTooltip}</div>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <input
@@ -300,7 +320,12 @@ export const ControlPanel = () => {
                       className={m3InputClass}
                       value={chordInput}
                       placeholder={t('control.manualInputPlaceholder')}
-                      title={manualInputTooltip}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && canApplyChordInput) {
+                          event.preventDefault()
+                          applyChordInput()
+                        }
+                      }}
                       onChange={(event) => {
                         setChordInput(event.target.value)
                       }}
