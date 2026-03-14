@@ -46,7 +46,7 @@ export type StringInfo = {
 }
 
 export const FRET_COUNT = 24
-export const DEGREE_LABELS = [
+export const CHORD_INTERVAL_LABELS = [
   'R',
   'b9',
   '9',
@@ -57,6 +57,20 @@ export const DEGREE_LABELS = [
   'P5',
   'b13',
   '13',
+  'm7',
+  'M7',
+]
+export const SCALE_INTERVAL_LABELS = [
+  'R',
+  'm2',
+  'M2',
+  'm3',
+  'M3',
+  'P4',
+  '#4',
+  'P5',
+  'm6',
+  'M6',
   'm7',
   'M7',
 ]
@@ -118,8 +132,10 @@ export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= 
  * normalizePc(69) // 9 (midi number 69 は A4の音高でありA)
  */
 export const normalizePc = (value: number): PitchClass => ((value % 12) + 12) % 12
-export const getLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
-  DEGREE_LABELS[normalizePc(pitchClass - rootPc)]
+export const getScaleIntervalLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
+  SCALE_INTERVAL_LABELS[normalizePc(pitchClass - rootPc)]
+export const getChordIntervalLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
+  CHORD_INTERVAL_LABELS[normalizePc(pitchClass - rootPc)]
 
 const getChordRootPc = (chordSymbol: string): PitchClass | undefined => {
   const tonic = Chord.get(chordSymbol).tonic
@@ -133,7 +149,7 @@ const getChordRootPc = (chordSymbol: string): PitchClass | undefined => {
 export const getChordToneLabel = (pitchClass: PitchClass, chordSymbol: string): string => {
   const rootPc = getChordRootPc(chordSymbol)
   if (rootPc === undefined) {
-    return DEGREE_LABELS[normalizePc(pitchClass)]
+    return CHORD_INTERVAL_LABELS[normalizePc(pitchClass)]
   }
 
   const intervalFromRoot = normalizePc(pitchClass - rootPc)
@@ -141,7 +157,7 @@ export const getChordToneLabel = (pitchClass: PitchClass, chordSymbol: string): 
   if (isHalfDiminished && intervalFromRoot === 6) {
     return 'b5'
   }
-  return DEGREE_LABELS[intervalFromRoot]
+  return CHORD_INTERVAL_LABELS[intervalFromRoot]
 }
 
 const getAccidentalPreferenceByKey = (keyPc: PitchClass): 'sharp' | 'flat' => {
@@ -186,7 +202,9 @@ export const getDisplayedNoteLabel = (
     ? getAbsoluteNoteLabelByKey(pitchClass, keyPc)
     : noteLabelMode === 'chord' && selectedChordSymbol !== undefined
       ? getChordToneLabel(pitchClass, selectedChordSymbol)
-      : getLabelFromRoot(pitchClass, keyPc)
+      : noteLabelMode === 'scale'
+        ? getScaleIntervalLabelFromRoot(pitchClass, keyPc)
+        : getChordIntervalLabelFromRoot(pitchClass, keyPc)
 
 const getReferenceScalePitchClasses = (
   noteLabelMode: NoteLabelMode,
