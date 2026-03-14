@@ -12,6 +12,8 @@ import { getNotePalette } from '../notePalette'
 import { EXPORT_CANVAS_FONT_STACK, EXPORT_SVG_FONT_STACK, getExportLayout } from './layout'
 import type { ExportGraphicInput } from './types'
 
+const EXPORT_BEND_STROKE = 'rgba(226, 232, 240, 0.76)'
+
 const escapeXml = (value: string) =>
   value
     .replaceAll('&', '&amp;')
@@ -206,7 +208,7 @@ export const renderExportPngCanvas = ({
     const { control1X, control1Y, control2X, control2Y, endX, endY, leftX, leftY, rightX, rightY } =
       createBendGeometry(startX, startY)
 
-    ctx.strokeStyle = 'rgba(192, 132, 252, 0.82)'
+    ctx.strokeStyle = EXPORT_BEND_STROKE
     ctx.lineWidth = 2.4
     ctx.lineCap = 'round'
     ctx.beginPath()
@@ -345,10 +347,10 @@ export const renderExportSvgMarkup = ({
     const startY = layout.boardTop + from.stringIndex * layout.rowHeight + layout.rowHeight / 2
     const { endX, endY, leftX, leftY, path, rightX, rightY } = createBendGeometry(startX, startY)
     svgParts.push(
-      `<path d="${path}" fill="none" stroke="rgba(192, 132, 252, 0.82)" stroke-width="2.4" stroke-linecap="round" />`,
+      `<path d="${path}" fill="none" stroke="${EXPORT_BEND_STROKE}" stroke-width="2.4" stroke-linecap="round" />`,
     )
     svgParts.push(
-      `<path d="M ${leftX} ${leftY} L ${endX} ${endY} L ${rightX} ${rightY}" fill="none" stroke="rgba(192, 132, 252, 0.82)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />`,
+      `<path d="M ${leftX} ${leftY} L ${endX} ${endY} L ${rightX} ${rightY}" fill="none" stroke="${EXPORT_BEND_STROKE}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />`,
     )
   }
 

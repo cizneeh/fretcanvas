@@ -30,6 +30,8 @@ export const ConnectionLayer = ({
 }: ConnectionLayerProps) => {
   const [hoveredConnectionId, setHoveredConnectionId] = useState<string | undefined>(undefined)
   const [hoveredBendId, setHoveredBendId] = useState<string | undefined>(undefined)
+  const bendStrokeColor = 'rgba(226, 232, 240, 0.76)'
+  const bendHoverStrokeColor = 'rgba(248, 250, 252, 0.96)'
 
   return (
     <svg
@@ -99,7 +101,7 @@ export const ConnectionLayer = ({
         )
         const isHovered = hoveredBendId === bend.id
         const strokeWidth = isHovered ? 3.8 : 2.4
-        const strokeColor = isHovered ? 'rgba(192, 132, 252, 0.96)' : 'rgba(192, 132, 252, 0.78)'
+        const strokeColor = isHovered ? bendHoverStrokeColor : bendStrokeColor
 
         return (
           <g key={bend.id}>
