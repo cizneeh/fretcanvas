@@ -235,7 +235,7 @@ export const ControlPanel = () => {
                         setAppliedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
                       }}
                     >
-                      <option value="">Select major diatonic 7th</option>
+                      <option value="">Select diatonic chord</option>
                       {diatonicChordOptions.map((option) => (
                         <option key={option.symbol} value={option.symbol}>
                           {option.label}
