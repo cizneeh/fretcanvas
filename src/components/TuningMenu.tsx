@@ -9,7 +9,6 @@ import {
   TUNING_NOTE_OPTIONS,
 } from '../libs/tuning'
 import { useFretboardStore } from '../stores/fretboardStore'
-import { BOARD_PADDING_Y } from './fretboard-grid/constants'
 import {
   m3CardElevatedClass,
   m3FieldLabelClass,
@@ -28,7 +27,8 @@ export const TuningMenu = () => {
     draftStrings,
     draftPresetId,
     setDraftPreset,
-    setDraftStringCount,
+    appendDraftString,
+    removeDraftString,
     setDraftStringNote,
     resetDraftStrings,
     applyDraftStrings,
@@ -38,7 +38,8 @@ export const TuningMenu = () => {
       draftStrings: state.draftStrings,
       draftPresetId: state.draftPresetId,
       setDraftPreset: state.setDraftPreset,
-      setDraftStringCount: state.setDraftStringCount,
+      appendDraftString: state.appendDraftString,
+      removeDraftString: state.removeDraftString,
       setDraftStringNote: state.setDraftStringNote,
       resetDraftStrings: state.resetDraftStrings,
       applyDraftStrings: state.applyDraftStrings,
@@ -89,14 +90,7 @@ export const TuningMenu = () => {
   }, [closeWithCancel, isOpen])
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute z-30"
-      style={{
-        left: -14,
-        top: BOARD_PADDING_Y - 18,
-      }}
-    >
+    <div ref={containerRef} className="relative z-30">
       <button
         type="button"
         className="m3-focus-ring m3-state-surface flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-high)] text-[color:var(--md-sys-color-on-surface-variant)] shadow-[var(--md-elevation-2)]"
@@ -123,7 +117,7 @@ export const TuningMenu = () => {
 
       {isOpen ? (
         <div
-          className={`${m3CardElevatedClass} absolute left-12 top-0 w-[18.5rem] p-3`}
+          className={`${m3CardElevatedClass} absolute left-full top-0 ml-3 w-[18.5rem] p-3`}
           role="dialog"
           aria-label={t('tuning.title')}
         >
@@ -168,42 +162,16 @@ export const TuningMenu = () => {
               </div>
             </label>
 
-            <div className="flex items-center justify-between rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
-              <div className="flex flex-col">
+            <div className="space-y-2">
+              <div className="flex items-end justify-between px-1">
                 <span className={m3FieldLabelClass}>{t('tuning.stringCount')}</span>
-                <span className="text-base font-medium text-[color:var(--md-sys-color-on-surface)]">
+                <span className="text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
                   {draftStrings.length}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="m3-focus-ring m3-state-surface flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-lg text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={t('tuning.decreaseStringCount')}
-                  disabled={draftStrings.length <= 4}
-                  onClick={() => {
-                    setDraftStringCount(draftStrings.length - 1)
-                  }}
-                >
-                  -
-                </button>
-                <button
-                  type="button"
-                  className="m3-focus-ring m3-state-surface flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-lg text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={t('tuning.increaseStringCount')}
-                  disabled={draftStrings.length >= 8}
-                  onClick={() => {
-                    setDraftStringCount(draftStrings.length + 1)
-                  }}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="grid grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-2 px-1">
+              <div className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2 px-1">
+                <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
                 <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
                 <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
                   {t('tuning.note')}
@@ -213,11 +181,23 @@ export const TuningMenu = () => {
               {draftStrings.map((stringInfo, stringIndex) => (
                 <div
                   key={stringInfo.id}
-                  className="grid grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-2"
+                  className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2"
                 >
                   <div className="text-center text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
                     {stringIndex + 1}
                   </div>
+
+                  <button
+                    type="button"
+                    className="m3-focus-ring m3-state-surface flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+                    aria-label={t('tuning.removeString')}
+                    disabled={draftStrings.length <= 4}
+                    onClick={() => {
+                      removeDraftString(stringIndex)
+                    }}
+                  >
+                    -
+                  </button>
 
                   <div className="relative">
                     <select
@@ -253,6 +233,18 @@ export const TuningMenu = () => {
                   </div>
                 </div>
               ))}
+
+              <button
+                type="button"
+                className="m3-focus-ring m3-state-surface flex min-h-10 w-full items-center justify-center rounded-[var(--md-shape-md)] border border-dashed border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={t('tuning.addString')}
+                disabled={draftStrings.length >= 8}
+                onClick={() => {
+                  appendDraftString()
+                }}
+              >
+                + {t('tuning.addString')}
+              </button>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-1">

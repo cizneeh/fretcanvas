@@ -7,6 +7,7 @@ import { FretboardGrid } from './FretboardGrid'
 import { NoteContextMenu } from './NoteContextMenu'
 import { NoteLegend } from './NoteLegend'
 import { SelectionContextMenu } from './SelectionContextMenu'
+import { TuningMenu } from './TuningMenu'
 import { m3CardClass, m3FieldLabelClass } from './ui/materialClasses'
 
 export const FretboardView = () => {
@@ -19,26 +20,32 @@ export const FretboardView = () => {
         <NoteLegend />
       </div>
 
-      <div className="overflow-x-auto py-4">
-        <div className="w-max min-w-full space-y-3">
-          <div className="w-full rounded-md bg-black ring-1 ring-inset ring-zinc-700">
-            <RenderProfiler id="FretboardGrid">
-              <FretboardGrid
-                previewConnection={interaction.previewConnection}
-                {...interaction.gridProps}
-              />
-            </RenderProfiler>
-          </div>
+      <div className="flex items-start gap-3 py-4">
+        <div className="shrink-0 pt-4">
+          <TuningMenu />
+        </div>
 
-          <div className={`${m3CardClass} w-full p-3`}>
-            <div className={`mb-2 ${m3FieldLabelClass}`}>{t('export.range')}</div>
-            <div
-              className="grid"
-              style={{
-                gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(3.5rem, 3.5rem))`,
-              }}
-            >
-              <ExportRangeTrack {...interaction.rangeTrackProps} />
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="w-max min-w-full space-y-3">
+            <div className="w-full rounded-md bg-black ring-1 ring-inset ring-zinc-700">
+              <RenderProfiler id="FretboardGrid">
+                <FretboardGrid
+                  previewConnection={interaction.previewConnection}
+                  {...interaction.gridProps}
+                />
+              </RenderProfiler>
+            </div>
+
+            <div className={`${m3CardClass} w-full p-3`}>
+              <div className={`mb-2 ${m3FieldLabelClass}`}>{t('export.range')}</div>
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(3.5rem, 3.5rem))`,
+                }}
+              >
+                <ExportRangeTrack {...interaction.rangeTrackProps} />
+              </div>
             </div>
           </div>
         </div>

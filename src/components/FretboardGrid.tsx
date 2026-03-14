@@ -13,7 +13,6 @@ import {
 import { FretHeaderRow } from './fretboard-grid/FretHeaderRow'
 import { FretMarkerRow } from './fretboard-grid/FretMarkerRow'
 import { StringRows } from './fretboard-grid/StringRows'
-import { TuningMenu } from './TuningMenu'
 
 type FretboardGridProps = {
   previewConnection:
@@ -107,8 +106,6 @@ export const FretboardGrid = ({
       onPointerCancel={onBoardPointerUpOrCancel}
       onPointerLeave={onBoardPointerUpOrCancel}
     >
-      <TuningMenu />
-
       <ConnectionLayer
         svgWidth={svgWidth}
         svgHeight={svgHeight}
