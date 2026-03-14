@@ -1,4 +1,4 @@
-import type { ChordInputErrorKey, ScaleId } from '../libs/model'
+import type { ChordInputErrorKey, InstrumentPresetId, ScaleId } from '../libs/model'
 
 export type AppLocale = 'ja' | 'en'
 
@@ -75,6 +75,20 @@ const messages = {
     'scale.naturalMinor': 'Natural Minor',
     'scale.pentatonicMajor': 'Pentatonic Major',
     'scale.pentatonicMinor': 'Pentatonic Minor',
+    'tuning.apply': 'Apply',
+    'tuning.custom': 'Custom',
+    'tuning.instrument': 'Instrument',
+    'tuning.note': 'Note',
+    'tuning.octave': 'Octave',
+    'tuning.openMenu': 'Open tuning settings',
+    'tuning.reset': 'Reset',
+    'tuning.stringCount': 'String Count',
+    'tuning.title': 'Tuning',
+    'tuning.preset.bass4': 'Bass 4',
+    'tuning.preset.bass5': 'Bass 5',
+    'tuning.preset.guitar7': 'Guitar 7',
+    'tuning.preset.guitarStandard6': 'Guitar Standard 6',
+    'tuning.preset.ukuleleC': 'Ukulele C',
   },
   ja: {
     'app.language': '言語',
@@ -146,6 +160,20 @@ const messages = {
     'scale.naturalMinor': 'ナチュラルマイナー',
     'scale.pentatonicMajor': 'メジャーペンタトニック',
     'scale.pentatonicMinor': 'マイナーペンタトニック',
+    'tuning.apply': '適用',
+    'tuning.custom': 'カスタム',
+    'tuning.instrument': '楽器',
+    'tuning.note': '音名',
+    'tuning.octave': 'オクターブ',
+    'tuning.openMenu': 'チューニング設定を開く',
+    'tuning.reset': 'リセット',
+    'tuning.stringCount': '弦数',
+    'tuning.title': 'チューニング',
+    'tuning.preset.bass4': 'ベース 4',
+    'tuning.preset.bass5': 'ベース 5',
+    'tuning.preset.guitar7': 'ギター 7',
+    'tuning.preset.guitarStandard6': 'ギター標準 6',
+    'tuning.preset.ukuleleC': 'ウクレレ C',
   },
 } as const
 
@@ -161,6 +189,14 @@ const scaleMessageKeys: Record<ScaleId, TranslationKey> = {
   naturalMinor: 'scale.naturalMinor',
   pentatonicMajor: 'scale.pentatonicMajor',
   pentatonicMinor: 'scale.pentatonicMinor',
+}
+
+const instrumentPresetMessageKeys: Record<InstrumentPresetId, TranslationKey> = {
+  guitarStandard6: 'tuning.preset.guitarStandard6',
+  guitar7: 'tuning.preset.guitar7',
+  bass4: 'tuning.preset.bass4',
+  bass5: 'tuning.preset.bass5',
+  ukuleleC: 'tuning.preset.ukuleleC',
 }
 
 const formatMessage = (message: string, values: TranslationValues | undefined): string => {
@@ -204,3 +240,6 @@ export const getChordInputErrorMessage = (
   locale: AppLocale,
   errorKey: ChordInputErrorKey,
 ): string => translate(locale, chordInputErrorMessageKeys[errorKey])
+
+export const getInstrumentPresetLabel = (locale: AppLocale, presetId: InstrumentPresetId): string =>
+  translate(locale, instrumentPresetMessageKeys[presetId])

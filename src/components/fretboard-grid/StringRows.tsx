@@ -5,7 +5,6 @@ import {
   getDisplayedNoteLabel,
   getNoteVisualRole,
   normalizePc,
-  OPEN_STRINGS,
   type PositionId,
   toPositionId,
 } from '../../libs/model'
@@ -51,7 +50,7 @@ export const StringRows = memo(
     onNoteContextMenu,
     onNotePointerUp,
   }: StringRowsProps) => {
-    const { keyPc, noteLabelMode, noteTextMode, appliedChordSymbol, selectedScale } =
+    const { keyPc, noteLabelMode, noteTextMode, appliedChordSymbol, selectedScale, strings } =
       useFretboardStore(
         useShallow((state) => ({
           keyPc: state.keyPc,
@@ -59,6 +58,7 @@ export const StringRows = memo(
           noteTextMode: state.noteTextMode,
           appliedChordSymbol: state.appliedChordSymbol,
           selectedScale: state.selectedScale,
+          strings: state.strings,
         })),
       )
     const { exportFretStart, exportFretEnd, showExportRangeHighlight } = useSettingsStore(
@@ -74,7 +74,7 @@ export const StringRows = memo(
 
     return (
       <RenderProfiler id="StringRows">
-        {OPEN_STRINGS.map((stringInfo, stringIndex) => (
+        {strings.map((stringInfo, stringIndex) => (
           <Fragment key={stringInfo.id}>
             <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
               {stringInfo.name}

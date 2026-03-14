@@ -32,6 +32,7 @@ export const getExportLayout = ({
   noteLabelMode,
   selectedScale,
   appliedChordSymbol,
+  strings,
   exportFretStart,
   exportFretEnd,
   showExportTitle,
@@ -42,6 +43,7 @@ export const getExportLayout = ({
   | 'noteLabelMode'
   | 'selectedScale'
   | 'appliedChordSymbol'
+  | 'strings'
   | 'exportFretStart'
   | 'exportFretEnd'
   | 'showExportTitle'
@@ -62,9 +64,10 @@ export const getExportLayout = ({
   const titleHeight = showExportTitle && exportTitle !== undefined ? 26 : 0
   const headerHeight = 26
   const rowHeight = 44
+  const stringCount = strings.length
   const markerHeight = 20
   const cellWidth = 56
-  const boardHeight = 6 * rowHeight
+  const boardHeight = stringCount * rowHeight
   const canvasWidth = paddingX * 2 + labelWidth + fretCountInRange * cellWidth
   const canvasHeight = paddingY * 2 + titleHeight + headerHeight + boardHeight + markerHeight
   const boardLeft = paddingX + labelWidth
@@ -82,6 +85,7 @@ export const getExportLayout = ({
     titleHeight,
     headerHeight,
     rowHeight,
+    stringCount,
     markerHeight,
     cellWidth,
     boardHeight,

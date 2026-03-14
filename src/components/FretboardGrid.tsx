@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { type BendArrow, FRET_NUMBERS, OPEN_STRINGS, type PositionId } from '../libs/model'
+import { type BendArrow, FRET_NUMBERS, type PositionId } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
 import {
@@ -13,6 +13,7 @@ import {
 import { FretHeaderRow } from './fretboard-grid/FretHeaderRow'
 import { FretMarkerRow } from './fretboard-grid/FretMarkerRow'
 import { StringRows } from './fretboard-grid/StringRows'
+import { TuningMenu } from './TuningMenu'
 
 type FretboardGridProps = {
   previewConnection:
@@ -79,13 +80,14 @@ export const FretboardGrid = ({
 }: FretboardGridProps) => {
   const connectionsById = useFretboardStore((state) => state.connections)
   const bendsById = useFretboardStore((state) => state.bends)
+  const strings = useFretboardStore((state) => state.strings)
   const removeConnection = useFretboardStore((state) => state.removeConnection)
   const removeBend = useFretboardStore((state) => state.removeBend)
   const connections = useMemo(() => Object.values(connectionsById), [connectionsById])
   const bends = useMemo(() => Object.values(bendsById) as BendArrow[], [bendsById])
 
   const gridWidth = LABEL_WIDTH + FRET_NUMBERS.length * FRET_CELL_WIDTH
-  const gridHeight = HEADER_ROW_HEIGHT + OPEN_STRINGS.length * STRING_ROW_HEIGHT
+  const gridHeight = HEADER_ROW_HEIGHT + strings.length * STRING_ROW_HEIGHT
   const svgWidth = BOARD_PADDING_X * 2 + gridWidth
   const svgHeight = BOARD_PADDING_Y * 2 + gridHeight
 
@@ -105,6 +107,8 @@ export const FretboardGrid = ({
       onPointerCancel={onBoardPointerUpOrCancel}
       onPointerLeave={onBoardPointerUpOrCancel}
     >
+      <TuningMenu />
+
       <ConnectionLayer
         svgWidth={svgWidth}
         svgHeight={svgHeight}

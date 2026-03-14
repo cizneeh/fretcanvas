@@ -8,6 +8,7 @@ import type {
   PitchClass,
   PositionId,
   ScaleId,
+  StringInfo,
 } from '../model'
 
 export type ExportGraphicInput = {
@@ -17,6 +18,7 @@ export type ExportGraphicInput = {
   noteTextMode: NoteTextMode
   selectedScale: ScaleId | undefined
   appliedChordSymbol: string | undefined
+  strings: StringInfo[]
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   bends: BendArrow[]
@@ -37,6 +39,7 @@ export type ExportLayout = {
   titleHeight: number
   headerHeight: number
   rowHeight: number
+  stringCount: number
   markerHeight: number
   cellWidth: number
   boardHeight: number

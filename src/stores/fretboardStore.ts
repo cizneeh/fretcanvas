@@ -8,16 +8,25 @@ import {
   getBendId,
   getChordPitchClasses,
   getConnectionId,
+  getDefaultStrings,
+  getInstrumentPresetStrings,
+  getMatchingInstrumentPresetId,
   getScalePitchClasses,
+  getStringInfoFromMidi,
+  getTuningMidi,
+  getTuningOctaveFromMidi,
   type HighlightedNote,
+  type InstrumentPresetId,
   type NoteLabelMode,
   type NoteTextMode,
   normalizePc,
-  OPEN_STRINGS,
   type PitchClass,
   type PositionId,
   parseChordInput,
   type ScaleId,
+  type StringInfo,
+  stringInfoArraysEqual,
+  type TuningNoteName,
   toPositionId,
 } from '../libs/model'
 import { useHistoryStore } from './historyStore'
@@ -36,6 +45,9 @@ export type FretboardStoreState = {
   selectedScale: ScaleId | undefined
   noteLabelMode: NoteLabelMode
   noteTextMode: NoteTextMode
+  strings: StringInfo[]
+  draftStrings: StringInfo[]
+  draftPresetId: InstrumentPresetId | 'custom'
   // 入力欄の文字列をそのまま表示や追加処理の基準にすると、打ちかけの不完全な文字列や
   // 一時的なパース失敗で UI 全体が不安定になる。
   // そのため、編集中の chordInput と、表示・色分け・export・Add Chord Tones の基準になる
@@ -52,6 +64,12 @@ export type FretboardStoreActions = {
   setSelectedScale: (nextScale: ScaleId | undefined) => void
   setNoteLabelMode: (nextMode: NoteLabelMode) => void
   setNoteTextMode: (nextMode: NoteTextMode) => void
+  setDraftPreset: (nextPresetId: InstrumentPresetId | 'custom') => void
+  setDraftStringCount: (nextCount: number) => void
+  setDraftStringNote: (stringIndex: number, nextNote: TuningNoteName) => void
+  setDraftStringOctave: (stringIndex: number, nextOctave: number) => void
+  resetDraftStrings: () => void
+  applyDraftStrings: () => void
   setAppliedChordSymbol: (nextChordSymbol: string | undefined) => void
   setChordInput: (nextChordInput: string) => void
   applyChordInput: () => void
@@ -77,6 +95,24 @@ export type FretboardStore = FretboardStoreState & FretboardStoreActions
 export const useFretboardStore = create<FretboardStore>((set, get) => {
   const pushHistoryBeforeChange = () => {
     useHistoryStore.getState().pushBeforeChange()
+  }
+  const defaultStrings = getDefaultStrings()
+  const defaultPresetId = getMatchingInstrumentPresetId(defaultStrings) ?? 'custom'
+  const clampStringCount = (value: number) => Math.max(4, Math.min(value, 8))
+  const buildExtendedDraftStrings = (
+    sourceStrings: StringInfo[],
+    nextCount: number,
+  ): StringInfo[] => {
+    const trimmedStrings = sourceStrings
+      .slice(0, clampStringCount(nextCount))
+      .map((stringInfo, stringIndex) => getStringInfoFromMidi(stringIndex, stringInfo.midi))
+
+    while (trimmedStrings.length < clampStringCount(nextCount)) {
+      const previousMidi = trimmedStrings.at(-1)?.midi ?? defaultStrings.at(-1)?.midi ?? 40
+      trimmedStrings.push(getStringInfoFromMidi(trimmedStrings.length, previousMidi - 5))
+    }
+
+    return trimmedStrings
   }
 
   const getNextConnectionsWithoutPositions = (
@@ -104,6 +140,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
   const addPitchClassNotes = (
     pitchClasses: Set<PitchClass>,
     displayedNotes: Record<PositionId, HighlightedNote>,
+    strings: StringInfo[],
     options: AddNotesOptions | undefined,
   ): Record<PositionId, HighlightedNote> | undefined => {
     const next: Record<PositionId, HighlightedNote> = { ...displayedNotes }
@@ -117,7 +154,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         ? Math.max(options.fretRange.start, options.fretRange.end)
         : FRET_COUNT
 
-    for (const [stringIndex, stringInfo] of OPEN_STRINGS.entries()) {
+    for (const [stringIndex, stringInfo] of strings.entries()) {
       for (let fret = minFret; fret <= maxFret; fret += 1) {
         const midi = stringInfo.midi + fret
         const pitchClass = normalizePc(midi)
@@ -152,6 +189,9 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     selectedScale: 'major',
     noteLabelMode: 'scale',
     noteTextMode: 'interval',
+    strings: defaultStrings,
+    draftStrings: defaultStrings,
+    draftPresetId: defaultPresetId,
     appliedChordSymbol: undefined,
     chordInput: '',
     displayedNotes: {},
@@ -198,6 +238,116 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ noteTextMode: nextMode })
     },
 
+    setDraftPreset: (nextPresetId) => {
+      if (nextPresetId === 'custom') {
+        set({ draftPresetId: 'custom' })
+        return
+      }
+
+      set({
+        draftPresetId: nextPresetId,
+        draftStrings: getInstrumentPresetStrings(nextPresetId),
+      })
+    },
+
+    setDraftStringCount: (nextCount) => {
+      const current = get()
+      const clampedCount = clampStringCount(nextCount)
+      const nextStrings = buildExtendedDraftStrings(current.draftStrings, clampedCount)
+      if (
+        current.draftPresetId === (getMatchingInstrumentPresetId(nextStrings) ?? 'custom') &&
+        stringInfoArraysEqual(current.draftStrings, nextStrings)
+      ) {
+        return
+      }
+
+      set({
+        draftPresetId: getMatchingInstrumentPresetId(nextStrings) ?? 'custom',
+        draftStrings: nextStrings,
+      })
+    },
+
+    setDraftStringNote: (stringIndex, nextNote) => {
+      const current = get()
+      const currentString = current.draftStrings[stringIndex]
+      if (currentString === undefined) {
+        return
+      }
+
+      const nextMidi = getTuningMidi(nextNote, getTuningOctaveFromMidi(currentString.midi))
+      if (currentString.midi === nextMidi && currentString.name === nextNote) {
+        return
+      }
+
+      const nextDraftStrings = current.draftStrings.map((stringInfo, index) =>
+        index === stringIndex ? getStringInfoFromMidi(index, nextMidi) : stringInfo,
+      )
+
+      set({
+        draftPresetId: getMatchingInstrumentPresetId(nextDraftStrings) ?? 'custom',
+        draftStrings: nextDraftStrings,
+      })
+    },
+
+    setDraftStringOctave: (stringIndex, nextOctave) => {
+      const current = get()
+      const currentString = current.draftStrings[stringIndex]
+      if (currentString === undefined) {
+        return
+      }
+
+      const nextMidi = getTuningMidi(currentString.name as TuningNoteName, nextOctave)
+      if (currentString.midi === nextMidi) {
+        return
+      }
+
+      const nextDraftStrings = current.draftStrings.map((stringInfo, index) =>
+        index === stringIndex ? getStringInfoFromMidi(index, nextMidi) : stringInfo,
+      )
+
+      set({
+        draftPresetId: getMatchingInstrumentPresetId(nextDraftStrings) ?? 'custom',
+        draftStrings: nextDraftStrings,
+      })
+    },
+
+    resetDraftStrings: () => {
+      const current = get()
+      const nextDraftStrings = current.strings.map((stringInfo, stringIndex) =>
+        getStringInfoFromMidi(stringIndex, stringInfo.midi),
+      )
+      const nextPresetId = getMatchingInstrumentPresetId(current.strings) ?? 'custom'
+
+      if (
+        current.draftPresetId === nextPresetId &&
+        stringInfoArraysEqual(current.draftStrings, nextDraftStrings)
+      ) {
+        return
+      }
+
+      set({
+        draftPresetId: nextPresetId,
+        draftStrings: nextDraftStrings,
+      })
+    },
+
+    applyDraftStrings: () => {
+      const current = get()
+      if (stringInfoArraysEqual(current.strings, current.draftStrings)) {
+        return
+      }
+
+      pushHistoryBeforeChange()
+      set({
+        strings: current.draftStrings.map((stringInfo, stringIndex) =>
+          getStringInfoFromMidi(stringIndex, stringInfo.midi),
+        ),
+        displayedNotes: {},
+        connections: {},
+        bends: {},
+      })
+    },
+
     setAppliedChordSymbol: (nextChordSymbol) => {
       const current = get()
       const nextChordInput = nextChordSymbol ?? ''
@@ -242,13 +392,13 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     },
 
     addScaleNotes: (options) => {
-      const { keyPc, selectedScale, displayedNotes } = get()
+      const { keyPc, selectedScale, displayedNotes, strings } = get()
       if (selectedScale === undefined) {
         return
       }
 
       const pcsToAdd = new Set(getScalePitchClasses(keyPc, selectedScale))
-      const next = addPitchClassNotes(pcsToAdd, displayedNotes, options)
+      const next = addPitchClassNotes(pcsToAdd, displayedNotes, strings, options)
       if (next === undefined) {
         return
       }
@@ -258,13 +408,13 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     },
 
     addAppliedChordNotes: (options) => {
-      const { appliedChordSymbol, displayedNotes } = get()
+      const { appliedChordSymbol, displayedNotes, strings } = get()
       if (appliedChordSymbol === undefined) {
         return
       }
 
       const pitchClasses = new Set<PitchClass>(getChordPitchClasses(appliedChordSymbol))
-      const next = addPitchClassNotes(pitchClasses, displayedNotes, options)
+      const next = addPitchClassNotes(pitchClasses, displayedNotes, strings, options)
       if (next === undefined) {
         return
       }

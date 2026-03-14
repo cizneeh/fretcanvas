@@ -2,6 +2,11 @@
 // 永続化コードが一緒になってて若干責務として分離できてないし理解しづらい感じがするけど、まあとりあえずこのままにしておく。
 
 import type { AppLocale } from '../i18n/config'
+import {
+  getDefaultStrings,
+  getMatchingInstrumentPresetId,
+  getStringInfoFromMidi,
+} from '../libs/model'
 import type { FretboardStoreState } from './fretboardStore'
 import { useFretboardStore } from './fretboardStore'
 import {
@@ -39,6 +44,22 @@ const normalizeDisplayedNotes = (
     ]),
   ) as FretboardStoreState['displayedNotes']
 
+const normalizeStrings = (
+  strings: FretboardStoreState['strings'] | undefined,
+): FretboardStoreState['strings'] => {
+  if (strings === undefined || strings.length === 0) {
+    return getDefaultStrings()
+  }
+
+  return strings.map((stringInfo, stringIndex) => {
+    const midi =
+      typeof stringInfo?.midi === 'number'
+        ? stringInfo.midi
+        : (getDefaultStrings()[stringIndex]?.midi ?? 40)
+    return getStringInfoFromMidi(stringIndex, midi)
+  })
+}
+
 const captureCurrentSnapshot = (): HistorySnapshot =>
   createHistorySnapshot(useFretboardStore.getState(), useSettingsStore.getState())
 
@@ -57,6 +78,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
 
   const rawFretboard = candidate.current.fretboard as Partial<FretboardStoreState>
   const rawSettings = candidate.current.settings as Partial<SettingsStoreState>
+  const normalizedStrings = normalizeStrings(rawFretboard.strings)
 
   return {
     current: createHistorySnapshot(
@@ -65,6 +87,9 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         selectedScale: rawFretboard.selectedScale,
         noteLabelMode: rawFretboard.noteLabelMode ?? 'scale',
         noteTextMode: rawFretboard.noteTextMode ?? 'interval',
+        strings: normalizedStrings,
+        draftStrings: normalizedStrings,
+        draftPresetId: getMatchingInstrumentPresetId(normalizedStrings) ?? 'custom',
         appliedChordSymbol:
           typeof rawFretboard.appliedChordSymbol === 'string'
             ? rawFretboard.appliedChordSymbol

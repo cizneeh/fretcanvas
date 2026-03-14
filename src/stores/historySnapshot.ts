@@ -1,14 +1,16 @@
+import { getMatchingInstrumentPresetId } from '../libs/model'
 import type { FretboardStoreState } from './fretboardStore'
 import type { SettingsStoreState } from './settingsStore'
 
 type HistorySettingsState = Omit<SettingsStoreState, 'locale'>
+type HistoryFretboardState = Omit<FretboardStoreState, 'draftPresetId' | 'draftStrings'>
 
 /**
  * 各storeの値のsnapshotを保持する
  * storeが増えたら、ここに追加される想定
  */
 export type HistorySnapshot = {
-  fretboard: FretboardStoreState
+  fretboard: HistoryFretboardState
   settings: HistorySettingsState
 }
 
@@ -25,6 +27,7 @@ export const createHistorySnapshot = (
     noteLabelMode: fretboard.noteLabelMode,
     noteTextMode: fretboard.noteTextMode,
     selectedScale: fretboard.selectedScale,
+    strings: fretboard.strings.map((stringInfo) => ({ ...stringInfo })),
     appliedChordSymbol: fretboard.appliedChordSymbol,
     chordInput: fretboard.appliedChordSymbol ?? '',
     displayedNotes: { ...fretboard.displayedNotes },
@@ -97,6 +100,9 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
     left.fretboard.noteLabelMode === right.fretboard.noteLabelMode &&
     left.fretboard.noteTextMode === right.fretboard.noteTextMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
+    recordsEqual(left.fretboard.strings, right.fretboard.strings, (leftString, rightString) => {
+      return leftString.name === rightString.name && leftString.midi === rightString.midi
+    }) &&
     left.fretboard.appliedChordSymbol === right.fretboard.appliedChordSymbol &&
     notesEqual(left.fretboard.displayedNotes, right.fretboard.displayedNotes) &&
     connectionsEqual(left.fretboard.connections, right.fretboard.connections) &&
@@ -117,10 +123,14 @@ export const applyHistorySnapshotToActualStores = ({
   setSettingsState,
 }: {
   snapshot: HistorySnapshot
-  setFretboardState: (next: FretboardStoreState) => void
+  setFretboardState: (next: Partial<FretboardStoreState>) => void
   setSettingsState: (next: Partial<SettingsStoreState>) => void
 }) => {
   const cloned = createHistorySnapshot(snapshot.fretboard, snapshot.settings)
-  setFretboardState(cloned.fretboard)
+  setFretboardState({
+    ...cloned.fretboard,
+    draftStrings: cloned.fretboard.strings.map((stringInfo) => ({ ...stringInfo })),
+    draftPresetId: getMatchingInstrumentPresetId(cloned.fretboard.strings) ?? 'custom',
+  })
   setSettingsState(cloned.settings)
 }

@@ -47,6 +47,29 @@ export type StringInfo = {
   midi: number
 }
 
+export type TuningNoteName =
+  | 'C'
+  | 'C#'
+  | 'D'
+  | 'Eb'
+  | 'E'
+  | 'F'
+  | 'F#'
+  | 'G'
+  | 'Ab'
+  | 'A'
+  | 'Bb'
+  | 'B'
+export type InstrumentPresetId = 'guitarStandard6' | 'guitar7' | 'bass4' | 'bass5' | 'ukuleleC'
+
+export type InstrumentPreset = {
+  id: InstrumentPresetId
+  strings: readonly {
+    note: TuningNoteName
+    octave: number
+  }[]
+}
+
 export const FRET_COUNT = 24
 export const CHORD_INTERVAL_LABELS = [
   'R',
@@ -77,6 +100,21 @@ export const SCALE_INTERVAL_LABELS = [
   'M7',
 ]
 export const NOTE_LABELS = ['C', 'C#/Db', 'D', 'Eb', 'E', 'F', 'F#/Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+export const TUNING_NOTE_OPTIONS: TuningNoteName[] = [
+  'C',
+  'C#',
+  'D',
+  'Eb',
+  'E',
+  'F',
+  'F#',
+  'G',
+  'Ab',
+  'A',
+  'Bb',
+  'B',
+]
+export const TUNING_OCTAVE_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const
 const SHARP_NOTE_LABELS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const FLAT_NOTE_LABELS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 const MAJOR_KEY_TONIC_CANDIDATES: Record<PitchClass, string[]> = {
@@ -95,14 +133,59 @@ const MAJOR_KEY_TONIC_CANDIDATES: Record<PitchClass, string[]> = {
 }
 
 // midiというのは音高のこと。半音上がるごとに +1される数字。絶対的な音の高さ。
-export const OPEN_STRINGS: StringInfo[] = [
-  { id: '1', name: 'E', midi: 64 },
-  { id: '2', name: 'B', midi: 59 },
-  { id: '3', name: 'G', midi: 55 },
-  { id: '4', name: 'D', midi: 50 },
-  { id: '5', name: 'A', midi: 45 },
-  { id: '6', name: 'E', midi: 40 },
-]
+export const INSTRUMENT_PRESETS: InstrumentPreset[] = [
+  {
+    id: 'guitarStandard6',
+    strings: [
+      { note: 'E', octave: 4 },
+      { note: 'B', octave: 3 },
+      { note: 'G', octave: 3 },
+      { note: 'D', octave: 3 },
+      { note: 'A', octave: 2 },
+      { note: 'E', octave: 2 },
+    ],
+  },
+  {
+    id: 'guitar7',
+    strings: [
+      { note: 'E', octave: 4 },
+      { note: 'B', octave: 3 },
+      { note: 'G', octave: 3 },
+      { note: 'D', octave: 3 },
+      { note: 'A', octave: 2 },
+      { note: 'E', octave: 2 },
+      { note: 'B', octave: 1 },
+    ],
+  },
+  {
+    id: 'bass4',
+    strings: [
+      { note: 'G', octave: 2 },
+      { note: 'D', octave: 2 },
+      { note: 'A', octave: 1 },
+      { note: 'E', octave: 1 },
+    ],
+  },
+  {
+    id: 'bass5',
+    strings: [
+      { note: 'G', octave: 2 },
+      { note: 'D', octave: 2 },
+      { note: 'A', octave: 1 },
+      { note: 'E', octave: 1 },
+      { note: 'B', octave: 0 },
+    ],
+  },
+  {
+    id: 'ukuleleC',
+    strings: [
+      { note: 'A', octave: 4 },
+      { note: 'E', octave: 4 },
+      { note: 'C', octave: 4 },
+      { note: 'G', octave: 4 },
+    ],
+  },
+] as const
 
 const SCALE_NAME_BY_ID: Record<ScaleId, string> = {
   major: 'major',
@@ -155,6 +238,89 @@ export type MajorDiatonicSeventhChordOption = {
 export const POSITION_MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24] as const
 export const FRET_NUMBERS = Array.from({ length: FRET_COUNT + 1 }, (_, index) => index)
 export const MARKER_FRETS: number[] = POSITION_MARKERS.filter((fret) => fret <= FRET_COUNT)
+const MIN_TUNING_MIDI = 12
+const MAX_TUNING_MIDI = 95
+
+const toStringId = (stringIndex: number) => String(stringIndex + 1)
+const createStringInfo = (
+  stringIndex: number,
+  note: TuningNoteName,
+  octave: number,
+): StringInfo => {
+  const midi = Note.midi(`${note}${octave}`)
+  return {
+    id: toStringId(stringIndex),
+    name: note,
+    midi: midi ?? MIN_TUNING_MIDI,
+  }
+}
+
+export const getTuningNameFromMidi = (midi: number): TuningNoteName =>
+  TUNING_NOTE_OPTIONS[normalizePc(midi)]
+
+export const getTuningOctaveFromMidi = (midi: number): number =>
+  Math.max(0, Math.min(6, Math.floor(midi / 12) - 1))
+
+export const getTuningMidi = (note: TuningNoteName, octave: number): number =>
+  Note.midi(`${note}${octave}`) ?? MIN_TUNING_MIDI
+
+export const getStringInfoFromMidi = (stringIndex: number, midi: number): StringInfo => {
+  const clampedMidi = Math.max(MIN_TUNING_MIDI, Math.min(midi, MAX_TUNING_MIDI))
+  return {
+    id: toStringId(stringIndex),
+    name: getTuningNameFromMidi(clampedMidi),
+    midi: clampedMidi,
+  }
+}
+
+export const cloneStrings = (strings: StringInfo[]): StringInfo[] =>
+  strings.map((stringInfo, stringIndex) => ({
+    id: toStringId(stringIndex),
+    name: stringInfo.name,
+    midi: stringInfo.midi,
+  }))
+
+export const getInstrumentPresetStrings = (presetId: InstrumentPresetId): StringInfo[] => {
+  const preset = INSTRUMENT_PRESETS.find((candidate) => candidate.id === presetId)
+  if (preset === undefined) {
+    return []
+  }
+
+  return preset.strings.map(({ note, octave }, stringIndex) =>
+    createStringInfo(stringIndex, note, octave),
+  )
+}
+
+export const getDefaultStrings = (): StringInfo[] => getInstrumentPresetStrings('guitarStandard6')
+
+export const getMatchingInstrumentPresetId = (
+  strings: StringInfo[],
+): InstrumentPresetId | undefined => {
+  const matchedPreset = INSTRUMENT_PRESETS.find((preset) => {
+    const presetStrings = getInstrumentPresetStrings(preset.id)
+    if (presetStrings.length !== strings.length) {
+      return false
+    }
+
+    return presetStrings.every((presetString, stringIndex) => {
+      const stringInfo = strings[stringIndex]
+      return stringInfo?.name === presetString.name && stringInfo?.midi === presetString.midi
+    })
+  })
+
+  return matchedPreset?.id
+}
+
+export const stringInfoArraysEqual = (left: StringInfo[], right: StringInfo[]): boolean =>
+  left.length === right.length &&
+  left.every((leftString, stringIndex) => {
+    const rightString = right[stringIndex]
+    return (
+      rightString !== undefined &&
+      leftString.name === rightString.name &&
+      leftString.midi === rightString.midi
+    )
+  })
 
 /**
  * PicthをPitch Classに正規化する

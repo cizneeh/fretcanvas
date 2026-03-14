@@ -4,7 +4,6 @@ import {
   getNoteVisualRole,
   MARKER_FRETS,
   normalizePc,
-  OPEN_STRINGS,
   parsePositionId,
   toPositionId,
 } from '../model'
@@ -28,6 +27,7 @@ export const renderExportPngCanvas = ({
   noteTextMode,
   selectedScale,
   appliedChordSymbol,
+  strings,
   displayedNotes,
   connections,
   bends,
@@ -39,6 +39,7 @@ export const renderExportPngCanvas = ({
     keyPc,
     noteLabelMode,
     selectedScale,
+    strings,
     appliedChordSymbol,
     showExportTitle,
     ...rangeInput,
@@ -162,8 +163,14 @@ export const renderExportPngCanvas = ({
     ctx.stroke()
   }
 
-  OPEN_STRINGS.forEach((_stringInfo, row) => {
+  strings.forEach((stringInfo, row) => {
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.92)'
+    ctx.font = `15px ${EXPORT_CANVAS_FONT_STACK}`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(stringInfo.name, layout.paddingX + layout.labelWidth / 2, yCenter)
+
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'
     ctx.lineWidth = 1
     ctx.beginPath()
@@ -232,7 +239,7 @@ export const renderExportPngCanvas = ({
 
   ctx.restore()
 
-  OPEN_STRINGS.forEach((stringInfo, stringIndex) => {
+  strings.forEach((stringInfo, stringIndex) => {
     const yCenter = layout.boardTop + stringIndex * layout.rowHeight + layout.rowHeight / 2
     for (let fret = layout.start; fret <= layout.end; fret += 1) {
       drawNote(stringIndex, stringInfo.midi, fret, yCenter)
@@ -267,6 +274,7 @@ export const renderExportSvgMarkup = ({
   noteTextMode,
   selectedScale,
   appliedChordSymbol,
+  strings,
   displayedNotes,
   connections,
   bends,
@@ -278,6 +286,7 @@ export const renderExportSvgMarkup = ({
     keyPc,
     noteLabelMode,
     selectedScale,
+    strings,
     appliedChordSymbol,
     showExportTitle,
     ...rangeInput,
@@ -319,8 +328,11 @@ export const renderExportSvgMarkup = ({
     )
   }
 
-  OPEN_STRINGS.forEach((_stringInfo, row) => {
+  strings.forEach((stringInfo, row) => {
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
+    svgParts.push(
+      `<text x="${layout.paddingX + layout.labelWidth / 2}" y="${yCenter}" fill="rgba(226, 232, 240, 0.92)" font-family="${EXPORT_SVG_FONT_STACK}" font-size="15" text-anchor="middle" dominant-baseline="middle">${escapeXml(stringInfo.name)}</text>`,
+    )
     svgParts.push(
       `<line x1="${layout.boardLeft}" y1="${yCenter}" x2="${layout.boardLeft + layout.fretCountInRange * layout.cellWidth}" y2="${yCenter}" stroke="rgba(203, 213, 225, 0.72)" stroke-width="1" />`,
     )
@@ -363,7 +375,7 @@ export const renderExportSvgMarkup = ({
 
   svgParts.push('</g>')
 
-  OPEN_STRINGS.forEach((stringInfo, stringIndex) => {
+  strings.forEach((stringInfo, stringIndex) => {
     const yCenter = layout.boardTop + stringIndex * layout.rowHeight + layout.rowHeight / 2
     for (let fret = layout.start; fret <= layout.end; fret += 1) {
       const positionId = toPositionId({ stringIndex, fret })
