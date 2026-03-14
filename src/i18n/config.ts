@@ -1,4 +1,4 @@
-import type { ChordInputErrorKey, InstrumentPresetId, ScaleId } from '../libs/model'
+import type { ChordInputErrorKey, InstrumentPresetId, ScaleId } from '../libs/musicCore'
 
 export type AppLocale = 'ja' | 'en'
 

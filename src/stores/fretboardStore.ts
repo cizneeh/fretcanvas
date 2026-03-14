@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { getChordPitchClasses, getScalePitchClasses, parseChordInput } from '../libs/chordAnalysis'
 import {
   type BendArrow,
   type BendId,
@@ -6,15 +7,7 @@ import {
   type ConnectionId,
   FRET_COUNT,
   getBendId,
-  getChordPitchClasses,
   getConnectionId,
-  getDefaultStrings,
-  getInstrumentPresetStrings,
-  getMatchingInstrumentPresetId,
-  getScalePitchClasses,
-  getStringInfoFromMidi,
-  getTuningMidi,
-  getTuningOctaveFromMidi,
   type HighlightedNote,
   type InstrumentPresetId,
   type NoteLabelMode,
@@ -22,13 +15,20 @@ import {
   normalizePc,
   type PitchClass,
   type PositionId,
-  parseChordInput,
   type ScaleId,
   type StringInfo,
+  toPositionId,
+} from '../libs/musicCore'
+import {
+  getDefaultStrings,
+  getInstrumentPresetStrings,
+  getMatchingInstrumentPresetId,
+  getStringInfoFromMidi,
+  getTuningMidi,
+  getTuningOctaveFromMidi,
   stringInfoArraysEqual,
   type TuningNoteName,
-  toPositionId,
-} from '../libs/model'
+} from '../libs/tuning'
 import { useHistoryStore } from './historyStore'
 
 type AddNotesOptions = {

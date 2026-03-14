@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react'
 import { getPositionBounds } from '../components/fretboard-grid/constants'
-import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/model'
+import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/musicCore'
 import {
   isBendShortcutPressed,
   isDimShortcutPressed,

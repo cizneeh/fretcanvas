@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createBendGeometry } from '../../libs/bendGeometry'
-import type { BendArrow, Connection, PositionId } from '../../libs/model'
+import type { BendArrow, Connection, PositionId } from '../../libs/musicCore'
 import { getPositionPoint } from './constants'
 
 type ConnectionLayerProps = {

@@ -1,12 +1,6 @@
 import { createBendGeometry } from '../bendGeometry'
-import {
-  getDisplayedNoteLabel,
-  getNoteVisualRole,
-  MARKER_FRETS,
-  normalizePc,
-  parsePositionId,
-  toPositionId,
-} from '../model'
+import { MARKER_FRETS, normalizePc, parsePositionId, toPositionId } from '../musicCore'
+import { getDisplayedNoteLabel, getNoteVisualRole } from '../noteDisplay'
 import { getNotePalette } from '../notePalette'
 import { EXPORT_CANVAS_FONT_STACK, EXPORT_SVG_FONT_STACK, getExportLayout } from './layout'
 import type { ExportGraphicInput } from './types'

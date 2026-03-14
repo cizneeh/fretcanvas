@@ -1,13 +1,7 @@
 import { Fragment, memo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import {
-  FRET_NUMBERS,
-  getDisplayedNoteLabel,
-  getNoteVisualRole,
-  normalizePc,
-  type PositionId,
-  toPositionId,
-} from '../../libs/model'
+import { FRET_NUMBERS, normalizePc, type PositionId, toPositionId } from '../../libs/musicCore'
+import { getDisplayedNoteLabel, getNoteVisualRole } from '../../libs/noteDisplay'
 import { useFretboardStore } from '../../stores/fretboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { RenderProfiler } from '../dev/RenderProfiler'

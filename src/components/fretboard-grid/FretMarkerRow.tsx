@@ -1,4 +1,4 @@
-import { FRET_NUMBERS, MARKER_FRETS } from '../../libs/model'
+import { FRET_NUMBERS, MARKER_FRETS } from '../../libs/musicCore'
 
 type FretMarkerRowProps = {
   onSelectClosestHandleToFret: (fret: number) => void

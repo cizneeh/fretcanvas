@@ -1,4 +1,4 @@
-import type { NoteVisualRole } from './model'
+import type { NoteVisualRole } from './musicCore'
 
 export type ThemeMode = 'dark' | 'light'
 

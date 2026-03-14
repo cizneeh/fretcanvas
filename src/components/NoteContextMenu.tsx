@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n/useI18n'
-import { getBendId, type PositionId } from '../libs/model'
+import { getBendId, type PositionId } from '../libs/musicCore'
 import {
   getBendShortcutLabel,
   getDimShortcutLabel,

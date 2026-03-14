@@ -1,5 +1,5 @@
-import type { PositionId } from '../../libs/model'
-import { parsePositionId } from '../../libs/model'
+import type { PositionId } from '../../libs/musicCore'
+import { parsePositionId } from '../../libs/musicCore'
 
 export const LABEL_WIDTH = 32
 export const HEADER_ROW_HEIGHT = 32

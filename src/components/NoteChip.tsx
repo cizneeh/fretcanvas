@@ -1,4 +1,4 @@
-import type { NoteVisualRole } from '../libs/model'
+import type { NoteVisualRole } from '../libs/musicCore'
 import { getNotePalette } from '../libs/notePalette'
 
 type NoteChipProps = {

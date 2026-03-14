@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { type BendArrow, FRET_NUMBERS, type PositionId } from '../libs/model'
+import { type BendArrow, FRET_NUMBERS, type PositionId } from '../libs/musicCore'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
 import {

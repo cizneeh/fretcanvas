@@ -9,7 +9,7 @@ import {
   stringInfoArraysEqual,
   TUNING_NOTE_OPTIONS,
   TUNING_OCTAVE_OPTIONS,
-} from '../libs/model'
+} from '../libs/tuning'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { BOARD_PADDING_Y } from './fretboard-grid/constants'
 import {

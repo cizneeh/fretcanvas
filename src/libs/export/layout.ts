@@ -1,5 +1,5 @@
 import { getScaleExportTitle } from '../../i18n/config'
-import { getAbsoluteNoteLabelByKey } from '../model'
+import { getAbsoluteNoteLabelByKey } from '../noteDisplay'
 import type { ExportGraphicInput, ExportLayout } from './types'
 
 const getExportTitle = ({

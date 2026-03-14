@@ -9,7 +9,7 @@ import type {
   PositionId,
   ScaleId,
   StringInfo,
-} from '../model'
+} from '../musicCore'
 
 export type ExportGraphicInput = {
   locale: AppLocale

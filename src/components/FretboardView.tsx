@@ -1,6 +1,6 @@
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
 import { useI18n } from '../i18n/useI18n'
-import { FRET_NUMBERS } from '../libs/model'
+import { FRET_NUMBERS } from '../libs/musicCore'
 import { RenderProfiler } from './dev/RenderProfiler'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'

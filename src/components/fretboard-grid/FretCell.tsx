@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import type { NoteVisualRole, PositionId } from '../../libs/model'
+import type { NoteVisualRole, PositionId } from '../../libs/musicCore'
 import { isCellRenderLogEnabled } from '../../libs/renderProfiler'
 import { useFretboardStore } from '../../stores/fretboardStore'
 import { NoteChip } from '../NoteChip'

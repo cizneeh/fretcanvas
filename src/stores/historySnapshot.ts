@@ -1,4 +1,4 @@
-import { getMatchingInstrumentPresetId } from '../libs/model'
+import { getMatchingInstrumentPresetId } from '../libs/tuning'
 import type { FretboardStoreState } from './fretboardStore'
 import type { SettingsStoreState } from './settingsStore'
 

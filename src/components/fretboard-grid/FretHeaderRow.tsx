@@ -1,4 +1,4 @@
-import { FRET_NUMBERS } from '../../libs/model'
+import { FRET_NUMBERS } from '../../libs/musicCore'
 
 export const FretHeaderRow = () => {
   return (

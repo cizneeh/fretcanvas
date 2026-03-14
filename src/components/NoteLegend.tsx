@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n/useI18n'
-import type { NoteLabelMode, NoteVisualRole } from '../libs/model'
+import type { NoteLabelMode, NoteVisualRole } from '../libs/musicCore'
 import { getNotePalette } from '../libs/notePalette'
 import { useFretboardStore } from '../stores/fretboardStore'
 

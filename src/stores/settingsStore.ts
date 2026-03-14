@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { type AppLocale, getDefaultLocale } from '../i18n/config'
-import { FRET_COUNT } from '../libs/model'
+import { FRET_COUNT } from '../libs/musicCore'
 import { useHistoryStore } from './historyStore'
 
 type SettingsUpdateOptions = {

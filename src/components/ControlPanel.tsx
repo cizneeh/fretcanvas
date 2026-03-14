@@ -2,18 +2,20 @@ import { useShallow } from 'zustand/react/shallow'
 import { getChordInputErrorMessage, getScaleLabel } from '../i18n/config'
 import { useI18n } from '../i18n/useI18n'
 import {
-  getAbsoluteNoteLabelByKey,
   getChordPitchClasses,
   getChordToneLabel,
   getChordTonePitchClasses,
   getMajorDiatonicSeventhChordOptions,
+  parseChordInput,
+} from '../libs/chordAnalysis'
+import {
   NOTE_LABELS,
   type NoteLabelMode,
   type NoteTextMode,
   type PitchClass,
-  parseChordInput,
   type ScaleId,
-} from '../libs/model'
+} from '../libs/musicCore'
+import { getAbsoluteNoteLabelByKey } from '../libs/noteDisplay'
 import { getNotePalette } from '../libs/notePalette'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useSettingsStore } from '../stores/settingsStore'
