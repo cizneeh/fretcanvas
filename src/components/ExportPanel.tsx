@@ -189,7 +189,7 @@ export const ExportPanel = ({
         className={`w-full ${m3FilledButtonClass}`}
         onClick={onExportTransparentPng}
       >
-        Export Transparent PNG
+        Export PNG
       </button>
     </div>
   )
