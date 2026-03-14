@@ -52,7 +52,7 @@ export const CHORD_INTERVAL_LABELS = [
   '9',
   'm3',
   'M3',
-  'P4',
+  '11',
   '#11',
   'P5',
   'b13',
