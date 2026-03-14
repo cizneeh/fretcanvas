@@ -36,6 +36,7 @@ export const getExportLayout = ({
   exportFretStart,
   exportFretEnd,
   showExportTitle,
+  showExportStringLabels,
 }: Pick<
   ExportGraphicInput,
   | 'locale'
@@ -47,6 +48,7 @@ export const getExportLayout = ({
   | 'exportFretStart'
   | 'exportFretEnd'
   | 'showExportTitle'
+  | 'showExportStringLabels'
 >): ExportLayout => {
   const start = Math.min(exportFretStart, exportFretEnd)
   const end = Math.max(exportFretStart, exportFretEnd)
@@ -60,7 +62,7 @@ export const getExportLayout = ({
   })
   const paddingX = 12
   const paddingY = 12
-  const labelWidth = 34
+  const labelWidth = showExportStringLabels ? 34 : 0
   const titleHeight = showExportTitle && exportTitle !== undefined ? 26 : 0
   const headerHeight = 26
   const rowHeight = 44

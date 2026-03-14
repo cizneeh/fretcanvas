@@ -18,6 +18,7 @@ export type SettingsStoreState = {
   addScaleWithinExportRange: boolean
   showExportRangeHighlight: boolean
   showExportTitle: boolean
+  showExportStringLabels: boolean
 }
 
 export type SettingsStoreActions = {
@@ -26,6 +27,7 @@ export type SettingsStoreActions = {
   setExportFormat: (nextFormat: ExportFormat, options?: SettingsUpdateOptions) => void
   setShowExportRangeHighlight: (nextValue: boolean, options?: SettingsUpdateOptions) => void
   setShowExportTitle: (nextValue: boolean, options?: SettingsUpdateOptions) => void
+  setShowExportStringLabels: (nextValue: boolean, options?: SettingsUpdateOptions) => void
   handleExportFretStartChange: (nextStart: number, options?: SettingsUpdateOptions) => void
   handleExportFretEndChange: (nextEnd: number, options?: SettingsUpdateOptions) => void
   handleBackgroundOpacityPercentChange: (
@@ -50,6 +52,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
     addScaleWithinExportRange: true,
     showExportRangeHighlight: true,
     showExportTitle: false,
+    showExportStringLabels: true,
 
     setLocale: (nextLocale) => {
       if (get().locale === nextLocale) {
@@ -106,6 +109,18 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
       }
 
       set({ showExportTitle: nextValue })
+    },
+
+    setShowExportStringLabels: (nextValue, options) => {
+      if (get().showExportStringLabels === nextValue) {
+        return
+      }
+
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({ showExportStringLabels: nextValue })
     },
 
     handleExportFretStartChange: (nextStart, options) => {

@@ -27,6 +27,7 @@ export const renderExportPngCanvas = ({
   bends,
   backgroundOpacityPercent,
   showExportTitle,
+  showExportStringLabels,
   ...rangeInput
 }: ExportGraphicInput) => {
   const layout = getExportLayout({
@@ -36,6 +37,7 @@ export const renderExportPngCanvas = ({
     strings,
     appliedChordSymbol,
     showExportTitle,
+    showExportStringLabels,
     ...rangeInput,
   })
   const canvas = document.createElement('canvas')
@@ -164,11 +166,13 @@ export const renderExportPngCanvas = ({
 
   strings.forEach((stringInfo, row) => {
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
-    ctx.fillStyle = 'rgba(226, 232, 240, 0.92)'
-    ctx.font = `15px ${EXPORT_CANVAS_FONT_STACK}`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(stringInfo.name, layout.paddingX + layout.labelWidth / 2, yCenter)
+    if (showExportStringLabels) {
+      ctx.fillStyle = 'rgba(226, 232, 240, 0.92)'
+      ctx.font = `15px ${EXPORT_CANVAS_FONT_STACK}`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(stringInfo.name, layout.paddingX + layout.labelWidth / 2, yCenter)
+    }
 
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'
     ctx.lineWidth = 1
@@ -279,6 +283,7 @@ export const renderExportSvgMarkup = ({
   bends,
   backgroundOpacityPercent,
   showExportTitle,
+  showExportStringLabels,
   ...rangeInput
 }: ExportGraphicInput) => {
   const layout = getExportLayout({
@@ -288,6 +293,7 @@ export const renderExportSvgMarkup = ({
     strings,
     appliedChordSymbol,
     showExportTitle,
+    showExportStringLabels,
     ...rangeInput,
   })
   const clipTop = Math.max(0, layout.boardTop - 56)
@@ -329,9 +335,11 @@ export const renderExportSvgMarkup = ({
 
   strings.forEach((stringInfo, row) => {
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
-    svgParts.push(
-      `<text x="${layout.paddingX + layout.labelWidth / 2}" y="${yCenter}" fill="rgba(226, 232, 240, 0.92)" font-family="${EXPORT_SVG_FONT_STACK}" font-size="15" text-anchor="middle" dominant-baseline="middle">${escapeXml(stringInfo.name)}</text>`,
-    )
+    if (showExportStringLabels) {
+      svgParts.push(
+        `<text x="${layout.paddingX + layout.labelWidth / 2}" y="${yCenter}" fill="rgba(226, 232, 240, 0.92)" font-family="${EXPORT_SVG_FONT_STACK}" font-size="15" text-anchor="middle" dominant-baseline="middle">${escapeXml(stringInfo.name)}</text>`,
+      )
+    }
     svgParts.push(
       `<line x1="${layout.boardLeft}" y1="${yCenter}" x2="${layout.boardLeft + layout.fretCountInRange * layout.cellWidth}" y2="${yCenter}" stroke="rgba(203, 213, 225, 0.72)" stroke-width="1" />`,
     )

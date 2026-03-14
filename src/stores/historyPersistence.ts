@@ -103,6 +103,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         addScaleWithinExportRange: rawSettings.addScaleWithinExportRange ?? true,
         showExportRangeHighlight: rawSettings.showExportRangeHighlight ?? true,
         showExportTitle: rawSettings.showExportTitle ?? false,
+        showExportStringLabels: rawSettings.showExportStringLabels ?? true,
         locale: candidate.locale === 'ja' || candidate.locale === 'en' ? candidate.locale : 'en',
       },
     ),

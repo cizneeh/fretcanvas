@@ -57,9 +57,11 @@ const ExpandedExportSettingsContent = () => {
     exportFormat,
     backgroundOpacityPercent,
     showExportTitle,
+    showExportStringLabels,
     setExportFormat,
     handleBackgroundOpacityPercentChange,
     setShowExportTitle,
+    setShowExportStringLabels,
   } = useSettingsStore(
     useShallow((state) => ({
       exportFretStart: state.exportFretStart,
@@ -67,9 +69,11 @@ const ExpandedExportSettingsContent = () => {
       exportFormat: state.exportFormat,
       backgroundOpacityPercent: state.backgroundOpacityPercent,
       showExportTitle: state.showExportTitle,
+      showExportStringLabels: state.showExportStringLabels,
       setExportFormat: state.setExportFormat,
       handleBackgroundOpacityPercentChange: state.handleBackgroundOpacityPercentChange,
       setShowExportTitle: state.setShowExportTitle,
+      setShowExportStringLabels: state.setShowExportStringLabels,
     })),
   )
   const { beginBufferedEdit, commitBufferedEdit, cancelBufferedEdit, captureSnapshot } =
@@ -103,6 +107,7 @@ const ExpandedExportSettingsContent = () => {
       exportFretEnd,
       backgroundOpacityPercent,
       showExportTitle,
+      showExportStringLabels,
     }),
     [
       locale,
@@ -119,6 +124,7 @@ const ExpandedExportSettingsContent = () => {
       exportFretEnd,
       backgroundOpacityPercent,
       showExportTitle,
+      showExportStringLabels,
     ],
   )
 
@@ -185,9 +191,11 @@ const ExpandedExportSettingsContent = () => {
           exportFormat={exportFormat}
           backgroundOpacityPercent={backgroundOpacityPercent}
           showExportTitle={showExportTitle}
+          showExportStringLabels={showExportStringLabels}
           onExportFormatChange={setExportFormat}
           onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
           onShowExportTitleChange={setShowExportTitle}
+          onShowExportStringLabelsChange={setShowExportStringLabels}
           onBackgroundOpacityEditStart={() => {
             const snapshot = captureSnapshot()
             if (snapshot !== undefined) {

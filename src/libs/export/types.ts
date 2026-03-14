@@ -26,6 +26,7 @@ export type ExportGraphicInput = {
   exportFretEnd: number
   backgroundOpacityPercent: number
   showExportTitle: boolean
+  showExportStringLabels: boolean
 }
 
 export type ExportLayout = {

@@ -17,6 +17,7 @@ type ExportPanelProps = {
   exportFormat: ExportFormat
   backgroundOpacityPercent: number
   showExportTitle: boolean
+  showExportStringLabels: boolean
   onExportFormatChange: (nextFormat: ExportFormat) => void
   onBackgroundOpacityPercentChange: (
     nextOpacity: number,
@@ -25,6 +26,7 @@ type ExportPanelProps = {
     },
   ) => void
   onShowExportTitleChange: (nextValue: boolean) => void
+  onShowExportStringLabelsChange: (nextValue: boolean) => void
   onBackgroundOpacityEditStart: () => void
   onBackgroundOpacityEditEnd: () => void
   onExport: () => void
@@ -36,9 +38,11 @@ export const ExportPanel = ({
   exportFormat,
   backgroundOpacityPercent,
   showExportTitle,
+  showExportStringLabels,
   onExportFormatChange,
   onBackgroundOpacityPercentChange,
   onShowExportTitleChange,
+  onShowExportStringLabelsChange,
   onBackgroundOpacityEditStart,
   onBackgroundOpacityEditEnd,
   onExport,
@@ -89,6 +93,18 @@ export const ExportPanel = ({
           }}
         />
         {t('export.showTitle')}
+      </label>
+
+      <label className="mb-4 flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+        <input
+          type="checkbox"
+          className={m3CheckboxClass}
+          checked={showExportStringLabels}
+          onChange={(event) => {
+            onShowExportStringLabelsChange(event.target.checked)
+          }}
+        />
+        {t('export.showStringLabels')}
       </label>
 
       <div className="mb-4">
