@@ -341,6 +341,14 @@ export const getChordToneLabel = (pitchClass: PitchClass, chordSymbol: string): 
   }
 
   const intervalFromRoot = normalizePc(pitchClass - rootPc)
+  const chordToneDegrees = getChordToneDegrees(chordSymbol)
+  if (chordToneDegrees.has(2) && intervalFromRoot === 2) {
+    return 'M2'
+  }
+  if (chordToneDegrees.has(4) && intervalFromRoot === 5) {
+    return 'P4'
+  }
+
   const isHalfDiminished = getResolvedChord(chordSymbol).intervals.includes('5d')
   if (isHalfDiminished && intervalFromRoot === 6) {
     return 'b5'
@@ -515,16 +523,34 @@ export const getChordPitchClasses = (chordSymbol: string): PitchClass[] =>
     .filter((value): value is number => value !== undefined)
     .map((value) => normalizePc(value))
 
+const getChordToneDegrees = (chordSymbol: string): Set<number> => {
+  const intervalDegrees = getResolvedChord(chordSymbol).intervals.map(getIntervalDegree)
+  const chordToneDegrees = new Set([1, 3, 5, 7])
+
+  // sus2 / sus4 は 3rd の代わりに 2nd / 4th が骨格音になるので chord tone として扱う。
+  if (!intervalDegrees.includes(3)) {
+    if (intervalDegrees.includes(2)) {
+      chordToneDegrees.add(2)
+    }
+    if (intervalDegrees.includes(4)) {
+      chordToneDegrees.add(4)
+    }
+  }
+
+  return chordToneDegrees
+}
+
 export const getChordTonePitchClasses = (chordSymbol: string): PitchClass[] => {
   const parsed = getResolvedChord(chordSymbol)
+  const chordToneDegrees = getChordToneDegrees(chordSymbol)
 
   return parsed.intervals
     .map((interval, index) => ({
-      intervalDegree: Number.parseInt(interval, 10),
+      intervalDegree: getIntervalDegree(interval),
       noteName: parsed.notes[index],
     }))
     .filter(({ intervalDegree, noteName }) => {
-      return [1, 3, 5, 7].includes(intervalDegree) && noteName !== undefined
+      return chordToneDegrees.has(intervalDegree) && noteName !== undefined
     })
     .map(({ noteName }) => Note.chroma(noteName))
     .filter((value): value is number => value !== undefined)
