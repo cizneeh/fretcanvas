@@ -28,7 +28,7 @@ const messages = {
     'control.chordNotes': 'Chord Notes',
     'control.examples': 'Examples',
     'control.manualInput': 'Manual Input',
-    'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Dm7,13, Cmaj7/B, G7alt...',
+    'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Cmaj7/B...',
     'control.manualInputTooltip':
       'Examples:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nC7#9b13',
     'control.interval': 'Interval',
@@ -99,7 +99,7 @@ const messages = {
     'control.chordNotes': '構成音',
     'control.examples': '例',
     'control.manualInput': '手動入力',
-    'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Dm7,13, Cmaj7/B, G7alt...',
+    'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Cmaj7/B...',
     'control.manualInputTooltip': '例:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nC7#9b13',
     'control.interval': '度数',
     'control.key': 'キー',
