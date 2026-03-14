@@ -191,6 +191,13 @@ export const saveCustomTuningPreset = (
   return nextPresets
 }
 
+export const deleteCustomTuningPreset = (presetId: string): CustomTuningPreset[] => {
+  const presets = loadCustomTuningPresets()
+  const nextPresets = presets.filter((preset) => preset.id !== presetId)
+  persistCustomTuningPresets(nextPresets)
+  return nextPresets
+}
+
 export const getMatchingCustomTuningPresetId = (
   strings: StringInfo[],
   presets: CustomTuningPreset[],
