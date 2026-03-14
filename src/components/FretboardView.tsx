@@ -4,6 +4,7 @@ import { RenderProfiler } from './dev/RenderProfiler'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'
 import { NoteContextMenu } from './NoteContextMenu'
+import { NoteLegend } from './NoteLegend'
 import { SelectionContextMenu } from './SelectionContextMenu'
 import { m3CardClass, m3FieldLabelClass } from './ui/materialClasses'
 
@@ -12,6 +13,10 @@ export const FretboardView = () => {
 
   return (
     <section className="select-none">
+      <div className="mb-1">
+        <NoteLegend />
+      </div>
+
       <div className="overflow-x-auto py-4">
         <div className="w-max min-w-full space-y-3">
           <div className="w-full rounded-md bg-black ring-1 ring-inset ring-zinc-700">
