@@ -74,10 +74,10 @@ export const StringRows = memo(
               {stringInfo.name}
             </div>
 
-            {/* ノート自体じゃなくて、マス目がmidiのデータを持ってるのか。で、ノート自体は、midi　音高の情報を持っていない。マス目の上にノートが来たら、マス目の音高で表示される。 */}
+            {/* 各マスは弦の pitch class と fret 番号から音名を決める。ノート自体は絶対音高を持たない。 */}
             {FRET_NUMBERS.map((fret) => {
               const positionId = toPositionId({ stringIndex, fret })
-              const pitchClass = normalizePc(stringInfo.midi + fret)
+              const pitchClass = normalizePc(stringInfo.pitchClass + fret)
               const visualRole = getNoteVisualRole({
                 pitchClass,
                 noteLabelMode,

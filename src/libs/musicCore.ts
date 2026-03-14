@@ -41,7 +41,7 @@ export type HighlightedNote = {
 export type StringInfo = {
   id: string
   name: string
-  midi: number
+  pitchClass: PitchClass
 }
 
 export type TuningNoteName =
@@ -62,10 +62,7 @@ export type InstrumentPresetId = 'guitarStandard6' | 'guitar7' | 'bass4' | 'bass
 
 export type InstrumentPreset = {
   id: InstrumentPresetId
-  strings: readonly {
-    note: TuningNoteName
-    octave: number
-  }[]
+  strings: readonly TuningNoteName[]
 }
 
 export const FRET_COUNT = 24

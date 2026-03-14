@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { getInstrumentPresetLabel } from '../i18n/config'
 import { useI18n } from '../i18n/useI18n'
 import {
   getMatchingInstrumentPresetId,
-  getTuningOctaveFromMidi,
   INSTRUMENT_PRESETS,
   stringInfoArraysEqual,
   TUNING_NOTE_OPTIONS,
-  TUNING_OCTAVE_OPTIONS,
 } from '../libs/tuning'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { BOARD_PADDING_Y } from './fretboard-grid/constants'
@@ -32,7 +30,6 @@ export const TuningMenu = () => {
     setDraftPreset,
     setDraftStringCount,
     setDraftStringNote,
-    setDraftStringOctave,
     resetDraftStrings,
     applyDraftStrings,
   } = useFretboardStore(
@@ -43,7 +40,6 @@ export const TuningMenu = () => {
       setDraftPreset: state.setDraftPreset,
       setDraftStringCount: state.setDraftStringCount,
       setDraftStringNote: state.setDraftStringNote,
-      setDraftStringOctave: state.setDraftStringOctave,
       resetDraftStrings: state.resetDraftStrings,
       applyDraftStrings: state.applyDraftStrings,
     })),
@@ -56,6 +52,16 @@ export const TuningMenu = () => {
     [draftPresetId, draftStrings, strings],
   )
 
+  const closeWithCancel = useCallback(() => {
+    resetDraftStrings()
+    setIsOpen(false)
+  }, [resetDraftStrings])
+
+  const applyAndClose = () => {
+    applyDraftStrings()
+    setIsOpen(false)
+  }
+
   useEffect(() => {
     if (!isOpen) {
       return
@@ -65,12 +71,12 @@ export const TuningMenu = () => {
       if (containerRef.current?.contains(event.target as Node) === true) {
         return
       }
-      setIsOpen(false)
+      closeWithCancel()
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsOpen(false)
+        closeWithCancel()
       }
     }
 
@@ -80,15 +86,15 @@ export const TuningMenu = () => {
       window.removeEventListener('pointerdown', handlePointerDown)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen])
+  }, [closeWithCancel, isOpen])
 
   return (
     <div
       ref={containerRef}
       className="absolute z-30"
       style={{
-        left: 8,
-        top: BOARD_PADDING_Y + 6,
+        left: -14,
+        top: BOARD_PADDING_Y - 18,
       }}
     >
       <button
@@ -97,7 +103,12 @@ export const TuningMenu = () => {
         aria-label={t('tuning.openMenu')}
         aria-expanded={isOpen}
         onClick={() => {
-          setIsOpen((current) => !current)
+          if (isOpen) {
+            closeWithCancel()
+            return
+          }
+          resetDraftStrings()
+          setIsOpen(true)
         }}
       >
         <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
@@ -112,28 +123,17 @@ export const TuningMenu = () => {
 
       {isOpen ? (
         <div
-          className={`${m3CardElevatedClass} absolute left-10 top-[-8px] w-[18rem] p-3`}
+          className={`${m3CardElevatedClass} absolute left-12 top-0 w-[18.5rem] p-3`}
           role="dialog"
           aria-label={t('tuning.title')}
         >
-          <div className="mb-3 flex items-center justify-between">
-            <div className="text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
-              {t('tuning.title')}
-            </div>
-            <button
-              type="button"
-              className="m3-state-surface rounded-full px-2 py-1 text-xs text-[color:var(--md-sys-color-on-surface-variant)]"
-              onClick={() => {
-                setIsOpen(false)
-              }}
-            >
-              {t('common.close')}
-            </button>
+          <div className="mb-3 text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
+            {t('tuning.title')}
           </div>
 
           <div className="flex flex-col gap-3">
             <label className="flex flex-col gap-1.5">
-              <span className={m3FieldLabelClass}>{t('tuning.instrument')}</span>
+              <span className={m3FieldLabelClass}>{t('tuning.preset')}</span>
               <div className="relative">
                 <select
                   className={m3SelectClass}
@@ -168,54 +168,52 @@ export const TuningMenu = () => {
               </div>
             </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className={m3FieldLabelClass}>{t('tuning.stringCount')}</span>
-              <div className="relative">
-                <select
-                  className={m3SelectClass}
-                  value={draftStrings.length}
-                  onChange={(event) => {
-                    setDraftStringCount(Number(event.target.value))
+            <div className="flex items-center justify-between rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
+              <div className="flex flex-col">
+                <span className={m3FieldLabelClass}>{t('tuning.stringCount')}</span>
+                <span className="text-base font-medium text-[color:var(--md-sys-color-on-surface)]">
+                  {draftStrings.length}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="m3-focus-ring m3-state-surface flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-lg text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label={t('tuning.decreaseStringCount')}
+                  disabled={draftStrings.length <= 4}
+                  onClick={() => {
+                    setDraftStringCount(draftStrings.length - 1)
                   }}
                 >
-                  {[4, 5, 6, 7, 8].map((count) => (
-                    <option key={count} value={count}>
-                      {count}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className={m3SelectChevronClass}
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden="true"
+                  -
+                </button>
+                <button
+                  type="button"
+                  className="m3-focus-ring m3-state-surface flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-lg text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label={t('tuning.increaseStringCount')}
+                  disabled={draftStrings.length >= 8}
+                  onClick={() => {
+                    setDraftStringCount(draftStrings.length + 1)
+                  }}
                 >
-                  <path
-                    d="M4 6.5L8 10L12 6.5"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                  +
+                </button>
               </div>
-            </label>
+            </div>
 
             <div className="space-y-2">
-              <div className="grid grid-cols-[1.6rem_minmax(0,1fr)_5.5rem] items-center gap-2 px-1">
+              <div className="grid grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-2 px-1">
                 <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
                 <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
                   {t('tuning.note')}
-                </span>
-                <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
-                  {t('tuning.octave')}
                 </span>
               </div>
 
               {draftStrings.map((stringInfo, stringIndex) => (
                 <div
                   key={stringInfo.id}
-                  className="grid grid-cols-[1.6rem_minmax(0,1fr)_5.5rem] items-center gap-2"
+                  className="grid grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-2"
                 >
                   <div className="text-center text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
                     {stringIndex + 1}
@@ -253,61 +251,21 @@ export const TuningMenu = () => {
                       />
                     </svg>
                   </div>
-
-                  <div className="relative">
-                    <select
-                      className={m3SelectClass}
-                      value={getTuningOctaveFromMidi(stringInfo.midi)}
-                      onChange={(event) => {
-                        setDraftStringOctave(stringIndex, Number(event.target.value))
-                      }}
-                    >
-                      {TUNING_OCTAVE_OPTIONS.map((octave) => (
-                        <option key={octave} value={octave}>
-                          {octave}
-                        </option>
-                      ))}
-                    </select>
-                    <svg
-                      className={m3SelectChevronClass}
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M4 6.5L8 10L12 6.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-1 flex gap-2">
-              <button
-                type="button"
-                className={`flex-1 ${m3FilledButtonClass}`}
-                onClick={() => {
-                  applyDraftStrings()
-                  setIsOpen(false)
-                }}
-                disabled={!isDirty}
-              >
-                {t('tuning.apply')}
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button type="button" className={m3OutlinedButtonClass} onClick={closeWithCancel}>
+                {t('tuning.cancel')}
               </button>
               <button
                 type="button"
-                className={`flex-1 ${m3OutlinedButtonClass}`}
-                onClick={() => {
-                  resetDraftStrings()
-                }}
+                className={m3FilledButtonClass}
                 disabled={!isDirty}
+                onClick={applyAndClose}
               >
-                {t('tuning.reset')}
+                {t('tuning.apply')}
               </button>
             </div>
           </div>

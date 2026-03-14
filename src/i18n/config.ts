@@ -4,11 +4,14 @@ export type AppLocale = 'ja' | 'en'
 
 type TranslationValues = Record<string, number | string>
 
+const LOCALE_STORAGE_KEY = 'fretmap:locale:v1'
+
 const messages = {
   en: {
     'app.language': 'Language',
     'app.switchToEnglish': 'Switch language to English',
     'app.switchToJapanese': 'Switch language to Japanese',
+    'common.cancel': 'Cancel',
     'common.clear': 'Clear',
     'common.close': 'Close',
     'context.addBend': 'Add Bend',
@@ -76,12 +79,13 @@ const messages = {
     'scale.pentatonicMajor': 'Pentatonic Major',
     'scale.pentatonicMinor': 'Pentatonic Minor',
     'tuning.apply': 'Apply',
+    'tuning.cancel': 'Cancel',
     'tuning.custom': 'Custom',
-    'tuning.instrument': 'Instrument',
+    'tuning.decreaseStringCount': 'Decrease string count',
+    'tuning.increaseStringCount': 'Increase string count',
     'tuning.note': 'Note',
-    'tuning.octave': 'Octave',
     'tuning.openMenu': 'Open tuning settings',
-    'tuning.reset': 'Reset',
+    'tuning.preset': 'Preset',
     'tuning.stringCount': 'String Count',
     'tuning.title': 'Tuning',
     'tuning.preset.bass4': 'Bass 4',
@@ -94,6 +98,7 @@ const messages = {
     'app.language': '言語',
     'app.switchToEnglish': '言語を英語に切り替え',
     'app.switchToJapanese': '言語を日本語に切り替え',
+    'common.cancel': 'キャンセル',
     'common.clear': 'クリア',
     'common.close': '閉じる',
     'context.addBend': 'ベンドを追加',
@@ -161,12 +166,13 @@ const messages = {
     'scale.pentatonicMajor': 'メジャーペンタトニック',
     'scale.pentatonicMinor': 'マイナーペンタトニック',
     'tuning.apply': '適用',
+    'tuning.cancel': 'キャンセル',
     'tuning.custom': 'カスタム',
-    'tuning.instrument': '楽器',
+    'tuning.decreaseStringCount': '弦を減らす',
+    'tuning.increaseStringCount': '弦を増やす',
     'tuning.note': '音名',
-    'tuning.octave': 'オクターブ',
     'tuning.openMenu': 'チューニング設定を開く',
-    'tuning.reset': 'リセット',
+    'tuning.preset': 'プリセット',
     'tuning.stringCount': '弦数',
     'tuning.title': 'チューニング',
     'tuning.preset.bass4': 'ベース 4',
@@ -216,11 +222,26 @@ export const translate = (
 ): string => formatMessage(messages[locale][key], values)
 
 export const getDefaultLocale = (): AppLocale => {
+  if (typeof window !== 'undefined') {
+    const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+    if (storedLocale === 'ja' || storedLocale === 'en') {
+      return storedLocale
+    }
+  }
+
   if (typeof navigator === 'undefined') {
     return 'en'
   }
 
   return navigator.language.toLowerCase().startsWith('ja') ? 'ja' : 'en'
+}
+
+export const persistLocalePreference = (locale: AppLocale) => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(LOCALE_STORAGE_KEY, locale)
 }
 
 export const getScaleLabel = (locale: AppLocale, scaleId: ScaleId): string =>

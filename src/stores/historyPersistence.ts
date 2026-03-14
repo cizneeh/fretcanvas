@@ -2,7 +2,8 @@ import type { AppLocale } from '../i18n/config'
 import {
   getDefaultStrings,
   getMatchingInstrumentPresetId,
-  getStringInfoFromMidi,
+  getPitchClassFromTuningName,
+  getStringInfoFromPitchClass,
 } from '../libs/tuning'
 import type { FretboardStoreState } from './fretboardStore'
 import { createHistorySnapshot, type HistorySnapshot } from './historySnapshot'
@@ -31,19 +32,30 @@ const normalizeDisplayedNotes = (
     ]),
   ) as FretboardStoreState['displayedNotes']
 
-const normalizeStrings = (
-  strings: FretboardStoreState['strings'] | undefined,
-): FretboardStoreState['strings'] => {
-  if (strings === undefined || strings.length === 0) {
+const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
+  if (!Array.isArray(strings) || strings.length === 0) {
     return getDefaultStrings()
   }
 
   return strings.map((stringInfo, stringIndex) => {
-    const midi =
-      typeof stringInfo?.midi === 'number'
-        ? stringInfo.midi
-        : (getDefaultStrings()[stringIndex]?.midi ?? 40)
-    return getStringInfoFromMidi(stringIndex, midi)
+    const candidate = stringInfo as
+      | {
+          pitchClass?: number
+          midi?: number
+          name?: string
+        }
+      | undefined
+    const pitchClass =
+      typeof candidate?.pitchClass === 'number'
+        ? candidate.pitchClass
+        : typeof candidate?.midi === 'number'
+          ? candidate.midi
+          : typeof candidate?.name === 'string'
+            ? getPitchClassFromTuningName(
+                candidate.name as Parameters<typeof getPitchClassFromTuningName>[0],
+              )
+            : (getDefaultStrings()[stringIndex]?.pitchClass ?? 4)
+    return getStringInfoFromPitchClass(stringIndex, pitchClass)
   })
 }
 

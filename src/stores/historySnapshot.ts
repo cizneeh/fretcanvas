@@ -101,7 +101,9 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
     left.fretboard.noteTextMode === right.fretboard.noteTextMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
     recordsEqual(left.fretboard.strings, right.fretboard.strings, (leftString, rightString) => {
-      return leftString.name === rightString.name && leftString.midi === rightString.midi
+      return (
+        leftString.name === rightString.name && leftString.pitchClass === rightString.pitchClass
+      )
     }) &&
     left.fretboard.appliedChordSymbol === right.fretboard.appliedChordSymbol &&
     notesEqual(left.fretboard.displayedNotes, right.fretboard.displayedNotes) &&

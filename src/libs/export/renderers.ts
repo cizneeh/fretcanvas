@@ -68,14 +68,19 @@ export const renderExportPngCanvas = ({
   ctx.font = `12px ${EXPORT_CANVAS_FONT_STACK}`
   ctx.textBaseline = 'middle'
 
-  const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
+  const drawNote = (
+    stringIndex: number,
+    stringPitchClass: number,
+    fret: number,
+    yCenter: number,
+  ) => {
     const positionId = toPositionId({ stringIndex, fret })
     const displayedNote = displayedNotes[positionId]
     if (displayedNote === undefined) {
       return
     }
 
-    const pitchClass = normalizePc(midiBase + fret)
+    const pitchClass = normalizePc(stringPitchClass + fret)
     const visualRole = getNoteVisualRole({
       pitchClass,
       noteLabelMode,
@@ -236,7 +241,7 @@ export const renderExportPngCanvas = ({
   strings.forEach((stringInfo, stringIndex) => {
     const yCenter = layout.boardTop + stringIndex * layout.rowHeight + layout.rowHeight / 2
     for (let fret = layout.start; fret <= layout.end; fret += 1) {
-      drawNote(stringIndex, stringInfo.midi, fret, yCenter)
+      drawNote(stringIndex, stringInfo.pitchClass, fret, yCenter)
     }
   })
 
@@ -378,7 +383,7 @@ export const renderExportSvgMarkup = ({
         continue
       }
 
-      const pitchClass = normalizePc(stringInfo.midi + fret)
+      const pitchClass = normalizePc(stringInfo.pitchClass + fret)
       const visualRole = getNoteVisualRole({
         pitchClass,
         noteLabelMode,
