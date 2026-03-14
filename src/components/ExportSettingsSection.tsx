@@ -80,6 +80,10 @@ const ExpandedExportSettingsContent = () => {
       })),
     )
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined)
+  const [previewErrorKey, setPreviewErrorKey] = useState<
+    'export.previewCreateFailed' | 'export.previewFailed' | undefined
+  >(undefined)
 
   const exportInput = useMemo<ExportGraphicInput>(
     () => ({
@@ -114,59 +118,42 @@ const ExpandedExportSettingsContent = () => {
     ],
   )
 
-  const preview = useMemo(() => {
-    if (exportFormat === 'svg') {
-      try {
-        const svgMarkup = renderExportSvgMarkup(exportInput)
-        const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
-        return {
-          url: URL.createObjectURL(blob),
-          errorKey: undefined,
-          revokeOnCleanup: true,
-        }
-      } catch {
-        return {
-          url: undefined,
-          errorKey: 'export.previewFailed' as const,
-          revokeOnCleanup: false,
-        }
-      }
-    }
-
-    const canvas = renderExportPngCanvas(exportInput)
-    if (canvas === undefined) {
-      return {
-        url: undefined,
-        errorKey: 'export.previewFailed' as const,
-        revokeOnCleanup: false,
-      }
-    }
+  useEffect(() => {
+    let nextPreviewUrl: string | undefined
 
     try {
-      return {
-        url: canvas.toDataURL('image/png', 1),
-        errorKey: undefined,
-        revokeOnCleanup: false,
+      if (exportFormat === 'svg') {
+        const svgMarkup = renderExportSvgMarkup(exportInput)
+        const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
+        nextPreviewUrl = URL.createObjectURL(blob)
+      } else {
+        const canvas = renderExportPngCanvas(exportInput)
+        if (canvas === undefined) {
+          setPreviewUrl(undefined)
+          setPreviewErrorKey('export.previewFailed')
+          return
+        }
+
+        nextPreviewUrl = canvas.toDataURL('image/png', 1)
       }
+
+      setPreviewUrl(nextPreviewUrl)
+      setPreviewErrorKey(undefined)
     } catch {
-      return {
-        url: undefined,
-        errorKey: 'export.previewCreateFailed' as const,
-        revokeOnCleanup: false,
+      setPreviewUrl(undefined)
+      setPreviewErrorKey(
+        exportFormat === 'svg' ? 'export.previewFailed' : 'export.previewCreateFailed',
+      )
+    }
+
+    return () => {
+      if (exportFormat === 'svg' && nextPreviewUrl !== undefined) {
+        URL.revokeObjectURL(nextPreviewUrl)
       }
     }
   }, [exportFormat, exportInput])
 
-  const previewUrl = preview.url
-  const previewError = preview.errorKey === undefined ? undefined : t(preview.errorKey)
-
-  useEffect(() => {
-    return () => {
-      if (preview.revokeOnCleanup && preview.url !== undefined) {
-        URL.revokeObjectURL(preview.url)
-      }
-    }
-  }, [preview])
+  const previewError = previewErrorKey === undefined ? undefined : t(previewErrorKey)
 
   useEffect(() => {
     if (!isPreviewModalOpen) {
