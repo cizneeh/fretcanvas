@@ -62,11 +62,13 @@ export const FretCell = memo(
     const displayedNote = useFretboardStore((state) => state.displayedNotes[positionId])
     const isHighlighted = displayedNote !== undefined
     const isDimmed = displayedNote?.isDimmed ?? false
+    const isEmphasized = displayedNote?.isEmphasized ?? false
 
     if (isCellRenderLogEnabled()) {
       console.debug('[CellRender]', positionId, {
         isHighlighted,
         isDimmed,
+        isEmphasized,
         label,
       })
     }
@@ -121,6 +123,7 @@ export const FretCell = memo(
           isHighlighted={isHighlighted}
           visualRole={visualRole}
           isDimmed={isDimmed}
+          isEmphasized={isEmphasized}
           isSelected={isSelected}
           disablePreview={disablePreview}
           label={label}

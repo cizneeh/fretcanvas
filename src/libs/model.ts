@@ -41,6 +41,7 @@ export type NoteVisualRole = 'root' | 'default' | 'tension' | 'outOfKey'
 export type HighlightedNote = {
   positionId: PositionId
   isDimmed: boolean
+  isEmphasized: boolean
   colorVariant: NoteColorVariant
 }
 

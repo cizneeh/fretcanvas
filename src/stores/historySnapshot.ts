@@ -69,6 +69,7 @@ const notesEqual = (
     return (
       leftNote.positionId === rightNote.positionId &&
       leftNote.isDimmed === rightNote.isDimmed &&
+      leftNote.isEmphasized === rightNote.isEmphasized &&
       leftNote.colorVariant === rightNote.colorVariant
     )
   })

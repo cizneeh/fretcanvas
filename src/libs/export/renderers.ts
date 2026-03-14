@@ -100,6 +100,13 @@ export const renderExportPngCanvas = ({
 
     ctx.save()
     ctx.globalAlpha = displayedNote.isDimmed ? 0.35 : 1
+    if (displayedNote.isEmphasized) {
+      ctx.strokeStyle = 'rgba(248, 250, 252, 0.94)'
+      ctx.lineWidth = 2.25
+      ctx.beginPath()
+      ctx.arc(xCenter, yCenter, 18.75, 0, Math.PI * 2)
+      ctx.stroke()
+    }
     ctx.fillStyle = palette.png.fill
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
@@ -383,6 +390,11 @@ export const renderExportSvgMarkup = ({
       const palette = getNotePalette(visualRole)
       const xCenter = layout.boardLeft + (fret - layout.start + 0.5) * layout.cellWidth
       svgParts.push(`<g opacity="${displayedNote.isDimmed ? 0.35 : 1}">`)
+      if (displayedNote.isEmphasized) {
+        svgParts.push(
+          `<circle cx="${xCenter}" cy="${yCenter}" r="18.75" fill="none" stroke="rgba(248, 250, 252, 0.94)" stroke-width="2.25" />`,
+        )
+      }
       svgParts.push(`<circle cx="${xCenter}" cy="${yCenter}" r="16" fill="${palette.png.fill}" />`)
       svgParts.push(
         `<circle cx="${xCenter}" cy="${yCenter}" r="16" fill="none" stroke="${palette.png.stroke}" stroke-width="1.5" />`,

@@ -23,6 +23,22 @@ type PersistedHistory = {
 let isConfigured = false
 let isHydrating = false
 
+const normalizeDisplayedNotes = (
+  displayedNotes: FretboardStoreState['displayedNotes'] | undefined,
+): FretboardStoreState['displayedNotes'] =>
+  Object.fromEntries(
+    Object.entries(displayedNotes ?? {}).map(([positionId, note]) => [
+      positionId,
+      {
+        ...note,
+        positionId,
+        isDimmed: note?.isDimmed ?? false,
+        isEmphasized: note?.isEmphasized ?? false,
+        colorVariant: note?.colorVariant ?? 'default',
+      },
+    ]),
+  ) as FretboardStoreState['displayedNotes']
+
 const captureCurrentSnapshot = (): HistorySnapshot =>
   createHistorySnapshot(useFretboardStore.getState(), useSettingsStore.getState())
 
@@ -57,7 +73,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
           typeof rawFretboard.appliedChordSymbol === 'string'
             ? rawFretboard.appliedChordSymbol
             : '',
-        displayedNotes: rawFretboard.displayedNotes ?? {},
+        displayedNotes: normalizeDisplayedNotes(rawFretboard.displayedNotes),
         connections: rawFretboard.connections ?? {},
         bends: rawFretboard.bends ?? {},
       },

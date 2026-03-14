@@ -60,6 +60,7 @@ export type FretboardStoreActions = {
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
+  toggleNoteEmphasized: (positionId: PositionId) => void
   removePositions: (positionIds: PositionId[]) => void
   setNotesDimmed: (positionIds: PositionId[], isDimmed: boolean) => void
   connectPositions: (from: PositionId, to: PositionId) => void
@@ -129,6 +130,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
             next[positionId] = {
               positionId,
               isDimmed: false,
+              isEmphasized: false,
               colorVariant: 'default',
             }
             didChange = true
@@ -305,6 +307,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         next[positionId] = {
           positionId,
           isDimmed: false,
+          isEmphasized: false,
           colorVariant: 'default',
         }
       }
@@ -324,6 +327,25 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       next[positionId] = {
         ...currentNote,
         isDimmed: !currentNote.isDimmed,
+        isEmphasized: currentNote.isDimmed ? currentNote.isEmphasized : false,
+      }
+
+      pushHistoryBeforeChange()
+      set({ displayedNotes: next })
+    },
+
+    toggleNoteEmphasized: (positionId) => {
+      const current = get()
+      const currentNote = current.displayedNotes[positionId]
+      if (currentNote === undefined) {
+        return
+      }
+
+      const next: Record<PositionId, HighlightedNote> = { ...current.displayedNotes }
+      next[positionId] = {
+        ...currentNote,
+        isDimmed: currentNote.isEmphasized ? currentNote.isDimmed : false,
+        isEmphasized: !currentNote.isEmphasized,
       }
 
       pushHistoryBeforeChange()
@@ -379,6 +401,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         nextDisplayedNotes[positionId] = {
           ...currentNote,
           isDimmed,
+          isEmphasized: isDimmed ? false : currentNote.isEmphasized,
         }
         didChange = true
       }
