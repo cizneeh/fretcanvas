@@ -1,0 +1,64 @@
+import { getExportTitle } from '../model'
+import type { ExportGraphicInput, ExportLayout } from './types'
+
+export const EXPORT_CANVAS_FONT_STACK = '"Avenir Next", "Avenir", "Segoe UI", sans-serif'
+export const EXPORT_SVG_FONT_STACK = 'Avenir Next, Avenir, Segoe UI, sans-serif'
+
+export const getExportLayout = ({
+  keyPc,
+  noteLabelMode,
+  selectedScale,
+  appliedChordSymbol,
+  exportFretStart,
+  exportFretEnd,
+  showExportTitle,
+}: Pick<
+  ExportGraphicInput,
+  | 'keyPc'
+  | 'noteLabelMode'
+  | 'selectedScale'
+  | 'appliedChordSymbol'
+  | 'exportFretStart'
+  | 'exportFretEnd'
+  | 'showExportTitle'
+>): ExportLayout => {
+  const start = Math.min(exportFretStart, exportFretEnd)
+  const end = Math.max(exportFretStart, exportFretEnd)
+  const fretCountInRange = end - start + 1
+  const exportTitle = getExportTitle(keyPc, noteLabelMode, selectedScale, appliedChordSymbol)
+  const paddingX = 12
+  const paddingY = 12
+  const labelWidth = 34
+  const titleHeight = showExportTitle && exportTitle !== undefined ? 26 : 0
+  const headerHeight = 26
+  const rowHeight = 44
+  const markerHeight = 20
+  const cellWidth = 56
+  const boardHeight = 6 * rowHeight
+  const canvasWidth = paddingX * 2 + labelWidth + fretCountInRange * cellWidth
+  const canvasHeight = paddingY * 2 + titleHeight + headerHeight + boardHeight + markerHeight
+  const boardLeft = paddingX + labelWidth
+  const boardTop = paddingY + titleHeight + headerHeight
+  const markerY = boardTop + boardHeight + markerHeight / 2
+
+  return {
+    start,
+    end,
+    fretCountInRange,
+    exportTitle,
+    paddingX,
+    paddingY,
+    labelWidth,
+    titleHeight,
+    headerHeight,
+    rowHeight,
+    markerHeight,
+    cellWidth,
+    boardHeight,
+    canvasWidth,
+    canvasHeight,
+    boardLeft,
+    boardTop,
+    markerY,
+  }
+}

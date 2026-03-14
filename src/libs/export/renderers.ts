@@ -1,121 +1,16 @@
-import { createBendGeometry } from './bendGeometry'
+import { createBendGeometry } from '../bendGeometry'
 import {
-  type BendArrow,
-  type Connection,
   getDisplayedNoteLabel,
-  getExportTitle,
   getNoteVisualRole,
-  type HighlightedNote,
   MARKER_FRETS,
-  type NoteLabelMode,
-  type NoteTextMode,
   normalizePc,
   OPEN_STRINGS,
-  type PitchClass,
-  type PositionId,
   parsePositionId,
-  type ScaleId,
   toPositionId,
-} from './model'
-import { getNotePalette } from './notePalette'
-
-export type ExportGraphicInput = {
-  keyPc: PitchClass
-  noteLabelMode: NoteLabelMode
-  noteTextMode: NoteTextMode
-  selectedScale: ScaleId | undefined
-  appliedChordSymbol: string | undefined
-  displayedNotes: Record<PositionId, HighlightedNote>
-  connections: Connection[]
-  bends: BendArrow[]
-  exportFretStart: number
-  exportFretEnd: number
-  backgroundOpacityPercent: number
-  showExportTitle: boolean
-}
-
-type ExportLayout = {
-  start: number
-  end: number
-  fretCountInRange: number
-  exportTitle: string | undefined
-  paddingX: number
-  paddingY: number
-  labelWidth: number
-  titleHeight: number
-  headerHeight: number
-  rowHeight: number
-  markerHeight: number
-  cellWidth: number
-  boardHeight: number
-  canvasWidth: number
-  canvasHeight: number
-  boardLeft: number
-  boardTop: number
-  markerY: number
-}
-
-const EXPORT_CANVAS_FONT_STACK = '"Avenir Next", "Avenir", "Segoe UI", sans-serif'
-const EXPORT_SVG_FONT_STACK = 'Avenir Next, Avenir, Segoe UI, sans-serif'
-
-const getExportLayout = ({
-  keyPc,
-  noteLabelMode,
-  selectedScale,
-  appliedChordSymbol,
-  exportFretStart,
-  exportFretEnd,
-  showExportTitle,
-}: Pick<
-  ExportGraphicInput,
-  | 'keyPc'
-  | 'noteLabelMode'
-  | 'selectedScale'
-  | 'appliedChordSymbol'
-  | 'exportFretStart'
-  | 'exportFretEnd'
-  | 'showExportTitle'
->): ExportLayout => {
-  const start = Math.min(exportFretStart, exportFretEnd)
-  const end = Math.max(exportFretStart, exportFretEnd)
-  const fretCountInRange = end - start + 1
-  const exportTitle = getExportTitle(keyPc, noteLabelMode, selectedScale, appliedChordSymbol)
-  const paddingX = 12
-  const paddingY = 12
-  const labelWidth = 34
-  const titleHeight = showExportTitle && exportTitle !== undefined ? 26 : 0
-  const headerHeight = 26
-  const rowHeight = 44
-  const markerHeight = 20
-  const cellWidth = 56
-  const boardHeight = OPEN_STRINGS.length * rowHeight
-  const canvasWidth = paddingX * 2 + labelWidth + fretCountInRange * cellWidth
-  const canvasHeight = paddingY * 2 + titleHeight + headerHeight + boardHeight + markerHeight
-  const boardLeft = paddingX + labelWidth
-  const boardTop = paddingY + titleHeight + headerHeight
-  const markerY = boardTop + boardHeight + markerHeight / 2
-
-  return {
-    start,
-    end,
-    fretCountInRange,
-    exportTitle,
-    paddingX,
-    paddingY,
-    labelWidth,
-    titleHeight,
-    headerHeight,
-    rowHeight,
-    markerHeight,
-    cellWidth,
-    boardHeight,
-    canvasWidth,
-    canvasHeight,
-    boardLeft,
-    boardTop,
-    markerY,
-  }
-}
+} from '../model'
+import { getNotePalette } from '../notePalette'
+import { EXPORT_CANVAS_FONT_STACK, EXPORT_SVG_FONT_STACK, getExportLayout } from './layout'
+import type { ExportGraphicInput } from './types'
 
 const escapeXml = (value: string) =>
   value
@@ -124,27 +19,6 @@ const escapeXml = (value: string) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;')
-
-const downloadBlob = (blob: Blob, filename: string) => {
-  const downloadUrl = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = downloadUrl
-  anchor.setAttribute('download', filename)
-  anchor.style.display = 'none'
-  document.body.append(anchor)
-  anchor.click()
-  anchor.remove()
-  setTimeout(() => URL.revokeObjectURL(downloadUrl), 2000)
-}
-
-const getExportFilename = (
-  input: Pick<ExportGraphicInput, 'exportFretStart' | 'exportFretEnd'>,
-  format: 'png' | 'svg',
-) => {
-  const start = Math.min(input.exportFretStart, input.exportFretEnd)
-  const end = Math.max(input.exportFretStart, input.exportFretEnd)
-  return `fretmap-frets-${start}-${end}.${format}`
-}
 
 export const renderExportPngCanvas = ({
   keyPc,
@@ -198,10 +72,7 @@ export const renderExportPngCanvas = ({
   ctx.textBaseline = 'middle'
 
   const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
-    const positionId = toPositionId({
-      stringIndex,
-      fret,
-    })
+    const positionId = toPositionId({ stringIndex, fret })
     const displayedNote = displayedNotes[positionId]
     if (displayedNote === undefined) {
       return
@@ -542,30 +413,4 @@ export const renderExportSvgMarkup = ({
   svgParts.push('</svg>')
 
   return svgParts.join('')
-}
-
-export const exportPng = (input: ExportGraphicInput) => {
-  const canvas = renderExportPngCanvas(input)
-  if (canvas === undefined) {
-    return
-  }
-
-  const filename = getExportFilename(input, 'png')
-  canvas.toBlob(
-    (blob) => {
-      if (blob === null) {
-        return
-      }
-
-      downloadBlob(blob, filename)
-    },
-    'image/png',
-    1,
-  )
-}
-
-export const exportSvg = (input: ExportGraphicInput) => {
-  const svgMarkup = renderExportSvgMarkup(input)
-  const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
-  downloadBlob(blob, getExportFilename(input, 'svg'))
 }

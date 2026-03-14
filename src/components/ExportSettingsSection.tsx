@@ -6,7 +6,7 @@ import {
   exportSvg,
   renderExportPngCanvas,
   renderExportSvgMarkup,
-} from '../libs/exportTransparentPng'
+} from '../libs/export'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
