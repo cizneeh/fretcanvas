@@ -277,6 +277,14 @@ export const ControlPanel = () => {
                 {chordInputError !== undefined ? (
                   <div className="text-xs text-rose-300">{chordInputError}</div>
                 ) : undefined}
+                <div className="rounded-[var(--md-shape-md)] border border-transparent bg-[color:var(--md-sys-color-secondary-container)] px-3 py-2">
+                  <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
+                    Applied Chord
+                  </div>
+                  <div className="mt-0.5 text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]">
+                    {activeChordSymbol ?? 'No chord applied'}
+                  </div>
+                </div>
               </div>
             </div>
           )}
