@@ -97,7 +97,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
   }
   const defaultStrings = getDefaultStrings()
   const defaultPresetId = getMatchingInstrumentPresetId(defaultStrings) ?? 'custom'
-  const clampStringCount = (value: number) => Math.max(4, Math.min(value, 8))
+  const clampStringCount = (value: number) => Math.max(1, Math.min(value, 10))
   const buildExtendedDraftStrings = (
     sourceStrings: StringInfo[],
     nextCount: number,
@@ -272,7 +272,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
     removeDraftString: (stringIndex) => {
       const current = get()
-      if (current.draftStrings.length <= 4) {
+      if (current.draftStrings.length <= 1) {
         return
       }
 

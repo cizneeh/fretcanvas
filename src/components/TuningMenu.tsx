@@ -247,14 +247,14 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
 
               <button
                 type="button"
-                className="m3-focus-ring m3-state-surface flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+                className="m3-focus-ring m3-state-surface flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-sm text-[color:var(--md-sys-color-on-surface)] transition-colors hover:border-rose-300/50 hover:bg-rose-300/10 hover:text-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label={t('tuning.removeString')}
-                disabled={draftStrings.length <= 4}
+                disabled={draftStrings.length <= 1}
                 onClick={() => {
                   removeDraftString(stringIndex)
                 }}
               >
-                -
+                ×
               </button>
 
               <div className="relative">
@@ -296,7 +296,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
             type="button"
             className="m3-focus-ring m3-state-surface flex min-h-10 w-full items-center justify-center rounded-[var(--md-shape-md)] border border-dashed border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
             aria-label={t('tuning.addString')}
-            disabled={draftStrings.length >= 8}
+            disabled={draftStrings.length >= 10}
             onClick={() => {
               appendDraftString()
             }}
