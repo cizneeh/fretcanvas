@@ -1,5 +1,6 @@
 import { Fragment, memo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { useI18n } from '../../i18n/useI18n'
 import { FRET_NUMBERS, normalizePc, type PositionId, toPositionId } from '../../libs/musicCore'
 import { getDisplayedNoteLabel, getNoteVisualRole } from '../../libs/noteDisplay'
 import { useFretboardStore } from '../../stores/fretboardStore'
@@ -32,6 +33,7 @@ type StringRowsProps = {
     clientX: number,
     clientY: number,
   ) => void
+  onOpenTuningMenu: (anchorElement: HTMLButtonElement) => void
   onNotePointerUp: (positionId: PositionId) => void
 }
 
@@ -42,8 +44,10 @@ export const StringRows = memo(
     onNotePointerDown,
     onNoteClick,
     onNoteContextMenu,
+    onOpenTuningMenu,
     onNotePointerUp,
   }: StringRowsProps) => {
+    const { t } = useI18n()
     const { keyPc, noteLabelMode, noteTextMode, appliedChordSymbol, selectedScale, strings } =
       useFretboardStore(
         useShallow((state) => ({
@@ -70,8 +74,17 @@ export const StringRows = memo(
       <RenderProfiler id="StringRows">
         {strings.map((stringInfo, stringIndex) => (
           <Fragment key={stringInfo.id}>
-            <div className="flex h-12 items-center justify-center pr-2 text-base text-slate-300">
-              {stringInfo.name}
+            <div className="flex h-12 items-center justify-center pr-2">
+              <button
+                type="button"
+                className="m3-focus-ring rounded-md border border-transparent px-2 py-1 text-base text-slate-300 transition-colors hover:border-cyan-200/30 hover:bg-cyan-200/10 hover:text-slate-50 focus-visible:border-cyan-200/30 focus-visible:bg-cyan-200/10 focus-visible:text-slate-50"
+                aria-label={`${stringInfo.name} ${t('tuning.openMenu')}`}
+                onClick={(event) => {
+                  onOpenTuningMenu(event.currentTarget)
+                }}
+              >
+                {stringInfo.name}
+              </button>
             </div>
 
             {/* 各マスは弦の pitch class と fret 番号から音名を決める。ノート自体は絶対音高を持たない。 */}

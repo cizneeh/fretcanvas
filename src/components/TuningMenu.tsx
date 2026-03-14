@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
 import { getInstrumentPresetLabel } from '../i18n/config'
 import { useI18n } from '../i18n/useI18n'
@@ -18,10 +19,18 @@ import {
   m3SelectClass,
 } from './ui/materialClasses'
 
-export const TuningMenu = () => {
+type TuningMenuProps = {
+  anchorElement: HTMLElement | null
+  onClose: () => void
+}
+
+export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
   const { locale, t } = useI18n()
-  const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const [panelPosition, setPanelPosition] = useState({
+    left: 0,
+    top: 0,
+  })
   const {
     strings,
     draftStrings,
@@ -46,6 +55,8 @@ export const TuningMenu = () => {
     })),
   )
 
+  const isOpen = anchorElement !== null
+
   const isDirty = useMemo(
     () =>
       draftPresetId !== (getMatchingInstrumentPresetId(strings) ?? 'custom') ||
@@ -55,21 +66,56 @@ export const TuningMenu = () => {
 
   const closeWithCancel = useCallback(() => {
     resetDraftStrings()
-    setIsOpen(false)
-  }, [resetDraftStrings])
+    onClose()
+  }, [onClose, resetDraftStrings])
 
-  const applyAndClose = () => {
+  const applyAndClose = useCallback(() => {
     applyDraftStrings()
-    setIsOpen(false)
-  }
+    onClose()
+  }, [applyDraftStrings, onClose])
 
   useEffect(() => {
     if (!isOpen) {
       return
     }
 
+    resetDraftStrings()
+  }, [isOpen, resetDraftStrings])
+
+  useEffect(() => {
+    if (!isOpen || anchorElement === null) {
+      return
+    }
+
+    const updatePanelPosition = () => {
+      const rect = anchorElement.getBoundingClientRect()
+      const width = 18.5 * 16
+      const height = panelRef.current?.offsetHeight ?? 520
+      const gap = 12
+      const preferredLeft = rect.left - width - gap
+      const fallbackLeft = rect.right + gap
+      const nextLeft =
+        preferredLeft >= 16
+          ? preferredLeft
+          : Math.min(Math.max(fallbackLeft, 16), window.innerWidth - width - 16)
+      const centeredTop = rect.top + rect.height / 2 - 64
+      const nextTop = Math.min(
+        Math.max(16, centeredTop),
+        Math.max(16, window.innerHeight - height - 16),
+      )
+
+      setPanelPosition({
+        left: nextLeft,
+        top: nextTop,
+      })
+    }
+
     const handlePointerDown = (event: PointerEvent) => {
-      if (containerRef.current?.contains(event.target as Node) === true) {
+      const targetNode = event.target as Node
+      if (
+        anchorElement.contains(targetNode) === true ||
+        panelRef.current?.contains(targetNode) === true
+      ) {
         return
       }
       closeWithCancel()
@@ -81,69 +127,128 @@ export const TuningMenu = () => {
       }
     }
 
+    updatePanelPosition()
     window.addEventListener('pointerdown', handlePointerDown)
     window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('resize', updatePanelPosition)
+    document.addEventListener('scroll', updatePanelPosition, true)
     return () => {
       window.removeEventListener('pointerdown', handlePointerDown)
       window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('resize', updatePanelPosition)
+      document.removeEventListener('scroll', updatePanelPosition, true)
     }
-  }, [closeWithCancel, isOpen])
+  }, [anchorElement, closeWithCancel, isOpen])
 
-  return (
-    <div ref={containerRef} className="relative z-30">
-      <button
-        type="button"
-        className="m3-focus-ring m3-state-surface flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-high)] text-[color:var(--md-sys-color-on-surface-variant)] shadow-[var(--md-elevation-2)]"
-        aria-label={t('tuning.openMenu')}
-        aria-expanded={isOpen}
-        onClick={() => {
-          if (isOpen) {
-            closeWithCancel()
-            return
-          }
-          resetDraftStrings()
-          setIsOpen(true)
-        }}
-      >
-        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
-          <path
-            d="M3 4H13M3 8H13M3 12H13"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
+  if (!isOpen || typeof document === 'undefined') {
+    return undefined
+  }
 
-      {isOpen ? (
-        <div
-          className={`${m3CardElevatedClass} absolute left-full top-0 ml-3 w-[18.5rem] p-3`}
-          role="dialog"
-          aria-label={t('tuning.title')}
-        >
-          <div className="mb-3 text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
-            {t('tuning.title')}
+  return createPortal(
+    <div
+      ref={panelRef}
+      className={`${m3CardElevatedClass} fixed z-40 w-[18.5rem] p-3`}
+      role="dialog"
+      aria-label={t('tuning.title')}
+      style={{
+        left: panelPosition.left,
+        top: panelPosition.top,
+      }}
+    >
+      <div className="mb-3 text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
+        {t('tuning.title')}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1.5">
+          <span className={m3FieldLabelClass}>{t('tuning.preset')}</span>
+          <div className="relative">
+            <select
+              className={m3SelectClass}
+              value={draftPresetId}
+              onChange={(event) => {
+                setDraftPreset(event.target.value as typeof draftPresetId)
+              }}
+            >
+              {INSTRUMENT_PRESETS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {getInstrumentPresetLabel(locale, preset.id)}
+                </option>
+              ))}
+              {draftPresetId === 'custom' ? (
+                <option value="custom">{t('tuning.custom')}</option>
+              ) : undefined}
+            </select>
+            <svg
+              className={m3SelectChevronClass}
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 6.5L8 10L12 6.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </label>
+
+        <div className="space-y-2">
+          <div className="flex items-end justify-between px-1">
+            <span className={m3FieldLabelClass}>{t('tuning.stringCount')}</span>
+            <span className="text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+              {draftStrings.length}
+            </span>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <label className="flex flex-col gap-1.5">
-              <span className={m3FieldLabelClass}>{t('tuning.preset')}</span>
+          <div className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2 px-1">
+            <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
+            <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
+            <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+              {t('tuning.note')}
+            </span>
+          </div>
+
+          {draftStrings.map((stringInfo, stringIndex) => (
+            <div
+              key={stringInfo.id}
+              className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2"
+            >
+              <div className="text-center text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
+                {stringIndex + 1}
+              </div>
+
+              <button
+                type="button"
+                className="m3-focus-ring m3-state-surface flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={t('tuning.removeString')}
+                disabled={draftStrings.length <= 4}
+                onClick={() => {
+                  removeDraftString(stringIndex)
+                }}
+              >
+                -
+              </button>
+
               <div className="relative">
                 <select
                   className={m3SelectClass}
-                  value={draftPresetId}
+                  value={stringInfo.name}
                   onChange={(event) => {
-                    setDraftPreset(event.target.value as typeof draftPresetId)
+                    setDraftStringNote(
+                      stringIndex,
+                      event.target.value as (typeof TUNING_NOTE_OPTIONS)[number],
+                    )
                   }}
                 >
-                  {INSTRUMENT_PRESETS.map((preset) => (
-                    <option key={preset.id} value={preset.id}>
-                      {getInstrumentPresetLabel(locale, preset.id)}
+                  {TUNING_NOTE_OPTIONS.map((note) => (
+                    <option key={note} value={note}>
+                      {note}
                     </option>
                   ))}
-                  {draftPresetId === 'custom' ? (
-                    <option value="custom">{t('tuning.custom')}</option>
-                  ) : undefined}
                 </select>
                 <svg
                   className={m3SelectChevronClass}
@@ -160,109 +265,37 @@ export const TuningMenu = () => {
                   />
                 </svg>
               </div>
-            </label>
-
-            <div className="space-y-2">
-              <div className="flex items-end justify-between px-1">
-                <span className={m3FieldLabelClass}>{t('tuning.stringCount')}</span>
-                <span className="text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-                  {draftStrings.length}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2 px-1">
-                <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
-                <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
-                <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
-                  {t('tuning.note')}
-                </span>
-              </div>
-
-              {draftStrings.map((stringInfo, stringIndex) => (
-                <div
-                  key={stringInfo.id}
-                  className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2"
-                >
-                  <div className="text-center text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-                    {stringIndex + 1}
-                  </div>
-
-                  <button
-                    type="button"
-                    className="m3-focus-ring m3-state-surface flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--md-sys-color-outline)] text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label={t('tuning.removeString')}
-                    disabled={draftStrings.length <= 4}
-                    onClick={() => {
-                      removeDraftString(stringIndex)
-                    }}
-                  >
-                    -
-                  </button>
-
-                  <div className="relative">
-                    <select
-                      className={m3SelectClass}
-                      value={stringInfo.name}
-                      onChange={(event) => {
-                        setDraftStringNote(
-                          stringIndex,
-                          event.target.value as (typeof TUNING_NOTE_OPTIONS)[number],
-                        )
-                      }}
-                    >
-                      {TUNING_NOTE_OPTIONS.map((note) => (
-                        <option key={note} value={note}>
-                          {note}
-                        </option>
-                      ))}
-                    </select>
-                    <svg
-                      className={m3SelectChevronClass}
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M4 6.5L8 10L12 6.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                className="m3-focus-ring m3-state-surface flex min-h-10 w-full items-center justify-center rounded-[var(--md-shape-md)] border border-dashed border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label={t('tuning.addString')}
-                disabled={draftStrings.length >= 8}
-                onClick={() => {
-                  appendDraftString()
-                }}
-              >
-                + {t('tuning.addString')}
-              </button>
             </div>
+          ))}
 
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button type="button" className={m3OutlinedButtonClass} onClick={closeWithCancel}>
-                {t('tuning.cancel')}
-              </button>
-              <button
-                type="button"
-                className={m3FilledButtonClass}
-                disabled={!isDirty}
-                onClick={applyAndClose}
-              >
-                {t('tuning.apply')}
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            className="m3-focus-ring m3-state-surface flex min-h-10 w-full items-center justify-center rounded-[var(--md-shape-md)] border border-dashed border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2 text-sm text-[color:var(--md-sys-color-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label={t('tuning.addString')}
+            disabled={draftStrings.length >= 8}
+            onClick={() => {
+              appendDraftString()
+            }}
+          >
+            + {t('tuning.addString')}
+          </button>
         </div>
-      ) : undefined}
-    </div>
+
+        <div className="flex items-center justify-end gap-2 pt-1">
+          <button type="button" className={m3OutlinedButtonClass} onClick={closeWithCancel}>
+            {t('tuning.cancel')}
+          </button>
+          <button
+            type="button"
+            className={m3FilledButtonClass}
+            disabled={!isDirty}
+            onClick={applyAndClose}
+          >
+            {t('tuning.apply')}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
