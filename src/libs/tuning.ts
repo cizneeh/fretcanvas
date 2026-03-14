@@ -28,6 +28,10 @@ export const INSTRUMENT_PRESETS: InstrumentPreset[] = [
     strings: ['E', 'B', 'G', 'D', 'A', 'E'],
   },
   {
+    id: 'guitarHalfStepDown6',
+    strings: ['Eb', 'Bb', 'Gb', 'Db', 'Ab', 'Eb'],
+  },
+  {
     id: 'guitar7',
     strings: ['E', 'B', 'G', 'D', 'A', 'E', 'B'],
   },
@@ -38,6 +42,10 @@ export const INSTRUMENT_PRESETS: InstrumentPreset[] = [
   {
     id: 'bass5',
     strings: ['G', 'D', 'A', 'E', 'B'],
+  },
+  {
+    id: 'bass6',
+    strings: ['C', 'G', 'D', 'A', 'E', 'B'],
   },
   {
     id: 'ukuleleC',

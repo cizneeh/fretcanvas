@@ -35,6 +35,9 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
     strings,
     draftStrings,
     draftPresetId,
+    displayedNotes,
+    connections,
+    bends,
     setDraftPreset,
     appendDraftString,
     removeDraftString,
@@ -46,6 +49,9 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
       strings: state.strings,
       draftStrings: state.draftStrings,
       draftPresetId: state.draftPresetId,
+      displayedNotes: state.displayedNotes,
+      connections: state.connections,
+      bends: state.bends,
       setDraftPreset: state.setDraftPreset,
       appendDraftString: state.appendDraftString,
       removeDraftString: state.removeDraftString,
@@ -64,15 +70,29 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
     [draftPresetId, draftStrings, strings],
   )
 
+  const willClearBoardState =
+    Object.keys(displayedNotes).length > 0 ||
+    Object.keys(connections).length > 0 ||
+    Object.keys(bends).length > 0
+
   const closeWithCancel = useCallback(() => {
     resetDraftStrings()
     onClose()
   }, [onClose, resetDraftStrings])
 
   const applyAndClose = useCallback(() => {
+    if (
+      isDirty &&
+      willClearBoardState &&
+      typeof window !== 'undefined' &&
+      window.confirm(t('tuning.applyWarning')) === false
+    ) {
+      return
+    }
+
     applyDraftStrings()
     onClose()
-  }, [applyDraftStrings, onClose])
+  }, [applyDraftStrings, isDirty, onClose, t, willClearBoardState])
 
   useEffect(() => {
     if (!isOpen) {
@@ -123,22 +143,32 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
         closeWithCancel()
       }
     }
 
     updatePanelPosition()
     window.addEventListener('pointerdown', handlePointerDown)
-    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', handleKeyDown, true)
     window.addEventListener('resize', updatePanelPosition)
     document.addEventListener('scroll', updatePanelPosition, true)
     return () => {
       window.removeEventListener('pointerdown', handlePointerDown)
-      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keydown', handleKeyDown, true)
       window.removeEventListener('resize', updatePanelPosition)
       document.removeEventListener('scroll', updatePanelPosition, true)
     }
   }, [anchorElement, closeWithCancel, isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    panelRef.current?.focus()
+  }, [isOpen])
 
   if (!isOpen || typeof document === 'undefined') {
     return undefined
@@ -150,6 +180,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
       className={`${m3CardElevatedClass} fixed z-40 w-[18.5rem] p-3`}
       role="dialog"
       aria-label={t('tuning.title')}
+      tabIndex={-1}
       style={{
         left: panelPosition.left,
         top: panelPosition.top,
@@ -197,13 +228,6 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
         </label>
 
         <div className="space-y-2">
-          <div className="flex items-end justify-between px-1">
-            <span className={m3FieldLabelClass}>{t('tuning.stringCount')}</span>
-            <span className="text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-              {draftStrings.length}
-            </span>
-          </div>
-
           <div className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2 px-1">
             <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
             <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />

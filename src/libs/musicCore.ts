@@ -58,7 +58,14 @@ export type TuningNoteName =
   | 'Bb'
   | 'B'
 
-export type InstrumentPresetId = 'guitarStandard6' | 'guitar7' | 'bass4' | 'bass5' | 'ukuleleC'
+export type InstrumentPresetId =
+  | 'guitarStandard6'
+  | 'guitarHalfStepDown6'
+  | 'guitar7'
+  | 'bass4'
+  | 'bass5'
+  | 'bass6'
+  | 'ukuleleC'
 
 export type InstrumentPreset = {
   id: InstrumentPresetId
