@@ -64,6 +64,7 @@ export type FretboardStoreActions = {
   setNoteLabelMode: (nextMode: NoteLabelMode) => void
   setNoteTextMode: (nextMode: NoteTextMode) => void
   setDraftPreset: (nextPresetId: InstrumentPresetId | 'custom') => void
+  setDraftStrings: (nextStrings: StringInfo[]) => void
   appendDraftString: () => void
   removeDraftString: (stringIndex: number) => void
   setDraftStringNote: (stringIndex: number, nextNote: TuningNoteName) => void
@@ -250,6 +251,26 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({
         draftPresetId: nextPresetId,
         draftStrings: getInstrumentPresetStrings(nextPresetId),
+      })
+    },
+
+    setDraftStrings: (nextStrings) => {
+      const normalizedStrings = nextStrings.map((stringInfo, stringIndex) =>
+        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass),
+      )
+      const nextPresetId = getMatchingInstrumentPresetId(normalizedStrings) ?? 'custom'
+      const current = get()
+
+      if (
+        current.draftPresetId === nextPresetId &&
+        stringInfoArraysEqual(current.draftStrings, normalizedStrings)
+      ) {
+        return
+      }
+
+      set({
+        draftPresetId: nextPresetId,
+        draftStrings: normalizedStrings,
       })
     },
 

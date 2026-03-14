@@ -4,8 +4,12 @@ import { useShallow } from 'zustand/react/shallow'
 import { getInstrumentPresetLabel } from '../i18n/config'
 import { useI18n } from '../i18n/useI18n'
 import {
+  type CustomTuningPreset,
+  getMatchingCustomTuningPresetId,
   getMatchingInstrumentPresetId,
   INSTRUMENT_PRESETS,
+  loadCustomTuningPresets,
+  saveCustomTuningPreset,
   stringInfoArraysEqual,
   TUNING_NOTE_OPTIONS,
 } from '../libs/tuning'
@@ -14,9 +18,11 @@ import {
   m3CardElevatedClass,
   m3FieldLabelClass,
   m3FilledButtonClass,
+  m3InputClass,
   m3OutlinedButtonClass,
   m3SelectChevronClass,
   m3SelectClass,
+  m3TonalButtonClass,
 } from './ui/materialClasses'
 
 type TuningMenuProps = {
@@ -27,10 +33,14 @@ type TuningMenuProps = {
 export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
   const { locale, t } = useI18n()
   const panelRef = useRef<HTMLDivElement | null>(null)
+  const presetNameInputRef = useRef<HTMLInputElement | null>(null)
   const [panelPosition, setPanelPosition] = useState({
     left: 0,
     top: 0,
   })
+  const [customPresets, setCustomPresets] = useState<CustomTuningPreset[]>([])
+  const [isSavingPreset, setIsSavingPreset] = useState(false)
+  const [presetName, setPresetName] = useState('')
   const {
     strings,
     draftStrings,
@@ -39,6 +49,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
     connections,
     bends,
     setDraftPreset,
+    setDraftStrings,
     appendDraftString,
     removeDraftString,
     setDraftStringNote,
@@ -53,6 +64,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
       connections: state.connections,
       bends: state.bends,
       setDraftPreset: state.setDraftPreset,
+      setDraftStrings: state.setDraftStrings,
       appendDraftString: state.appendDraftString,
       removeDraftString: state.removeDraftString,
       setDraftStringNote: state.setDraftStringNote,
@@ -69,6 +81,12 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
       !stringInfoArraysEqual(strings, draftStrings),
     [draftPresetId, draftStrings, strings],
   )
+  const matchingCustomPresetId = useMemo(
+    () => getMatchingCustomTuningPresetId(draftStrings, customPresets),
+    [customPresets, draftStrings],
+  )
+  const selectedPresetValue = matchingCustomPresetId ?? draftPresetId
+  const canSaveAsPreset = selectedPresetValue === 'custom'
 
   const willClearBoardState =
     Object.keys(displayedNotes).length > 0 ||
@@ -99,8 +117,19 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
       return
     }
 
+    setCustomPresets(loadCustomTuningPresets())
+    setIsSavingPreset(false)
+    setPresetName('')
     resetDraftStrings()
   }, [isOpen, resetDraftStrings])
+
+  useEffect(() => {
+    if (!isSavingPreset) {
+      return
+    }
+
+    presetNameInputRef.current?.focus()
+  }, [isSavingPreset])
 
   useEffect(() => {
     if (!isOpen || anchorElement === null) {
@@ -196,9 +225,18 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
           <div className="relative">
             <select
               className={m3SelectClass}
-              value={draftPresetId}
+              value={selectedPresetValue}
               onChange={(event) => {
-                setDraftPreset(event.target.value as typeof draftPresetId)
+                const nextPresetId = event.target.value
+                const selectedCustomPreset = customPresets.find(
+                  (preset) => preset.id === nextPresetId,
+                )
+                if (selectedCustomPreset !== undefined) {
+                  setDraftStrings(selectedCustomPreset.strings)
+                  return
+                }
+
+                setDraftPreset(nextPresetId as typeof draftPresetId)
               }}
             >
               {INSTRUMENT_PRESETS.map((preset) => (
@@ -206,7 +244,16 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
                   {getInstrumentPresetLabel(locale, preset.id)}
                 </option>
               ))}
-              {draftPresetId === 'custom' ? (
+              {customPresets.length > 0 ? (
+                <optgroup label={t('tuning.savedPresets')}>
+                  {customPresets.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : undefined}
+              {selectedPresetValue === 'custom' ? (
                 <option value="custom">{t('tuning.custom')}</option>
               ) : undefined}
             </select>
@@ -304,6 +351,71 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
             + {t('tuning.addString')}
           </button>
         </div>
+
+        {canSaveAsPreset ? (
+          <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-3">
+            {isSavingPreset ? (
+              <div className="flex flex-col gap-2">
+                <label className="flex flex-col gap-1.5">
+                  <span className={m3FieldLabelClass}>{t('tuning.presetName')}</span>
+                  <input
+                    ref={presetNameInputRef}
+                    className={m3InputClass}
+                    value={presetName}
+                    placeholder={t('tuning.presetNamePlaceholder')}
+                    onChange={(event) => {
+                      setPresetName(event.target.value)
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && presetName.trim().length > 0) {
+                        const nextPresets = saveCustomTuningPreset(presetName, draftStrings)
+                        setCustomPresets(nextPresets)
+                        setPresetName('')
+                        setIsSavingPreset(false)
+                      }
+                    }}
+                  />
+                </label>
+
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    className={m3OutlinedButtonClass}
+                    onClick={() => {
+                      setPresetName('')
+                      setIsSavingPreset(false)
+                    }}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    className={m3FilledButtonClass}
+                    disabled={presetName.trim().length === 0}
+                    onClick={() => {
+                      const nextPresets = saveCustomTuningPreset(presetName, draftStrings)
+                      setCustomPresets(nextPresets)
+                      setPresetName('')
+                      setIsSavingPreset(false)
+                    }}
+                  >
+                    {t('tuning.savePreset')}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={`${m3TonalButtonClass} w-full`}
+                onClick={() => {
+                  setIsSavingPreset(true)
+                }}
+              >
+                {t('tuning.saveAsPreset')}
+              </button>
+            )}
+          </div>
+        ) : undefined}
 
         <div className="flex items-center justify-end gap-2 pt-1">
           <button type="button" className={m3OutlinedButtonClass} onClick={closeWithCancel}>

@@ -7,6 +7,8 @@ import type {
 } from './musicCore'
 import { normalizePc } from './musicCore'
 
+const CUSTOM_TUNING_PRESETS_STORAGE_KEY = 'fretmap:custom-tuning-presets:v1'
+
 export const TUNING_NOTE_OPTIONS: TuningNoteName[] = [
   'C',
   'C#',
@@ -53,6 +55,12 @@ export const INSTRUMENT_PRESETS: InstrumentPreset[] = [
   },
 ] as const
 
+export type CustomTuningPreset = {
+  id: string
+  name: string
+  strings: StringInfo[]
+}
+
 const toStringId = (stringIndex: number) => String(stringIndex + 1)
 
 export const getPitchClassFromTuningName = (note: TuningNoteName): PitchClass =>
@@ -85,6 +93,109 @@ export const cloneStrings = (strings: StringInfo[]): StringInfo[] =>
     name: stringInfo.name,
     pitchClass: stringInfo.pitchClass,
   }))
+
+const isTuningNoteName = (value: unknown): value is TuningNoteName =>
+  typeof value === 'string' && TUNING_NOTE_OPTIONS.includes(value as TuningNoteName)
+
+const isStringInfo = (value: unknown): value is StringInfo =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as StringInfo).id === 'string' &&
+  isTuningNoteName((value as StringInfo).name) &&
+  typeof (value as StringInfo).pitchClass === 'number'
+
+const parseCustomTuningPreset = (value: unknown): CustomTuningPreset | undefined => {
+  if (
+    typeof value !== 'object' ||
+    value === null ||
+    typeof (value as CustomTuningPreset).id !== 'string' ||
+    typeof (value as CustomTuningPreset).name !== 'string' ||
+    !Array.isArray((value as CustomTuningPreset).strings)
+  ) {
+    return undefined
+  }
+
+  const strings = (value as CustomTuningPreset).strings
+  if (strings.some((stringInfo) => !isStringInfo(stringInfo))) {
+    return undefined
+  }
+
+  return {
+    id: (value as CustomTuningPreset).id,
+    name: (value as CustomTuningPreset).name,
+    strings: cloneStrings(strings),
+  }
+}
+
+const createCustomTuningPresetId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `custom:${crypto.randomUUID()}`
+  }
+
+  return `custom:${Date.now().toString(36)}`
+}
+
+export const loadCustomTuningPresets = (): CustomTuningPreset[] => {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  const raw = window.localStorage.getItem(CUSTOM_TUNING_PRESETS_STORAGE_KEY)
+  if (raw === null) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+
+    return parsed
+      .map((preset) => parseCustomTuningPreset(preset))
+      .filter((preset) => preset !== undefined)
+  } catch {
+    return []
+  }
+}
+
+const persistCustomTuningPresets = (presets: CustomTuningPreset[]) => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(CUSTOM_TUNING_PRESETS_STORAGE_KEY, JSON.stringify(presets))
+}
+
+export const saveCustomTuningPreset = (
+  name: string,
+  strings: StringInfo[],
+): CustomTuningPreset[] => {
+  const trimmedName = name.trim()
+  if (trimmedName.length === 0) {
+    return loadCustomTuningPresets()
+  }
+
+  const presets = loadCustomTuningPresets()
+  const existingPreset = presets.find((preset) => preset.name === trimmedName)
+  const nextPreset: CustomTuningPreset = {
+    id: existingPreset?.id ?? createCustomTuningPresetId(),
+    name: trimmedName,
+    strings: cloneStrings(strings),
+  }
+  const nextPresets = existingPreset
+    ? presets.map((preset) => (preset.id === existingPreset.id ? nextPreset : preset))
+    : [...presets, nextPreset]
+
+  persistCustomTuningPresets(nextPresets)
+  return nextPresets
+}
+
+export const getMatchingCustomTuningPresetId = (
+  strings: StringInfo[],
+  presets: CustomTuningPreset[],
+): string | undefined =>
+  presets.find((preset) => stringInfoArraysEqual(strings, preset.strings))?.id
 
 export const getInstrumentPresetStrings = (presetId: InstrumentPresetId): StringInfo[] => {
   const preset = INSTRUMENT_PRESETS.find((candidate) => candidate.id === presetId)
