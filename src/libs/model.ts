@@ -186,22 +186,22 @@ export const getAbsoluteNoteLabelByKey = (pitchClass: PitchClass, keyPc: PitchCl
 export const getDisplayRootPc = (
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
-  activeChordSymbol: string | undefined,
+  appliedChordSymbol: string | undefined,
 ): PitchClass =>
-  noteLabelMode === 'chord' && activeChordSymbol !== undefined
-    ? (getChordRootPc(activeChordSymbol) ?? keyPc)
+  noteLabelMode === 'chord' && appliedChordSymbol !== undefined
+    ? (getChordRootPc(appliedChordSymbol) ?? keyPc)
     : keyPc
 export const getDisplayedNoteLabel = (
   pitchClass: PitchClass,
   noteTextMode: NoteTextMode,
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
-  activeChordSymbol: string | undefined,
+  appliedChordSymbol: string | undefined,
 ): string =>
   noteTextMode === 'absolute'
     ? getAbsoluteNoteLabelByKey(pitchClass, keyPc)
-    : noteLabelMode === 'chord' && activeChordSymbol !== undefined
-      ? getChordToneLabel(pitchClass, activeChordSymbol)
+    : noteLabelMode === 'chord' && appliedChordSymbol !== undefined
+      ? getChordToneLabel(pitchClass, appliedChordSymbol)
       : noteLabelMode === 'scale'
         ? getScaleIntervalLabelFromRoot(pitchClass, keyPc)
         : getChordIntervalLabelFromRoot(pitchClass, keyPc)
@@ -272,28 +272,28 @@ export const getNoteVisualRole = ({
   noteLabelMode,
   keyPc,
   selectedScale,
-  activeChordSymbol,
+  appliedChordSymbol,
 }: {
   pitchClass: PitchClass
   noteLabelMode: NoteLabelMode
   keyPc: PitchClass
   selectedScale: ScaleId | undefined
-  activeChordSymbol: string | undefined
+  appliedChordSymbol: string | undefined
 }): NoteVisualRole => {
   const normalizedPitchClass = normalizePc(pitchClass)
 
-  if (noteLabelMode === 'chord' && activeChordSymbol !== undefined) {
-    const chordRootPc = getChordRootPc(activeChordSymbol)
+  if (noteLabelMode === 'chord' && appliedChordSymbol !== undefined) {
+    const chordRootPc = getChordRootPc(appliedChordSymbol)
     if (chordRootPc !== undefined && normalizedPitchClass === chordRootPc) {
       return 'root'
     }
 
-    const chordTonePitchClasses = new Set(getChordTonePitchClasses(activeChordSymbol))
+    const chordTonePitchClasses = new Set(getChordTonePitchClasses(appliedChordSymbol))
     if (chordTonePitchClasses.has(normalizedPitchClass)) {
       return 'default'
     }
 
-    const chordPitchClasses = new Set(getChordPitchClasses(activeChordSymbol))
+    const chordPitchClasses = new Set(getChordPitchClasses(appliedChordSymbol))
     if (chordPitchClasses.has(normalizedPitchClass)) {
       return 'tension'
     }
@@ -301,7 +301,7 @@ export const getNoteVisualRole = ({
     return 'outOfKey'
   }
 
-  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, activeChordSymbol)
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, appliedChordSymbol)
   if (normalizePc(normalizedPitchClass - displayRootPc) === 0) {
     return 'root'
   }
@@ -325,7 +325,7 @@ export const getExportTitle = (
   keyPc: PitchClass,
   noteLabelMode: NoteLabelMode,
   selectedScale: ScaleId | undefined,
-  activeChordSymbol: string | undefined,
+  appliedChordSymbol: string | undefined,
 ): string | undefined => {
   if (noteLabelMode === 'scale') {
     if (selectedScale === undefined) {
@@ -335,7 +335,7 @@ export const getExportTitle = (
     return `${getAbsoluteNoteLabelByKey(keyPc, keyPc)} ${SCALE_LABELS[selectedScale]} Scale`
   }
 
-  return activeChordSymbol
+  return appliedChordSymbol
 }
 
 export const getScalePitchClasses = (keyPc: PitchClass, scaleId: ScaleId): PitchClass[] =>

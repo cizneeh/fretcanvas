@@ -23,8 +23,8 @@ export const createHistorySnapshot = (
     noteLabelMode: fretboard.noteLabelMode,
     noteTextMode: fretboard.noteTextMode,
     selectedScale: fretboard.selectedScale,
-    activeChordSymbol: fretboard.activeChordSymbol,
-    chordInput: fretboard.activeChordSymbol ?? '',
+    appliedChordSymbol: fretboard.appliedChordSymbol,
+    chordInput: fretboard.appliedChordSymbol ?? '',
     displayedNotes: { ...fretboard.displayedNotes },
     connections: { ...fretboard.connections },
     bends: { ...fretboard.bends },
@@ -93,7 +93,7 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
     left.fretboard.noteLabelMode === right.fretboard.noteLabelMode &&
     left.fretboard.noteTextMode === right.fretboard.noteTextMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
-    left.fretboard.activeChordSymbol === right.fretboard.activeChordSymbol &&
+    left.fretboard.appliedChordSymbol === right.fretboard.appliedChordSymbol &&
     notesEqual(left.fretboard.displayedNotes, right.fretboard.displayedNotes) &&
     connectionsEqual(left.fretboard.connections, right.fretboard.connections) &&
     bendsEqual(left.fretboard.bends, right.fretboard.bends) &&

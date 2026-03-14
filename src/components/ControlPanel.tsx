@@ -30,17 +30,17 @@ export const ControlPanel = () => {
     noteLabelMode,
     noteTextMode,
     selectedScale,
-    activeChordSymbol,
+    appliedChordSymbol,
     chordInput,
     setKeyPc,
     setNoteLabelMode,
     setNoteTextMode,
     setSelectedScale,
-    setActiveChordSymbol,
+    setAppliedChordSymbol,
     setChordInput,
     applyChordInput,
     addScaleNotes,
-    addActiveChordNotes,
+    addAppliedChordNotes,
     clearHighlightedNotes,
   } = useFretboardStore(
     useShallow((state) => ({
@@ -48,17 +48,17 @@ export const ControlPanel = () => {
       noteLabelMode: state.noteLabelMode,
       noteTextMode: state.noteTextMode,
       selectedScale: state.selectedScale,
-      activeChordSymbol: state.activeChordSymbol,
+      appliedChordSymbol: state.appliedChordSymbol,
       chordInput: state.chordInput,
       setKeyPc: state.setKeyPc,
       setNoteLabelMode: state.setNoteLabelMode,
       setNoteTextMode: state.setNoteTextMode,
       setSelectedScale: state.setSelectedScale,
-      setActiveChordSymbol: state.setActiveChordSymbol,
+      setAppliedChordSymbol: state.setAppliedChordSymbol,
       setChordInput: state.setChordInput,
       applyChordInput: state.applyChordInput,
       addScaleNotes: state.addScaleNotes,
-      addActiveChordNotes: state.addActiveChordNotes,
+      addAppliedChordNotes: state.addAppliedChordNotes,
       clearHighlightedNotes: state.clearHighlightedNotes,
     })),
   )
@@ -81,9 +81,9 @@ export const ControlPanel = () => {
   )
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
   const diatonicSelectValue =
-    activeChordSymbol !== undefined &&
-    diatonicChordOptions.some((option) => option.symbol === activeChordSymbol)
-      ? activeChordSymbol
+    appliedChordSymbol !== undefined &&
+    diatonicChordOptions.some((option) => option.symbol === appliedChordSymbol)
+      ? appliedChordSymbol
       : ''
   const trimmedChordInput = chordInput.trim()
   const parsedChordInput = trimmedChordInput === '' ? undefined : parseChordInput(trimmedChordInput)
@@ -93,7 +93,7 @@ export const ControlPanel = () => {
       : undefined
   const canApplyChordInput =
     parsedChordInput !== undefined && 'symbol' in parsedChordInput && chordInputError === undefined
-  const canAddChordTones = activeChordSymbol !== undefined
+  const canAddChordTones = appliedChordSymbol !== undefined
   const fretRange = addScaleWithinExportRange
     ? {
         start: exportFretStart,
@@ -232,7 +232,7 @@ export const ControlPanel = () => {
                       value={diatonicSelectValue}
                       onChange={(event) => {
                         const nextSymbol = event.target.value
-                        setActiveChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
+                        setAppliedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
                       }}
                     >
                       <option value="">Select major diatonic 7th</option>
@@ -283,13 +283,13 @@ export const ControlPanel = () => {
                   {chordInputError !== undefined ? (
                     <div className="text-xs text-rose-300">{chordInputError}</div>
                   ) : undefined}
-                  {/* 入力欄の文字列そのものではなく、Apply 済みの activeChordSymbol を表示する。 */}
+                  {/* 入力欄の文字列そのものではなく、Apply 済みの appliedChordSymbol を表示する。 */}
                   <div className="rounded-[var(--md-shape-md)] border border-transparent bg-[color:var(--md-sys-color-secondary-container)] px-3 py-2">
                     <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
                       Applied Chord
                     </div>
                     <div className="mt-0.5 text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]">
-                      {activeChordSymbol ?? 'No chord applied'}
+                      {appliedChordSymbol ?? 'No chord applied'}
                     </div>
                   </div>
                 </div>
@@ -310,7 +310,7 @@ export const ControlPanel = () => {
                 }
 
                 if (canAddChordTones) {
-                  addActiveChordNotes({ fretRange })
+                  addAppliedChordNotes({ fretRange })
                 }
               }}
               disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}

@@ -39,8 +39,8 @@ export type FretboardStoreState = {
   // 入力欄の文字列をそのまま表示や追加処理の基準にすると、打ちかけの不完全な文字列や
   // 一時的なパース失敗で UI 全体が不安定になる。
   // そのため、編集中の chordInput と、表示・色分け・export・Add Chord Tones の基準になる
-  // 確定済みの activeChordSymbol を分けて持つ。
-  activeChordSymbol: string | undefined
+  // 確定済みの appliedChordSymbol を分けて持つ。
+  appliedChordSymbol: string | undefined
   chordInput: string
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Record<ConnectionId, Connection>
@@ -52,11 +52,11 @@ export type FretboardStoreActions = {
   setSelectedScale: (nextScale: ScaleId | undefined) => void
   setNoteLabelMode: (nextMode: NoteLabelMode) => void
   setNoteTextMode: (nextMode: NoteTextMode) => void
-  setActiveChordSymbol: (nextChordSymbol: string | undefined) => void
+  setAppliedChordSymbol: (nextChordSymbol: string | undefined) => void
   setChordInput: (nextChordInput: string) => void
   applyChordInput: () => void
   addScaleNotes: (options?: AddNotesOptions) => void
-  addActiveChordNotes: (options?: AddNotesOptions) => void
+  addAppliedChordNotes: (options?: AddNotesOptions) => void
   clearHighlightedNotes: () => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
@@ -149,7 +149,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     selectedScale: 'major',
     noteLabelMode: 'scale',
     noteTextMode: 'interval',
-    activeChordSymbol: undefined,
+    appliedChordSymbol: undefined,
     chordInput: '',
     displayedNotes: {},
     connections: {},
@@ -195,15 +195,15 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ noteTextMode: nextMode })
     },
 
-    setActiveChordSymbol: (nextChordSymbol) => {
+    setAppliedChordSymbol: (nextChordSymbol) => {
       const current = get()
       const nextChordInput = nextChordSymbol ?? ''
-      if (current.activeChordSymbol === nextChordSymbol && current.chordInput === nextChordInput) {
+      if (current.appliedChordSymbol === nextChordSymbol && current.chordInput === nextChordInput) {
         return
       }
 
       pushHistoryBeforeChange()
-      set({ activeChordSymbol: nextChordSymbol, chordInput: nextChordInput })
+      set({ appliedChordSymbol: nextChordSymbol, chordInput: nextChordInput })
     },
 
     setChordInput: (nextChordInput) => {
@@ -222,18 +222,18 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         return
       }
 
-      if (current.activeChordSymbol === parsed.symbol) {
+      if (current.appliedChordSymbol === parsed.symbol) {
         if (current.chordInput !== parsed.symbol) {
           set({ chordInput: parsed.symbol })
         }
         return
       }
 
-      // chordInput を直接参照して各 UI を動かすのではなく、Apply を境に activeChordSymbol へ昇格させる。
+      // chordInput を直接参照して各 UI を動かすのではなく、Apply を境に appliedChordSymbol へ昇格させる。
       // これで、入力途中でも現在の表示基準は維持される。
       pushHistoryBeforeChange()
       set({
-        activeChordSymbol: parsed.symbol,
+        appliedChordSymbol: parsed.symbol,
         chordInput: parsed.symbol,
       })
     },
@@ -254,13 +254,13 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       set({ displayedNotes: next })
     },
 
-    addActiveChordNotes: (options) => {
-      const { activeChordSymbol, displayedNotes } = get()
-      if (activeChordSymbol === undefined) {
+    addAppliedChordNotes: (options) => {
+      const { appliedChordSymbol, displayedNotes } = get()
+      if (appliedChordSymbol === undefined) {
         return
       }
 
-      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(activeChordSymbol))
+      const pitchClasses = new Set<PitchClass>(getChordPitchClasses(appliedChordSymbol))
       const next = addPitchClassNotes(pitchClasses, displayedNotes, options)
       if (next === undefined) {
         return

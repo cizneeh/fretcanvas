@@ -24,7 +24,7 @@ export type ExportTransparentPngInput = {
   noteLabelMode: NoteLabelMode
   noteTextMode: NoteTextMode
   selectedScale: ScaleId | undefined
-  activeChordSymbol: string | undefined
+  appliedChordSymbol: string | undefined
   displayedNotes: Record<PositionId, HighlightedNote>
   connections: Connection[]
   bends: BendArrow[]
@@ -39,7 +39,7 @@ export const renderExportPngCanvas = ({
   noteLabelMode,
   noteTextMode,
   selectedScale,
-  activeChordSymbol,
+  appliedChordSymbol,
   displayedNotes,
   connections,
   bends,
@@ -51,7 +51,7 @@ export const renderExportPngCanvas = ({
   const start = Math.min(exportFretStart, exportFretEnd)
   const end = Math.max(exportFretStart, exportFretEnd)
   const fretCountInRange = end - start + 1
-  const exportTitle = getExportTitle(keyPc, noteLabelMode, selectedScale, activeChordSymbol)
+  const exportTitle = getExportTitle(keyPc, noteLabelMode, selectedScale, appliedChordSymbol)
 
   const paddingX = 12
   const paddingY = 12
@@ -113,14 +113,14 @@ export const renderExportPngCanvas = ({
       noteLabelMode,
       keyPc,
       selectedScale,
-      activeChordSymbol,
+      appliedChordSymbol,
     })
     const label = getDisplayedNoteLabel(
       pitchClass,
       noteTextMode,
       noteLabelMode,
       keyPc,
-      activeChordSymbol,
+      appliedChordSymbol,
     )
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
     const palette = getNotePalette(visualRole)

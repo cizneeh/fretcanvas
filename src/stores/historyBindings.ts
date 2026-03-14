@@ -47,20 +47,14 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         selectedScale: rawFretboard.selectedScale,
         noteLabelMode: rawFretboard.noteLabelMode ?? 'scale',
         noteTextMode: rawFretboard.noteTextMode ?? 'interval',
-        activeChordSymbol:
-          typeof rawFretboard.activeChordSymbol === 'string'
-            ? rawFretboard.activeChordSymbol
-            : typeof (rawFretboard as { selectedChordSymbol?: unknown }).selectedChordSymbol ===
-                'string'
-              ? (rawFretboard as { selectedChordSymbol: string }).selectedChordSymbol
-              : undefined,
+        appliedChordSymbol:
+          typeof rawFretboard.appliedChordSymbol === 'string'
+            ? rawFretboard.appliedChordSymbol
+            : undefined,
         chordInput:
-          typeof rawFretboard.activeChordSymbol === 'string'
-            ? rawFretboard.activeChordSymbol
-            : typeof (rawFretboard as { selectedChordSymbol?: unknown }).selectedChordSymbol ===
-                'string'
-              ? (rawFretboard as { selectedChordSymbol: string }).selectedChordSymbol
-              : '',
+          typeof rawFretboard.appliedChordSymbol === 'string'
+            ? rawFretboard.appliedChordSymbol
+            : '',
         displayedNotes: rawFretboard.displayedNotes ?? {},
         connections: rawFretboard.connections ?? {},
         bends: rawFretboard.bends ?? {},
