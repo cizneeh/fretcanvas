@@ -1,13 +1,15 @@
 import type { FretboardStoreState } from './fretboardStore'
 import type { SettingsStoreState } from './settingsStore'
 
+type HistorySettingsState = Omit<SettingsStoreState, 'locale'>
+
 /**
  * 各storeの値のsnapshotを保持する
  * storeが増えたら、ここに追加される想定
  */
 export type HistorySnapshot = {
   fretboard: FretboardStoreState
-  settings: SettingsStoreState
+  settings: HistorySettingsState
 }
 
 /**
@@ -115,7 +117,7 @@ export const applyHistorySnapshotToActualStores = ({
 }: {
   snapshot: HistorySnapshot
   setFretboardState: (next: FretboardStoreState) => void
-  setSettingsState: (next: SettingsStoreState) => void
+  setSettingsState: (next: Partial<SettingsStoreState>) => void
 }) => {
   const cloned = createHistorySnapshot(snapshot.fretboard, snapshot.settings)
   setFretboardState(cloned.fretboard)

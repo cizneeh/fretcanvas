@@ -1,3 +1,4 @@
+import type { AppLocale } from '../../i18n/config'
 import type {
   BendArrow,
   Connection,
@@ -10,6 +11,7 @@ import type {
 } from '../model'
 
 export type ExportGraphicInput = {
+  locale: AppLocale
   keyPc: PitchClass
   noteLabelMode: NoteLabelMode
   noteTextMode: NoteTextMode

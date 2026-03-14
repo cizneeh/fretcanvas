@@ -1,4 +1,5 @@
 import type { PointerEvent as ReactPointerEvent } from 'react'
+import { useI18n } from '../i18n/useI18n'
 
 type HoverPreview = { handle: 'start' | 'end'; percent: number } | undefined
 
@@ -43,6 +44,8 @@ export const ExportRangeTrack = ({
   onEndPointerMove,
   onEndPointerUp,
 }: ExportRangeTrackProps) => {
+  const { t } = useI18n()
+
   return (
     <>
       <div />
@@ -90,7 +93,7 @@ export const ExportRangeTrack = ({
           onPointerDown={onStartPointerDown}
           onPointerMove={onStartPointerMove}
           onPointerUp={onStartPointerUp}
-          aria-label="Drag start fret"
+          aria-label={t('export.startHandle')}
         >
           S
         </button>
@@ -103,7 +106,7 @@ export const ExportRangeTrack = ({
           onPointerDown={onEndPointerDown}
           onPointerMove={onEndPointerMove}
           onPointerUp={onEndPointerUp}
-          aria-label="Drag end fret"
+          aria-label={t('export.endHandle')}
         >
           E
         </button>

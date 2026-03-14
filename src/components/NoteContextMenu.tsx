@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/useI18n'
 import { getBendId, type PositionId } from '../libs/model'
 import { getBendShortcutLabel, getDimShortcutLabel } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
@@ -18,11 +19,12 @@ export const NoteContextMenu = ({
   onClose,
   onToggleBend,
 }: NoteContextMenuProps) => {
+  const { locale, t } = useI18n()
   const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const bends = useFretboardStore((state) => state.bends)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
-  const shortcutLabel = getDimShortcutLabel()
-  const bendShortcutLabel = getBendShortcutLabel()
+  const shortcutLabel = getDimShortcutLabel(locale)
+  const bendShortcutLabel = getBendShortcutLabel(locale)
   const hasBend = bends[getBendId(positionId)] !== undefined
   const isDimmed = displayedNotes[positionId]?.isDimmed === true
 
@@ -43,7 +45,9 @@ export const NoteContextMenu = ({
         }}
       >
         <span className="flex w-full items-center gap-3">
-          <span className="min-w-0 flex-1 text-left">{isDimmed ? 'Undim' : 'Dim'}</span>
+          <span className="min-w-0 flex-1 text-left">
+            {isDimmed ? t('context.undim') : t('context.dim')}
+          </span>
           <span className="ml-auto text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
             {shortcutLabel}
           </span>
@@ -59,7 +63,9 @@ export const NoteContextMenu = ({
         }}
       >
         <span className="flex w-full items-center gap-3">
-          <span className="min-w-0 flex-1 text-left">{hasBend ? 'Remove Bend' : 'Add Bend'}</span>
+          <span className="min-w-0 flex-1 text-left">
+            {hasBend ? t('context.removeBend') : t('context.addBend')}
+          </span>
           <span className="ml-auto text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
             {bendShortcutLabel}
           </span>

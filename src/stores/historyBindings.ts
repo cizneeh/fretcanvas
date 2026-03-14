@@ -1,6 +1,7 @@
 // なんか、historyのbinding? つまりhistoryのキャプチャーするのとアプライするのと
 // 永続化コードが一緒になってて若干責務として分離できてないし理解しづらい感じがするけど、まあとりあえずこのままにしておく。
 
+import type { AppLocale } from '../i18n/config'
 import type { FretboardStoreState } from './fretboardStore'
 import { useFretboardStore } from './fretboardStore'
 import {
@@ -16,6 +17,7 @@ const HISTORY_STORAGE_KEY = 'fretmap:history:v1'
 
 type PersistedHistory = {
   current: HistorySnapshot
+  locale?: AppLocale
 }
 
 let isConfigured = false
@@ -69,6 +71,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         showExportTitle: rawSettings.showExportTitle ?? false,
       },
     ),
+    locale: candidate.locale === 'ja' || candidate.locale === 'en' ? candidate.locale : undefined,
   }
 }
 
@@ -100,6 +103,7 @@ const persistHistoryToLocalStorage = () => {
 
   const payload: PersistedHistory = {
     current: captureCurrentSnapshot(),
+    locale: useSettingsStore.getState().locale,
   }
 
   window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(payload))
@@ -137,6 +141,10 @@ export const initializeHistoryBindings = () => {
         useSettingsStore.setState(nextSettingsState)
       },
     })
+
+    if (persisted.locale !== undefined) {
+      useSettingsStore.setState({ locale: persisted.locale })
+    }
   }
   isHydrating = false
 

@@ -1,4 +1,6 @@
 import { useShallow } from 'zustand/react/shallow'
+import { getChordInputErrorMessage, getScaleLabel } from '../i18n/config'
+import { useI18n } from '../i18n/useI18n'
 import {
   getMajorDiatonicSeventhChordOptions,
   NOTE_LABELS,
@@ -6,7 +8,6 @@ import {
   type NoteTextMode,
   type PitchClass,
   parseChordInput,
-  SCALE_LABELS,
   type ScaleId,
 } from '../libs/model'
 import { useFretboardStore } from '../stores/fretboardStore'
@@ -25,6 +26,7 @@ import {
 } from './ui/materialClasses'
 
 export const ControlPanel = () => {
+  const { locale, t } = useI18n()
   const {
     keyPc,
     noteLabelMode,
@@ -88,8 +90,8 @@ export const ControlPanel = () => {
   const trimmedChordInput = chordInput.trim()
   const parsedChordInput = trimmedChordInput === '' ? undefined : parseChordInput(trimmedChordInput)
   const chordInputError =
-    parsedChordInput !== undefined && 'error' in parsedChordInput
-      ? parsedChordInput.error
+    parsedChordInput !== undefined && 'errorKey' in parsedChordInput
+      ? getChordInputErrorMessage(locale, parsedChordInput.errorKey)
       : undefined
   const canApplyChordInput =
     parsedChordInput !== undefined && 'symbol' in parsedChordInput && chordInputError === undefined
@@ -101,20 +103,21 @@ export const ControlPanel = () => {
       }
     : undefined
   const modeOptions: { value: NoteLabelMode; label: string }[] = [
-    { value: 'scale', label: 'Scale' },
-    { value: 'chord', label: 'Chord' },
+    { value: 'scale', label: t('control.scale') },
+    { value: 'chord', label: t('control.chord') },
   ]
   const labelOptions: { value: NoteTextMode; label: string }[] = [
-    { value: 'interval', label: 'Interval' },
-    { value: 'absolute', label: 'Absolute' },
+    { value: 'interval', label: t('control.interval') },
+    { value: 'absolute', label: t('control.absolute') },
   ]
+  const scaleOptions: ScaleId[] = ['major', 'naturalMinor', 'pentatonicMajor', 'pentatonicMinor']
 
   return (
     <section className={`${m3CardClass} p-4`}>
       <div className="grid gap-5 xl:grid-cols-[minmax(14rem,15rem)_minmax(0,1fr)_minmax(13rem,14rem)]">
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
-            <span className={m3FieldLabelClass}>Key</span>
+            <span className={m3FieldLabelClass}>{t('control.key')}</span>
             <div className="relative">
               <select
                 className={m3SelectClass}
@@ -147,7 +150,7 @@ export const ControlPanel = () => {
           </label>
 
           <div className="flex max-w-[11.5rem] flex-col gap-2">
-            <span className={m3FieldLabelClass}>Note Labels</span>
+            <span className={m3FieldLabelClass}>{t('control.noteLabels')}</span>
             <div className={`${m3SegmentedContainerClass} w-full`}>
               {labelOptions.map((labelOption) => (
                 <button
@@ -166,7 +169,7 @@ export const ControlPanel = () => {
           </div>
 
           <div className="flex max-w-[12rem] flex-col gap-2">
-            <span className={m3FieldLabelClass}>Mode</span>
+            <span className={m3FieldLabelClass}>{t('control.mode')}</span>
             <div className={`${m3SegmentedContainerClass} w-full`}>
               {modeOptions.map((modeOption) => (
                 <button
@@ -189,7 +192,7 @@ export const ControlPanel = () => {
           <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-3">
             {noteLabelMode === 'scale' ? (
               <div className="flex flex-col gap-2">
-                <span className={m3FieldLabelClass}>Scale</span>
+                <span className={m3FieldLabelClass}>{t('control.scale')}</span>
                 <div className="relative">
                   <select
                     className={m3SelectClass}
@@ -199,10 +202,10 @@ export const ControlPanel = () => {
                       setSelectedScale(value === '' ? undefined : value)
                     }}
                   >
-                    <option value="">Select scale</option>
-                    {Object.entries(SCALE_LABELS).map(([id, label]) => (
-                      <option key={id} value={id}>
-                        {label}
+                    <option value="">{t('control.selectScale')}</option>
+                    {scaleOptions.map((scaleId) => (
+                      <option key={scaleId} value={scaleId}>
+                        {getScaleLabel(locale, scaleId)}
                       </option>
                     ))}
                   </select>
@@ -225,7 +228,7 @@ export const ControlPanel = () => {
             ) : (
               <div className="grid gap-3 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start">
                 <div className="flex flex-col gap-2">
-                  <span className={m3FieldLabelClass}>Select Diatonic Chord</span>
+                  <span className={m3FieldLabelClass}>{t('control.selectDiatonicChord')}</span>
                   <div className="relative">
                     <select
                       className={m3SelectClass}
@@ -235,7 +238,7 @@ export const ControlPanel = () => {
                         setAppliedChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
                       }}
                     >
-                      <option value="">Select diatonic chord</option>
+                      <option value="">{t('control.selectDiatonicChordPlaceholder')}</option>
                       {diatonicChordOptions.map((option) => (
                         <option key={option.symbol} value={option.symbol}>
                           {option.label}
@@ -260,13 +263,13 @@ export const ControlPanel = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className={m3FieldLabelClass}>Custom Input</span>
+                  <span className={m3FieldLabelClass}>{t('control.customInput')}</span>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <input
                       type="text"
                       className={m3InputClass}
                       value={chordInput}
-                      placeholder="Cmaj7, Dm7b5, G7#11..."
+                      placeholder={t('control.customInputPlaceholder')}
                       onChange={(event) => {
                         setChordInput(event.target.value)
                       }}
@@ -277,7 +280,7 @@ export const ControlPanel = () => {
                       onClick={applyChordInput}
                       disabled={!canApplyChordInput}
                     >
-                      Apply
+                      {t('control.apply')}
                     </button>
                   </div>
                   {chordInputError !== undefined ? (
@@ -286,10 +289,10 @@ export const ControlPanel = () => {
                   {/* 入力欄の文字列そのものではなく、Apply 済みの appliedChordSymbol を表示する。 */}
                   <div className="rounded-[var(--md-shape-md)] border border-transparent bg-[color:var(--md-sys-color-secondary-container)] px-3 py-2">
                     <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
-                      Applied Chord
+                      {t('control.appliedChord')}
                     </div>
                     <div className="mt-0.5 text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]">
-                      {appliedChordSymbol ?? 'No chord applied'}
+                      {appliedChordSymbol ?? t('control.noChordApplied')}
                     </div>
                   </div>
                 </div>
@@ -315,11 +318,11 @@ export const ControlPanel = () => {
               }}
               disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}
             >
-              {noteLabelMode === 'scale' ? 'Add Scale Notes' : 'Add Chord Tones'}
+              {noteLabelMode === 'scale' ? t('control.addScaleNotes') : t('control.addChordTones')}
             </button>
 
             <button type="button" className={m3OutlinedButtonClass} onClick={clearHighlightedNotes}>
-              Clear
+              {t('common.clear')}
             </button>
           </div>
         </div>
@@ -335,7 +338,7 @@ export const ControlPanel = () => {
               setAddScaleWithinExportRange(event.target.checked)
             }}
           />
-          Add notes within export range only
+          {t('control.addNotesWithinExportRangeOnly')}
         </label>
 
         <label className="flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
@@ -347,7 +350,7 @@ export const ControlPanel = () => {
               setShowExportRangeHighlight(event.target.checked)
             }}
           />
-          Show export range highlights
+          {t('control.showExportRangeHighlights')}
         </label>
       </div>
     </section>

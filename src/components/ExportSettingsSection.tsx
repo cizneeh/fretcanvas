@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { useI18n } from '../i18n/useI18n'
 import {
   type ExportGraphicInput,
   exportPng,
@@ -26,6 +27,7 @@ const checkerboardStyle = {
 } as const
 
 const ExpandedExportSettingsContent = () => {
+  const { locale, t } = useI18n()
   const {
     keyPc,
     noteLabelMode,
@@ -81,6 +83,7 @@ const ExpandedExportSettingsContent = () => {
 
   const exportInput = useMemo<ExportGraphicInput>(
     () => ({
+      locale,
       keyPc,
       noteLabelMode,
       noteTextMode,
@@ -95,6 +98,7 @@ const ExpandedExportSettingsContent = () => {
       showExportTitle,
     }),
     [
+      locale,
       keyPc,
       noteLabelMode,
       noteTextMode,
@@ -117,13 +121,13 @@ const ExpandedExportSettingsContent = () => {
         const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
         return {
           url: URL.createObjectURL(blob),
-          error: undefined,
+          errorKey: undefined,
           revokeOnCleanup: true,
         }
       } catch {
         return {
           url: undefined,
-          error: 'Preview render failed',
+          errorKey: 'export.previewFailed' as const,
           revokeOnCleanup: false,
         }
       }
@@ -133,7 +137,7 @@ const ExpandedExportSettingsContent = () => {
     if (canvas === undefined) {
       return {
         url: undefined,
-        error: 'Preview render failed',
+        errorKey: 'export.previewFailed' as const,
         revokeOnCleanup: false,
       }
     }
@@ -141,20 +145,20 @@ const ExpandedExportSettingsContent = () => {
     try {
       return {
         url: canvas.toDataURL('image/png', 1),
-        error: undefined,
+        errorKey: undefined,
         revokeOnCleanup: false,
       }
     } catch {
       return {
         url: undefined,
-        error: 'Failed to create preview image',
+        errorKey: 'export.previewCreateFailed' as const,
         revokeOnCleanup: false,
       }
     }
   }, [exportFormat, exportInput])
 
   const previewUrl = preview.url
-  const previewError = preview.error
+  const previewError = preview.errorKey === undefined ? undefined : t(preview.errorKey)
 
   useEffect(() => {
     return () => {
@@ -218,7 +222,7 @@ const ExpandedExportSettingsContent = () => {
         />
 
         <div className={`${m3CardElevatedClass} p-3`}>
-          <div className={`mb-2 ${m3FieldLabelClass}`}>Preview</div>
+          <div className={`mb-2 ${m3FieldLabelClass}`}>{t('export.preview')}</div>
           <button
             type="button"
             className={`m3-state-surface w-full rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline)] p-2 text-left transition-colors ${
@@ -239,7 +243,7 @@ const ExpandedExportSettingsContent = () => {
               {previewUrl !== undefined ? (
                 <img
                   src={previewUrl}
-                  alt="Export preview"
+                  alt={t('export.previewAlt')}
                   className="h-full w-full object-contain"
                   draggable={false}
                 />
@@ -252,7 +256,7 @@ const ExpandedExportSettingsContent = () => {
             </div>
           </button>
           <div className="mt-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-            Click to view full size
+            {t('export.viewFullSize')}
           </div>
         </div>
       </div>
@@ -262,7 +266,7 @@ const ExpandedExportSettingsContent = () => {
           <button
             type="button"
             className="absolute inset-0"
-            aria-label="Close preview modal backdrop"
+            aria-label={t('export.closePreviewBackdrop')}
             onClick={() => {
               setIsPreviewModalOpen(false)
             }}
@@ -270,7 +274,7 @@ const ExpandedExportSettingsContent = () => {
           <div className={`${m3CardElevatedClass} relative w-full max-w-6xl p-4`}>
             <div className="mb-3 flex items-center justify-between">
               <div className="text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
-                Export Preview
+                {t('export.preview')}
               </div>
               <button
                 type="button"
@@ -279,7 +283,7 @@ const ExpandedExportSettingsContent = () => {
                   setIsPreviewModalOpen(false)
                 }}
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
 
@@ -289,7 +293,7 @@ const ExpandedExportSettingsContent = () => {
             >
               <img
                 src={previewUrl}
-                alt="Export preview enlarged"
+                alt={t('export.previewAltEnlarged')}
                 className="mx-auto block h-auto max-h-[74vh] w-auto max-w-full object-contain"
                 draggable={false}
               />
@@ -302,6 +306,7 @@ const ExpandedExportSettingsContent = () => {
 }
 
 export const ExportSettingsSection = () => {
+  const { t } = useI18n()
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
@@ -315,7 +320,7 @@ export const ExportSettingsSection = () => {
         aria-expanded={isExpanded}
       >
         <div className="text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
-          Export Settings
+          {t('export.settings')}
         </div>
         <svg
           className={`h-4 w-4 text-[color:var(--md-sys-color-on-surface-variant)] transition-transform duration-150 ${

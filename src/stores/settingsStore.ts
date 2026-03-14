@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { type AppLocale, getDefaultLocale } from '../i18n/config'
 import { FRET_COUNT } from '../libs/model'
 import { useHistoryStore } from './historyStore'
 
@@ -9,6 +10,7 @@ type SettingsUpdateOptions = {
 export type ExportFormat = 'png' | 'svg'
 
 export type SettingsStoreState = {
+  locale: AppLocale
   exportFretStart: number
   exportFretEnd: number
   exportFormat: ExportFormat
@@ -19,6 +21,7 @@ export type SettingsStoreState = {
 }
 
 export type SettingsStoreActions = {
+  setLocale: (nextLocale: AppLocale) => void
   setAddScaleWithinExportRange: (nextValue: boolean, options?: SettingsUpdateOptions) => void
   setExportFormat: (nextFormat: ExportFormat, options?: SettingsUpdateOptions) => void
   setShowExportRangeHighlight: (nextValue: boolean, options?: SettingsUpdateOptions) => void
@@ -39,6 +42,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
   }
 
   return {
+    locale: getDefaultLocale(),
     exportFretStart: 0,
     exportFretEnd: FRET_COUNT,
     exportFormat: 'png',
@@ -46,6 +50,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
     addScaleWithinExportRange: true,
     showExportRangeHighlight: true,
     showExportTitle: false,
+
+    setLocale: (nextLocale) => {
+      if (get().locale === nextLocale) {
+        return
+      }
+
+      set({ locale: nextLocale })
+    },
 
     setAddScaleWithinExportRange: (nextValue, options) => {
       if (get().addScaleWithinExportRange === nextValue) {

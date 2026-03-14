@@ -1,10 +1,33 @@
-import { getExportTitle } from '../model'
+import { getScaleExportTitle } from '../../i18n/config'
+import { getAbsoluteNoteLabelByKey } from '../model'
 import type { ExportGraphicInput, ExportLayout } from './types'
+
+const getExportTitle = ({
+  locale,
+  keyPc,
+  noteLabelMode,
+  selectedScale,
+  appliedChordSymbol,
+}: Pick<
+  ExportGraphicInput,
+  'appliedChordSymbol' | 'keyPc' | 'locale' | 'noteLabelMode' | 'selectedScale'
+>): string | undefined => {
+  if (noteLabelMode === 'scale') {
+    if (selectedScale === undefined) {
+      return undefined
+    }
+
+    return getScaleExportTitle(locale, getAbsoluteNoteLabelByKey(keyPc, keyPc), selectedScale)
+  }
+
+  return appliedChordSymbol
+}
 
 export const EXPORT_CANVAS_FONT_STACK = '"Avenir Next", "Avenir", "Segoe UI", sans-serif'
 export const EXPORT_SVG_FONT_STACK = 'Avenir Next, Avenir, Segoe UI, sans-serif'
 
 export const getExportLayout = ({
+  locale,
   keyPc,
   noteLabelMode,
   selectedScale,
@@ -14,6 +37,7 @@ export const getExportLayout = ({
   showExportTitle,
 }: Pick<
   ExportGraphicInput,
+  | 'locale'
   | 'keyPc'
   | 'noteLabelMode'
   | 'selectedScale'
@@ -25,7 +49,13 @@ export const getExportLayout = ({
   const start = Math.min(exportFretStart, exportFretEnd)
   const end = Math.max(exportFretStart, exportFretEnd)
   const fretCountInRange = end - start + 1
-  const exportTitle = getExportTitle(keyPc, noteLabelMode, selectedScale, appliedChordSymbol)
+  const exportTitle = getExportTitle({
+    locale,
+    keyPc,
+    noteLabelMode,
+    selectedScale,
+    appliedChordSymbol,
+  })
   const paddingX = 12
   const paddingY = 12
   const labelWidth = 34

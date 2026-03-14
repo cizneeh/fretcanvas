@@ -1,3 +1,5 @@
+import type { AppLocale } from '../i18n/config'
+
 type NavigatorWithUserAgentData = Navigator & {
   userAgentData?: {
     platform?: string
@@ -29,20 +31,24 @@ export const isDimShortcutPressed = (metaKey: boolean, ctrlKey: boolean): boolea
   return ctrlKey
 }
 
-export const getDimShortcutLabel = (): string => {
+export const getDimShortcutLabel = (locale: AppLocale = 'en'): string => {
+  const clickLabel = locale === 'ja' ? 'クリック' : 'Click'
+
   if (isMacLikePlatform()) {
-    return '⌘ + Click'
+    return `⌘ + ${clickLabel}`
   }
-  return 'Ctrl + Click'
+  return `Ctrl + ${clickLabel}`
 }
 
 export const isBendShortcutPressed = (altKey: boolean): boolean => altKey
 
-export const getBendShortcutLabel = (): string => {
+export const getBendShortcutLabel = (locale: AppLocale = 'en'): string => {
+  const clickLabel = locale === 'ja' ? 'クリック' : 'Click'
+
   if (isMacLikePlatform()) {
-    return '⌥ + Click'
+    return `⌥ + ${clickLabel}`
   }
-  return 'Alt + Click'
+  return `Alt + ${clickLabel}`
 }
 
 export const isUndoShortcutPressed = (

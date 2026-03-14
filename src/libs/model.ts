@@ -7,6 +7,11 @@ export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
 export type NoteLabelMode = 'scale' | 'chord'
 export type NoteTextMode = 'interval' | 'absolute'
+export type ChordInputErrorKey =
+  | 'alteredNotSupported'
+  | 'couldNotParse'
+  | 'empty'
+  | 'slashNotSupported'
 /**
  * 指板上の1マスごとのid
  * 例: "1:3" は1弦3フレット
@@ -206,43 +211,45 @@ export const getDisplayedNoteLabel = (
         ? getScaleIntervalLabelFromRoot(pitchClass, keyPc)
         : getChordIntervalLabelFromRoot(pitchClass, keyPc)
 
-export const parseChordInput = (input: string): { symbol: string } | { error: string } => {
+export const parseChordInput = (
+  input: string,
+): { symbol: string } | { errorKey: ChordInputErrorKey } => {
   const trimmedInput = input.trim()
   const normalizedInput = trimmedInput.toLowerCase()
   if (trimmedInput === '') {
     return {
-      error: 'Enter a chord symbol.',
+      errorKey: 'empty',
     }
   }
 
   if (trimmedInput.includes('/')) {
     return {
-      error: 'Slash chords are not supported yet.',
+      errorKey: 'slashNotSupported',
     }
   }
 
   if (normalizedInput.includes('alt') || normalizedInput.includes('altered')) {
     return {
-      error: 'Altered chords are not supported yet.',
+      errorKey: 'alteredNotSupported',
     }
   }
 
   const parsed = Chord.get(trimmedInput)
   if (parsed.empty || parsed.tonic === null) {
     return {
-      error: 'Could not parse that chord symbol.',
+      errorKey: 'couldNotParse',
     }
   }
 
   if (parsed.symbol.includes('/')) {
     return {
-      error: 'Slash chords are not supported yet.',
+      errorKey: 'slashNotSupported',
     }
   }
 
   if (parsed.symbol.toLowerCase().includes('alt')) {
     return {
-      error: 'Altered chords are not supported yet.',
+      errorKey: 'alteredNotSupported',
     }
   }
 

@@ -1,4 +1,5 @@
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
+import { useI18n } from '../i18n/useI18n'
 import { FRET_NUMBERS } from '../libs/model'
 import { RenderProfiler } from './dev/RenderProfiler'
 import { ExportRangeTrack } from './ExportRangeTrack'
@@ -9,6 +10,7 @@ import { SelectionContextMenu } from './SelectionContextMenu'
 import { m3CardClass, m3FieldLabelClass } from './ui/materialClasses'
 
 export const FretboardView = () => {
+  const { t } = useI18n()
   const interaction = useFretboardInteractionState()
 
   return (
@@ -29,7 +31,7 @@ export const FretboardView = () => {
           </div>
 
           <div className={`${m3CardClass} w-full p-3`}>
-            <div className={`mb-2 ${m3FieldLabelClass}`}>Export Range</div>
+            <div className={`mb-2 ${m3FieldLabelClass}`}>{t('export.range')}</div>
             <div
               className="grid"
               style={{

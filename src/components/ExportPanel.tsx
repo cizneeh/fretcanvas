@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useI18n } from '../i18n/useI18n'
 import type { ExportFormat } from '../stores/settingsStore'
 import {
   m3CheckboxClass,
@@ -42,6 +43,7 @@ export const ExportPanel = ({
   onBackgroundOpacityEditEnd,
   onExport,
 }: ExportPanelProps) => {
+  const { t } = useI18n()
   const [draftOpacity, setDraftOpacity] = useState(String(backgroundOpacityPercent))
 
   useEffect(() => {
@@ -50,7 +52,9 @@ export const ExportPanel = ({
 
   const clampOpacity = (value: number) => Math.max(0, Math.min(Math.round(value), 100))
   const exportRangeLabel =
-    exportStart === exportEnd ? `Fret ${exportStart}` : `Frets ${exportStart} - ${exportEnd}`
+    exportStart === exportEnd
+      ? t('export.rangeSingle', { start: exportStart })
+      : t('export.rangeMulti', { start: exportStart, end: exportEnd })
   const exportFormatLabel = exportFormat.toUpperCase()
   const applyOpacity = (
     value: number,
@@ -66,7 +70,9 @@ export const ExportPanel = ({
     <div className="w-full max-w-[22rem]">
       <div className="mb-3 space-y-2">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
-          <span className="text-[color:var(--md-sys-color-on-surface-variant)]">Export Range</span>
+          <span className="text-[color:var(--md-sys-color-on-surface-variant)]">
+            {t('export.range')}
+          </span>
           <span className="font-medium text-[color:var(--md-sys-color-on-surface)]">
             {exportRangeLabel}
           </span>
@@ -82,11 +88,11 @@ export const ExportPanel = ({
             onShowExportTitleChange(event.target.checked)
           }}
         />
-        Show scale/chord name in export image
+        {t('export.showTitle')}
       </label>
 
       <div className="mb-4">
-        <div className={`mb-1 ${m3FieldLabelClass}`}>Background Opacity</div>
+        <div className={`mb-1 ${m3FieldLabelClass}`}>{t('export.backgroundOpacity')}</div>
         <div className="mb-2 grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] gap-2">
           <button
             type="button"
@@ -97,7 +103,7 @@ export const ExportPanel = ({
               onBackgroundOpacityEditEnd()
             }}
             disabled={backgroundOpacityPercent <= 0}
-            aria-label="Decrease opacity by 1"
+            aria-label={t('export.decreaseOpacity')}
           >
             -
           </button>
@@ -132,7 +138,7 @@ export const ExportPanel = ({
                   applyOpacity(parsed, { skipHistory: true })
                 }
               }}
-              aria-label="Background opacity percentage"
+              aria-label={t('export.opacityPercentageAria')}
             />
             <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
               %
@@ -148,7 +154,7 @@ export const ExportPanel = ({
               onBackgroundOpacityEditEnd()
             }}
             disabled={backgroundOpacityPercent >= 100}
-            aria-label="Increase opacity by 1"
+            aria-label={t('export.increaseOpacity')}
           >
             +
           </button>
@@ -188,12 +194,12 @@ export const ExportPanel = ({
           onChange={(event) => {
             applyOpacity(Number(event.target.value), { skipHistory: true })
           }}
-          aria-label="Export background opacity"
+          aria-label={t('export.backgroundOpacityAria')}
         />
       </div>
 
       <div className="mb-4">
-        <div className={`mb-1 ${m3FieldLabelClass}`}>Format</div>
+        <div className={`mb-1 ${m3FieldLabelClass}`}>{t('export.format')}</div>
         <div className={`${m3SegmentedContainerClass} w-full`}>
           {(['png', 'svg'] as const).map((format) => (
             <button
@@ -215,7 +221,7 @@ export const ExportPanel = ({
         type="button"
         className={`w-full ${m3FilledButtonClass}`}
         onClick={onExport}
-        aria-label={`Export ${exportFormatLabel}`}
+        aria-label={t('export.exportAria', { format: exportFormatLabel })}
       >
         <span className="flex items-center justify-center gap-2">
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">

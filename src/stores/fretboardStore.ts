@@ -218,7 +218,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     applyChordInput: () => {
       const current = get()
       const parsed = parseChordInput(current.chordInput)
-      if ('error' in parsed) {
+      if ('errorKey' in parsed) {
         return
       }
 
