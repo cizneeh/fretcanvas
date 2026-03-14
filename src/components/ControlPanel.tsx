@@ -111,96 +111,21 @@ export const ControlPanel = () => {
 
   return (
     <section className={`${m3CardClass} p-4`}>
-      <div className="grid gap-4 xl:grid-cols-[minmax(12rem,14rem)_minmax(10.5rem,11.5rem)_minmax(14rem,1fr)_minmax(16rem,17.5rem)]">
-        <label className="flex flex-col gap-2">
-          <span className={m3FieldLabelClass}>Key</span>
-          <div className="relative">
-            <select
-              className={m3SelectClass}
-              value={keyPc}
-              onChange={(event) => {
-                setKeyPc(Number(event.target.value) as PitchClass)
-              }}
-            >
-              {NOTE_LABELS.map((note, pitchClass) => (
-                <option key={note} value={pitchClass}>
-                  {note}
-                </option>
-              ))}
-            </select>
-            <svg
-              className={m3SelectChevronClass}
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M4 6.5L8 10L12 6.5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        </label>
-
-        <div className="flex w-full max-w-[11.5rem] flex-col gap-3">
-          <div className="flex flex-col gap-2">
-            <span className={m3FieldLabelClass}>Mode</span>
-            <div className={`${m3SegmentedContainerClass} w-full`}>
-              {modeOptions.map((modeOption) => (
-                <button
-                  key={modeOption.value}
-                  type="button"
-                  aria-pressed={noteLabelMode === modeOption.value}
-                  className={`${m3SegmentedButtonClass(noteLabelMode === modeOption.value)} flex-1 text-center`}
-                  onClick={() => {
-                    setNoteLabelMode(modeOption.value)
-                  }}
-                >
-                  {modeOption.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className={m3FieldLabelClass}>Note Labels</span>
-            <div className={`${m3SegmentedContainerClass} w-full`}>
-              {labelOptions.map((labelOption) => (
-                <button
-                  key={labelOption.value}
-                  type="button"
-                  aria-pressed={noteTextMode === labelOption.value}
-                  className={`${m3SegmentedButtonClass(noteTextMode === labelOption.value)} flex-1 text-center`}
-                  onClick={() => {
-                    setNoteTextMode(labelOption.value)
-                  }}
-                >
-                  {labelOption.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className={m3FieldLabelClass}>{noteLabelMode === 'scale' ? 'Scale' : 'Chord'}</span>
-          {noteLabelMode === 'scale' ? (
+      <div className="grid gap-5 xl:grid-cols-[minmax(14rem,15rem)_minmax(0,1fr)_minmax(13rem,14rem)]">
+        <div className="flex flex-col gap-4">
+          <label className="flex flex-col gap-2">
+            <span className={m3FieldLabelClass}>Key</span>
             <div className="relative">
               <select
                 className={m3SelectClass}
-                value={selectedScale ?? ''}
+                value={keyPc}
                 onChange={(event) => {
-                  const value = event.target.value as ScaleId | ''
-                  setSelectedScale(value === '' ? undefined : value)
+                  setKeyPc(Number(event.target.value) as PitchClass)
                 }}
               >
-                <option value="">Select scale</option>
-                {Object.entries(SCALE_LABELS).map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {label}
+                {NOTE_LABELS.map((note, pitchClass) => (
+                  <option key={note} value={pitchClass}>
+                    {note}
                   </option>
                 ))}
               </select>
@@ -219,100 +144,184 @@ export const ControlPanel = () => {
                 />
               </svg>
             </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              <div className="relative">
-                <select
-                  className={m3SelectClass}
-                  value={diatonicSelectValue}
-                  onChange={(event) => {
-                    const nextSymbol = event.target.value
-                    setActiveChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
+          </label>
+
+          <div className="flex max-w-[11.5rem] flex-col gap-2">
+            <span className={m3FieldLabelClass}>Note Labels</span>
+            <div className={`${m3SegmentedContainerClass} w-full`}>
+              {labelOptions.map((labelOption) => (
+                <button
+                  key={labelOption.value}
+                  type="button"
+                  aria-pressed={noteTextMode === labelOption.value}
+                  className={`${m3SegmentedButtonClass(noteTextMode === labelOption.value)} flex-1 text-center`}
+                  onClick={() => {
+                    setNoteTextMode(labelOption.value)
                   }}
                 >
-                  <option value="">Select major diatonic 7th</option>
-                  {diatonicChordOptions.map((option) => (
-                    <option key={option.symbol} value={option.symbol}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className={m3SelectChevronClass}
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M4 6.5L8 10L12 6.5"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <span className={m3FieldLabelClass}>Custom Chord</span>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    className={m3InputClass}
-                    value={chordInput}
-                    placeholder="Cmaj7, Dm7b5, G7#11..."
-                    onChange={(event) => {
-                      setChordInput(event.target.value)
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={`${m3OutlinedButtonClass} shrink-0 whitespace-nowrap`}
-                    onClick={applyChordInput}
-                    disabled={!canApplyChordInput}
-                  >
-                    Apply
-                  </button>
-                </div>
-                {chordInputError !== undefined ? (
-                  <div className="text-xs text-rose-300">{chordInputError}</div>
-                ) : undefined}
-                {/* 入力欄の文字列そのものではなく、Apply 済みの activeChordSymbol を表示する。 */}
-                <div className="rounded-[var(--md-shape-md)] border border-transparent bg-[color:var(--md-sys-color-secondary-container)] px-3 py-2">
-                  <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
-                    Applied Chord
-                  </div>
-                  <div className="mt-0.5 text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]">
-                    {activeChordSymbol ?? 'No chord applied'}
-                  </div>
-                </div>
-              </div>
+                  {labelOption.label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+
+          <div className="flex max-w-[12rem] flex-col gap-2">
+            <span className={m3FieldLabelClass}>Display Mode</span>
+            <div className={`${m3SegmentedContainerClass} w-full`}>
+              {modeOptions.map((modeOption) => (
+                <button
+                  key={modeOption.value}
+                  type="button"
+                  aria-pressed={noteLabelMode === modeOption.value}
+                  className={`${m3SegmentedButtonClass(noteLabelMode === modeOption.value)} flex-1 text-center`}
+                  onClick={() => {
+                    setNoteLabelMode(modeOption.value)
+                  }}
+                >
+                  {modeOption.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 self-end">
-          <button
-            type="button"
-            className={m3FilledButtonClass}
-            onClick={() => {
-              if (noteLabelMode === 'scale') {
-                addScaleNotes({ fretRange })
-                return
-              }
+        <div className="flex flex-col gap-4">
+          <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-3">
+            {noteLabelMode === 'scale' ? (
+              <div className="flex flex-col gap-2">
+                <span className={m3FieldLabelClass}>Scale</span>
+                <div className="relative">
+                  <select
+                    className={m3SelectClass}
+                    value={selectedScale ?? ''}
+                    onChange={(event) => {
+                      const value = event.target.value as ScaleId | ''
+                      setSelectedScale(value === '' ? undefined : value)
+                    }}
+                  >
+                    <option value="">Select scale</option>
+                    {Object.entries(SCALE_LABELS).map(([id, label]) => (
+                      <option key={id} value={id}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className={m3SelectChevronClass}
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 6.5L8 10L12 6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start">
+                <div className="flex flex-col gap-2">
+                  <span className={m3FieldLabelClass}>Chord Input</span>
+                  <div className="relative">
+                    <select
+                      className={m3SelectClass}
+                      value={diatonicSelectValue}
+                      onChange={(event) => {
+                        const nextSymbol = event.target.value
+                        setActiveChordSymbol(nextSymbol === '' ? undefined : nextSymbol)
+                      }}
+                    >
+                      <option value="">Select major diatonic 7th</option>
+                      {diatonicChordOptions.map((option) => (
+                        <option key={option.symbol} value={option.symbol}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <svg
+                      className={m3SelectChevronClass}
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 6.5L8 10L12 6.5"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
 
-              if (canAddChordTones) {
-                addActiveChordNotes({ fretRange })
-              }
-            }}
-            disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}
-          >
-            {noteLabelMode === 'scale' ? 'Add Scale Notes' : 'Add Chord Tones'}
-          </button>
+                <div className="flex flex-col gap-2">
+                  <span className={m3FieldLabelClass}>Custom Chord</span>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <input
+                      type="text"
+                      className={m3InputClass}
+                      value={chordInput}
+                      placeholder="Cmaj7, Dm7b5, G7#11..."
+                      onChange={(event) => {
+                        setChordInput(event.target.value)
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className={`${m3OutlinedButtonClass} shrink-0 whitespace-nowrap sm:self-start`}
+                      onClick={applyChordInput}
+                      disabled={!canApplyChordInput}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {chordInputError !== undefined ? (
+                    <div className="text-xs text-rose-300">{chordInputError}</div>
+                  ) : undefined}
+                  {/* 入力欄の文字列そのものではなく、Apply 済みの activeChordSymbol を表示する。 */}
+                  <div className="rounded-[var(--md-shape-md)] border border-transparent bg-[color:var(--md-sys-color-secondary-container)] px-3 py-2">
+                    <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
+                      Applied Chord
+                    </div>
+                    <div className="mt-0.5 text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]">
+                      {activeChordSymbol ?? 'No chord applied'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
-          <button type="button" className={m3OutlinedButtonClass} onClick={clearHighlightedNotes}>
-            Clear
-          </button>
+        <div className="flex flex-col gap-4 xl:justify-between">
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              className={m3FilledButtonClass}
+              onClick={() => {
+                if (noteLabelMode === 'scale') {
+                  addScaleNotes({ fretRange })
+                  return
+                }
+
+                if (canAddChordTones) {
+                  addActiveChordNotes({ fretRange })
+                }
+              }}
+              disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}
+            >
+              {noteLabelMode === 'scale' ? 'Add Scale Notes' : 'Add Chord Tones'}
+            </button>
+
+            <button type="button" className={m3OutlinedButtonClass} onClick={clearHighlightedNotes}>
+              Clear
+            </button>
+          </div>
         </div>
       </div>
 
