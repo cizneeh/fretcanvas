@@ -62,6 +62,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
       {
         exportFretStart: rawSettings.exportFretStart ?? 0,
         exportFretEnd: rawSettings.exportFretEnd ?? 24,
+        exportFormat: rawSettings.exportFormat === 'svg' ? 'svg' : 'png',
         backgroundOpacityPercent: rawSettings.backgroundOpacityPercent ?? 0,
         addScaleWithinExportRange: rawSettings.addScaleWithinExportRange ?? true,
         showExportRangeHighlight: rawSettings.showExportRangeHighlight ?? true,

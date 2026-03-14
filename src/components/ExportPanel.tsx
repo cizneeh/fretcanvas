@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react'
+import type { ExportFormat } from '../stores/settingsStore'
 import {
   m3CheckboxClass,
   m3FieldLabelClass,
   m3FilledButtonClass,
   m3InputClass,
   m3OutlinedButtonClass,
+  m3SegmentedButtonClass,
+  m3SegmentedContainerClass,
 } from './ui/materialClasses'
 
 type ExportPanelProps = {
   exportStart: number
   exportEnd: number
+  exportFormat: ExportFormat
   backgroundOpacityPercent: number
   showExportTitle: boolean
+  onExportFormatChange: (nextFormat: ExportFormat) => void
   onBackgroundOpacityPercentChange: (
     nextOpacity: number,
     options?: {
@@ -21,19 +26,21 @@ type ExportPanelProps = {
   onShowExportTitleChange: (nextValue: boolean) => void
   onBackgroundOpacityEditStart: () => void
   onBackgroundOpacityEditEnd: () => void
-  onExportTransparentPng: () => void
+  onExport: () => void
 }
 
 export const ExportPanel = ({
   exportStart,
   exportEnd,
+  exportFormat,
   backgroundOpacityPercent,
   showExportTitle,
+  onExportFormatChange,
   onBackgroundOpacityPercentChange,
   onShowExportTitleChange,
   onBackgroundOpacityEditStart,
   onBackgroundOpacityEditEnd,
-  onExportTransparentPng,
+  onExport,
 }: ExportPanelProps) => {
   const [draftOpacity, setDraftOpacity] = useState(String(backgroundOpacityPercent))
 
@@ -44,6 +51,7 @@ export const ExportPanel = ({
   const clampOpacity = (value: number) => Math.max(0, Math.min(Math.round(value), 100))
   const exportRangeLabel =
     exportStart === exportEnd ? `Fret ${exportStart}` : `Frets ${exportStart} - ${exportEnd}`
+  const exportFormatLabel = exportFormat.toUpperCase()
   const applyOpacity = (
     value: number,
     options?: {
@@ -184,11 +192,30 @@ export const ExportPanel = ({
         />
       </div>
 
+      <div className="mb-4">
+        <div className={`mb-1 ${m3FieldLabelClass}`}>Format</div>
+        <div className={`${m3SegmentedContainerClass} w-full`}>
+          {(['png', 'svg'] as const).map((format) => (
+            <button
+              key={format}
+              type="button"
+              aria-pressed={exportFormat === format}
+              className={`${m3SegmentedButtonClass(exportFormat === format)} flex-1 text-center`}
+              onClick={() => {
+                onExportFormatChange(format)
+              }}
+            >
+              {format.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button
         type="button"
         className={`w-full ${m3FilledButtonClass}`}
-        onClick={onExportTransparentPng}
-        aria-label="Export PNG"
+        onClick={onExport}
+        aria-label={`Export ${exportFormatLabel}`}
       >
         <span className="flex items-center justify-center gap-2">
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -202,7 +229,7 @@ export const ExportPanel = ({
             />
             <path d="M3 12.5H13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
-          <span>PNG</span>
+          <span>{exportFormatLabel}</span>
         </span>
       </button>
     </div>

@@ -32,6 +32,7 @@ export const createHistorySnapshot = (
   settings: {
     exportFretStart: settings.exportFretStart,
     exportFretEnd: settings.exportFretEnd,
+    exportFormat: settings.exportFormat,
     backgroundOpacityPercent: settings.backgroundOpacityPercent,
     addScaleWithinExportRange: settings.addScaleWithinExportRange,
     showExportRangeHighlight: settings.showExportRangeHighlight,
@@ -99,6 +100,7 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
     bendsEqual(left.fretboard.bends, right.fretboard.bends) &&
     left.settings.exportFretStart === right.settings.exportFretStart &&
     left.settings.exportFretEnd === right.settings.exportFretEnd &&
+    left.settings.exportFormat === right.settings.exportFormat &&
     left.settings.backgroundOpacityPercent === right.settings.backgroundOpacityPercent &&
     left.settings.addScaleWithinExportRange === right.settings.addScaleWithinExportRange &&
     left.settings.showExportRangeHighlight === right.settings.showExportRangeHighlight &&

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import {
-  type ExportTransparentPngInput,
-  exportTransparentPng,
+  type ExportGraphicInput,
+  exportPng,
+  exportSvg,
   renderExportPngCanvas,
+  renderExportSvgMarkup,
 } from '../libs/exportTransparentPng'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useHistoryStore } from '../stores/historyStore'
@@ -48,16 +50,20 @@ const ExpandedExportSettingsContent = () => {
   const {
     exportFretStart,
     exportFretEnd,
+    exportFormat,
     backgroundOpacityPercent,
     showExportTitle,
+    setExportFormat,
     handleBackgroundOpacityPercentChange,
     setShowExportTitle,
   } = useSettingsStore(
     useShallow((state) => ({
       exportFretStart: state.exportFretStart,
       exportFretEnd: state.exportFretEnd,
+      exportFormat: state.exportFormat,
       backgroundOpacityPercent: state.backgroundOpacityPercent,
       showExportTitle: state.showExportTitle,
+      setExportFormat: state.setExportFormat,
       handleBackgroundOpacityPercentChange: state.handleBackgroundOpacityPercentChange,
       setShowExportTitle: state.setShowExportTitle,
     })),
@@ -73,7 +79,7 @@ const ExpandedExportSettingsContent = () => {
     )
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
 
-  const exportInput = useMemo<ExportTransparentPngInput>(
+  const exportInput = useMemo<ExportGraphicInput>(
     () => ({
       keyPc,
       noteLabelMode,
@@ -105,11 +111,30 @@ const ExpandedExportSettingsContent = () => {
   )
 
   const preview = useMemo(() => {
+    if (exportFormat === 'svg') {
+      try {
+        const svgMarkup = renderExportSvgMarkup(exportInput)
+        const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
+        return {
+          url: URL.createObjectURL(blob),
+          error: undefined,
+          revokeOnCleanup: true,
+        }
+      } catch {
+        return {
+          url: undefined,
+          error: 'Preview render failed',
+          revokeOnCleanup: false,
+        }
+      }
+    }
+
     const canvas = renderExportPngCanvas(exportInput)
     if (canvas === undefined) {
       return {
         url: undefined,
         error: 'Preview render failed',
+        revokeOnCleanup: false,
       }
     }
 
@@ -117,17 +142,27 @@ const ExpandedExportSettingsContent = () => {
       return {
         url: canvas.toDataURL('image/png', 1),
         error: undefined,
+        revokeOnCleanup: false,
       }
     } catch {
       return {
         url: undefined,
         error: 'Failed to create preview image',
+        revokeOnCleanup: false,
       }
     }
-  }, [exportInput])
+  }, [exportFormat, exportInput])
 
   const previewUrl = preview.url
   const previewError = preview.error
+
+  useEffect(() => {
+    return () => {
+      if (preview.revokeOnCleanup && preview.url !== undefined) {
+        URL.revokeObjectURL(preview.url)
+      }
+    }
+  }, [preview])
 
   useEffect(() => {
     if (!isPreviewModalOpen) {
@@ -152,8 +187,10 @@ const ExpandedExportSettingsContent = () => {
         <ExportPanel
           exportStart={Math.min(exportFretStart, exportFretEnd)}
           exportEnd={Math.max(exportFretStart, exportFretEnd)}
+          exportFormat={exportFormat}
           backgroundOpacityPercent={backgroundOpacityPercent}
           showExportTitle={showExportTitle}
+          onExportFormatChange={setExportFormat}
           onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
           onShowExportTitleChange={setShowExportTitle}
           onBackgroundOpacityEditStart={() => {
@@ -170,8 +207,13 @@ const ExpandedExportSettingsContent = () => {
               cancelBufferedEdit()
             }
           }}
-          onExportTransparentPng={() => {
-            exportTransparentPng(exportInput)
+          onExport={() => {
+            if (exportFormat === 'svg') {
+              exportSvg(exportInput)
+              return
+            }
+
+            exportPng(exportInput)
           }}
         />
 
@@ -261,47 +303,39 @@ const ExpandedExportSettingsContent = () => {
 
 export const ExportSettingsSection = () => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const contentId = 'export-settings-content'
 
   return (
     <section className={`${m3CardClass} overflow-hidden`}>
       <button
         type="button"
-        className="m3-focus-ring m3-state-surface group flex min-h-12 w-full items-center justify-between gap-4 px-4 py-3 text-left"
-        aria-expanded={isExpanded}
-        aria-controls={contentId}
+        className="m3-state-surface flex w-full items-center justify-between px-4 py-3 text-left"
         onClick={() => {
-          setIsExpanded((previous) => !previous)
+          setIsExpanded((current) => !current)
         }}
+        aria-expanded={isExpanded}
       >
-        <div className="text-sm font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-surface)]">
+        <div className="text-sm font-medium text-[color:var(--md-sys-color-on-surface)]">
           Export Settings
         </div>
-
         <svg
-          className={`h-5 w-5 text-[color:var(--md-sys-color-on-surface-variant)] transition-transform duration-200 ease-out ${
+          className={`h-4 w-4 text-[color:var(--md-sys-color-on-surface-variant)] transition-transform duration-150 ${
             isExpanded ? 'rotate-180' : ''
           }`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
+          viewBox="0 0 16 16"
+          fill="none"
           aria-hidden="true"
         >
           <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.1 1.02l-4.25 4.5a.75.75 0 0 1-1.1 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
-            clipRule="evenodd"
+            d="M4 6.5L8 10L12 6.5"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       </button>
 
-      <div
-        id={contentId}
-        className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-out ${
-          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        }`}
-      >
-        <div className="min-h-0">{isExpanded ? <ExpandedExportSettingsContent /> : undefined}</div>
-      </div>
+      {isExpanded ? <ExpandedExportSettingsContent /> : undefined}
     </section>
   )
 }

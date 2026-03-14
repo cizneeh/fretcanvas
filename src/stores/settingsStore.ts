@@ -6,9 +6,12 @@ type SettingsUpdateOptions = {
   skipHistory?: boolean
 }
 
+export type ExportFormat = 'png' | 'svg'
+
 export type SettingsStoreState = {
   exportFretStart: number
   exportFretEnd: number
+  exportFormat: ExportFormat
   backgroundOpacityPercent: number
   addScaleWithinExportRange: boolean
   showExportRangeHighlight: boolean
@@ -17,6 +20,7 @@ export type SettingsStoreState = {
 
 export type SettingsStoreActions = {
   setAddScaleWithinExportRange: (nextValue: boolean, options?: SettingsUpdateOptions) => void
+  setExportFormat: (nextFormat: ExportFormat, options?: SettingsUpdateOptions) => void
   setShowExportRangeHighlight: (nextValue: boolean, options?: SettingsUpdateOptions) => void
   setShowExportTitle: (nextValue: boolean, options?: SettingsUpdateOptions) => void
   handleExportFretStartChange: (nextStart: number, options?: SettingsUpdateOptions) => void
@@ -37,6 +41,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
   return {
     exportFretStart: 0,
     exportFretEnd: FRET_COUNT,
+    exportFormat: 'png',
     backgroundOpacityPercent: 0,
     addScaleWithinExportRange: true,
     showExportRangeHighlight: true,
@@ -52,6 +57,18 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
       }
 
       set({ addScaleWithinExportRange: nextValue })
+    },
+
+    setExportFormat: (nextFormat, options) => {
+      if (get().exportFormat === nextFormat) {
+        return
+      }
+
+      if (!options?.skipHistory) {
+        pushHistoryBeforeChange()
+      }
+
+      set({ exportFormat: nextFormat })
     },
 
     setShowExportRangeHighlight: (nextValue, options) => {
