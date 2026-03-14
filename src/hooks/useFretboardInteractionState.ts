@@ -265,7 +265,16 @@ export const useFretboardInteractionState = () => {
       return
     }
 
-    updateHandleFromClientX(event.clientX, getNearestHandle(nextFret), false)
+    const nextHandle = getNearestHandle(nextFret)
+    const snapshot = captureSnapshot()
+    if (snapshot !== undefined) {
+      beginBufferedEdit(snapshot)
+    }
+
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setDraggingHandle(nextHandle)
+    setHoverPreview(undefined)
+    updateHandleFromClientX(event.clientX, nextHandle, true)
   }
 
   const handleTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
