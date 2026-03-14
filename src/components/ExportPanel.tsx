@@ -42,6 +42,8 @@ export const ExportPanel = ({
   }, [backgroundOpacityPercent])
 
   const clampOpacity = (value: number) => Math.max(0, Math.min(Math.round(value), 100))
+  const exportRangeLabel =
+    exportStart === exportEnd ? `Fret ${exportStart}` : `Frets ${exportStart} - ${exportEnd}`
   const applyOpacity = (
     value: number,
     options?: {
@@ -54,15 +56,13 @@ export const ExportPanel = ({
 
   return (
     <div className="w-full max-w-[22rem]">
-      <div className="mb-3 flex items-center justify-between text-sm text-[color:var(--md-sys-color-on-surface)]">
-        <span>Export Range</span>
-        <span className="font-medium text-[color:var(--md-sys-color-on-surface)]">
-          Frets {exportStart} - {exportEnd}
-        </span>
-      </div>
-
-      <div className="mb-4 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-        S / E マーカーをドラッグ、またはバーをクリックして範囲を設定
+      <div className="mb-3 space-y-2">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface)]">
+          <span>Export Range</span>
+          <span className="rounded-full border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-1 text-xs font-medium text-[color:var(--md-sys-color-on-surface)]">
+            {exportRangeLabel}
+          </span>
+        </div>
       </div>
 
       <label className="mb-4 flex items-center gap-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
