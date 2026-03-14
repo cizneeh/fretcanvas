@@ -13,8 +13,8 @@ export const FretboardView = () => {
   return (
     <section className="select-none">
       <div className="overflow-x-auto py-4">
-        <div className="space-y-3">
-          <div className="rounded-md bg-black ring-1 ring-inset ring-zinc-700">
+        <div className="w-max min-w-full space-y-3">
+          <div className="w-full rounded-md bg-black ring-1 ring-inset ring-zinc-700">
             <RenderProfiler id="FretboardGrid">
               <FretboardGrid
                 previewConnection={interaction.previewConnection}
@@ -23,7 +23,7 @@ export const FretboardView = () => {
             </RenderProfiler>
           </div>
 
-          <div className={`${m3CardClass} p-3`}>
+          <div className={`${m3CardClass} w-full p-3`}>
             <div className={`mb-2 ${m3FieldLabelClass}`}>Export Range</div>
             <div
               className="grid"
