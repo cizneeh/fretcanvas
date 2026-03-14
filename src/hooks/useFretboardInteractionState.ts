@@ -12,6 +12,7 @@ import {
   isBendShortcutPressed,
   isDimShortcutPressed,
   isEditableTarget,
+  isEmphasisShortcutPressed,
   isSelectionDeleteShortcutPressed,
 } from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
@@ -24,6 +25,7 @@ export const useFretboardInteractionState = () => {
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
+  const toggleNoteEmphasized = useFretboardStore((state) => state.toggleNoteEmphasized)
   const removePositions = useFretboardStore((state) => state.removePositions)
   const setNotesDimmed = useFretboardStore((state) => state.setNotesDimmed)
   const connectPositions = useFretboardStore((state) => state.connectPositions)
@@ -323,8 +325,9 @@ export const useFretboardInteractionState = () => {
     ) => {
       if (
         button !== 0 ||
-        isDimShortcutPressed(isMetaKey, isCtrlKey) ||
-        isBendShortcutPressed(isAltKey)
+        isBendShortcutPressed(isAltKey, isMetaKey, isCtrlKey) ||
+        isEmphasisShortcutPressed(isMetaKey, isCtrlKey) ||
+        isDimShortcutPressed(isAltKey, isMetaKey, isCtrlKey)
       ) {
         return
       }
@@ -488,21 +491,26 @@ export const useFretboardInteractionState = () => {
 
   const handleNoteClick = useCallback(
     (positionId: PositionId, isMetaKey: boolean, isCtrlKey: boolean, isAltKey: boolean) => {
-      if (isDimShortcutPressed(isMetaKey, isCtrlKey)) {
-        if (selectedPositionIds.length > 0 && selectedPositionIdSet.has(positionId)) {
-          setNotesDimmed(selectedPositionIds, !areAllSelectedNotesDimmed)
-          return
-        }
-        toggleNoteDimmed(positionId)
-        return
-      }
-
-      if (isBendShortcutPressed(isAltKey)) {
+      if (isBendShortcutPressed(isAltKey, isMetaKey, isCtrlKey)) {
         if (useFretboardStore.getState().bends[getBendId(positionId)] !== undefined) {
           removeBendByFromPosition(positionId)
           return
         }
         upsertBendFromPosition(positionId)
+        return
+      }
+
+      if (isEmphasisShortcutPressed(isMetaKey, isCtrlKey) && !isAltKey) {
+        toggleNoteEmphasized(positionId)
+        return
+      }
+
+      if (isDimShortcutPressed(isAltKey, isMetaKey, isCtrlKey)) {
+        if (selectedPositionIds.length > 0 && selectedPositionIdSet.has(positionId)) {
+          setNotesDimmed(selectedPositionIds, !areAllSelectedNotesDimmed)
+          return
+        }
+        toggleNoteDimmed(positionId)
         return
       }
 
@@ -526,6 +534,7 @@ export const useFretboardInteractionState = () => {
       selectedPositionIds,
       setNotesDimmed,
       toggleNoteDimmed,
+      toggleNoteEmphasized,
       togglePosition,
       upsertBendFromPosition,
     ],

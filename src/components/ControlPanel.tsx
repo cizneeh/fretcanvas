@@ -132,6 +132,7 @@ export const ControlPanel = () => {
   const rootTonePalette = getNotePalette('root')
   const defaultTonePalette = getNotePalette('default')
   const tensionTonePalette = getNotePalette('tension')
+  const manualInputTooltip = t('control.manualInputTooltip')
 
   return (
     <section className={`${m3CardClass} p-4`}>
@@ -284,13 +285,22 @@ export const ControlPanel = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className={m3FieldLabelClass}>{t('control.customInput')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={m3FieldLabelClass}>{t('control.manualInput')}</span>
+                    <span
+                      className="cursor-help text-[11px] font-medium text-[color:var(--md-sys-color-on-surface-variant)]/80 underline decoration-dotted underline-offset-2"
+                      title={manualInputTooltip}
+                    >
+                      {t('control.examples')}
+                    </span>
+                  </div>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <input
                       type="text"
                       className={m3InputClass}
                       value={chordInput}
-                      placeholder={t('control.customInputPlaceholder')}
+                      placeholder={t('control.manualInputPlaceholder')}
+                      title={manualInputTooltip}
                       onChange={(event) => {
                         setChordInput(event.target.value)
                       }}
@@ -312,7 +322,13 @@ export const ControlPanel = () => {
                     <div className="text-[11px] font-medium tracking-[0.01em] text-[color:var(--md-sys-color-on-secondary-container)]/72">
                       {t('control.appliedChord')}
                     </div>
-                    <div className="mt-0.5 text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]">
+                    <div
+                      className={`mt-0.5 ${
+                        appliedChordSymbol === undefined
+                          ? 'text-xs font-medium text-[color:var(--md-sys-color-on-secondary-container)]/60'
+                          : 'text-sm font-medium text-[color:var(--md-sys-color-on-secondary-container)]'
+                      }`}
+                    >
                       {appliedChordSymbol ?? t('control.noChordApplied')}
                     </div>
                   </div>

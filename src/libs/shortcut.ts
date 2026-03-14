@@ -24,15 +24,17 @@ export const isMacLikePlatform = (): boolean => {
   return platformText.includes('mac')
 }
 
-export const isDimShortcutPressed = (metaKey: boolean, ctrlKey: boolean): boolean => {
+const getClickLabel = (locale: AppLocale): string => (locale === 'ja' ? 'クリック' : 'Click')
+
+export const isEmphasisShortcutPressed = (metaKey: boolean, ctrlKey: boolean): boolean => {
   if (isMacLikePlatform()) {
     return metaKey
   }
   return ctrlKey
 }
 
-export const getDimShortcutLabel = (locale: AppLocale = 'en'): string => {
-  const clickLabel = locale === 'ja' ? 'クリック' : 'Click'
+export const getEmphasisShortcutLabel = (locale: AppLocale = 'en'): string => {
+  const clickLabel = getClickLabel(locale)
 
   if (isMacLikePlatform()) {
     return `⌘ + ${clickLabel}`
@@ -40,15 +42,54 @@ export const getDimShortcutLabel = (locale: AppLocale = 'en'): string => {
   return `Ctrl + ${clickLabel}`
 }
 
-export const isBendShortcutPressed = (altKey: boolean): boolean => altKey
+export const isDimShortcutPressed = (
+  altKey: boolean,
+  metaKey: boolean,
+  ctrlKey: boolean,
+): boolean => {
+  if (!altKey) {
+    return false
+  }
 
-export const getBendShortcutLabel = (locale: AppLocale = 'en'): string => {
-  const clickLabel = locale === 'ja' ? 'クリック' : 'Click'
+  if (isMacLikePlatform()) {
+    return !metaKey
+  }
+
+  return !ctrlKey
+}
+
+export const getDimShortcutLabel = (locale: AppLocale = 'en'): string => {
+  const clickLabel = getClickLabel(locale)
 
   if (isMacLikePlatform()) {
     return `⌥ + ${clickLabel}`
   }
   return `Alt + ${clickLabel}`
+}
+
+export const isBendShortcutPressed = (
+  altKey: boolean,
+  metaKey: boolean,
+  ctrlKey: boolean,
+): boolean => {
+  if (!altKey) {
+    return false
+  }
+
+  if (isMacLikePlatform()) {
+    return metaKey
+  }
+
+  return ctrlKey
+}
+
+export const getBendShortcutLabel = (locale: AppLocale = 'en'): string => {
+  const clickLabel = getClickLabel(locale)
+
+  if (isMacLikePlatform()) {
+    return `⌥ + ⌘ + ${clickLabel}`
+  }
+  return `Alt + Ctrl + ${clickLabel}`
 }
 
 export const isUndoShortcutPressed = (

@@ -7,11 +7,7 @@ export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
 export type NoteLabelMode = 'scale' | 'chord'
 export type NoteTextMode = 'interval' | 'absolute'
-export type ChordInputErrorKey =
-  | 'alteredNotSupported'
-  | 'couldNotParse'
-  | 'empty'
-  | 'slashNotSupported'
+export type ChordInputErrorKey = 'couldNotParse' | 'empty'
 /**
  * 指板上の1マスごとのid
  * 例: "1:3" は1弦3フレット
@@ -402,22 +398,9 @@ export const parseChordInput = (
   input: string,
 ): { symbol: string } | { errorKey: ChordInputErrorKey } => {
   const trimmedInput = input.trim()
-  const normalizedInput = trimmedInput.toLowerCase()
   if (trimmedInput === '') {
     return {
       errorKey: 'empty',
-    }
-  }
-
-  if (trimmedInput.includes('/')) {
-    return {
-      errorKey: 'slashNotSupported',
-    }
-  }
-
-  if (normalizedInput.includes('alt') || normalizedInput.includes('altered')) {
-    return {
-      errorKey: 'alteredNotSupported',
     }
   }
 
@@ -425,19 +408,6 @@ export const parseChordInput = (
   if (resolvedChord === undefined) {
     return {
       errorKey: 'couldNotParse',
-    }
-  }
-
-  const parsed = resolvedChord.parsedChord
-  if (parsed.symbol.includes('/')) {
-    return {
-      errorKey: 'slashNotSupported',
-    }
-  }
-
-  if (parsed.symbol.toLowerCase().includes('alt')) {
-    return {
-      errorKey: 'alteredNotSupported',
     }
   }
 

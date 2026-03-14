@@ -1,6 +1,10 @@
 import { useI18n } from '../i18n/useI18n'
 import { getBendId, type PositionId } from '../libs/model'
-import { getBendShortcutLabel, getDimShortcutLabel } from '../libs/shortcut'
+import {
+  getBendShortcutLabel,
+  getDimShortcutLabel,
+  getEmphasisShortcutLabel,
+} from '../libs/shortcut'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { m3MenuContainerClass, m3MenuItemClass } from './ui/materialClasses'
 
@@ -24,6 +28,7 @@ export const NoteContextMenu = ({
   const bends = useFretboardStore((state) => state.bends)
   const toggleNoteDimmed = useFretboardStore((state) => state.toggleNoteDimmed)
   const toggleNoteEmphasized = useFretboardStore((state) => state.toggleNoteEmphasized)
+  const emphasisShortcutLabel = getEmphasisShortcutLabel(locale)
   const shortcutLabel = getDimShortcutLabel(locale)
   const bendShortcutLabel = getBendShortcutLabel(locale)
   const hasBend = bends[getBendId(positionId)] !== undefined
@@ -49,6 +54,9 @@ export const NoteContextMenu = ({
         <span className="flex w-full items-center gap-3">
           <span className="min-w-0 flex-1 text-left">
             {isEmphasized ? t('context.deemphasize') : t('context.emphasize')}
+          </span>
+          <span className="ml-auto text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+            {emphasisShortcutLabel}
           </span>
         </span>
       </button>

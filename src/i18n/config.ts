@@ -26,8 +26,11 @@ const messages = {
     'control.apply': 'Apply',
     'control.chord': 'Chord',
     'control.chordNotes': 'Chord Notes',
-    'control.customInput': 'Custom Input',
-    'control.customInputPlaceholder': 'Cmaj7, Dm7b5, G7#11...',
+    'control.examples': 'Examples',
+    'control.manualInput': 'Manual Input',
+    'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Dm7,13, Cmaj7/B, G7alt...',
+    'control.manualInputTooltip':
+      'Examples:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nC7#9b13',
     'control.interval': 'Interval',
     'control.key': 'Key',
     'control.mode': 'Mode',
@@ -38,10 +41,8 @@ const messages = {
     'control.selectDiatonicChordPlaceholder': 'Select diatonic chord',
     'control.selectScale': 'Select scale',
     'control.showExportRangeHighlights': 'Show export range highlights on the fretboard',
-    'errors.chord.alteredNotSupported': 'Altered chords are not supported yet.',
     'errors.chord.couldNotParse': 'Could not parse that chord symbol.',
     'errors.chord.empty': 'Enter a chord symbol.',
-    'errors.chord.slashNotSupported': 'Slash chords are not supported yet.',
     'export.backgroundOpacity': 'Background Opacity',
     'export.backgroundOpacityAria': 'Export background opacity',
     'export.closePreviewBackdrop': 'Close preview modal backdrop',
@@ -96,8 +97,10 @@ const messages = {
     'control.apply': '適用',
     'control.chord': 'コード',
     'control.chordNotes': '構成音',
-    'control.customInput': '手動入力',
-    'control.customInputPlaceholder': 'Cmaj7, Dm7b5, G7#11...',
+    'control.examples': '例',
+    'control.manualInput': '手動入力',
+    'control.manualInputPlaceholder': 'Cmaj7, Dm7(11), Dm7,13, Cmaj7/B, G7alt...',
+    'control.manualInputTooltip': '例:\nCmaj7\nDm7(11)\nDm7,13\nDm7(9,13)\nCmaj7/B\nG7alt\nC7#9b13',
     'control.interval': '度数',
     'control.key': 'キー',
     'control.mode': 'モード',
@@ -108,10 +111,8 @@ const messages = {
     'control.selectDiatonicChordPlaceholder': 'ダイアトニックコードを選択',
     'control.selectScale': 'スケールを選択',
     'control.showExportRangeHighlights': 'エクスポート範囲のハイライトを指板上に表示',
-    'errors.chord.alteredNotSupported': 'オルタードコードにはまだ対応していません。',
     'errors.chord.couldNotParse': 'そのコードシンボルは解析できませんでした。',
     'errors.chord.empty': 'コードシンボルを入力してください。',
-    'errors.chord.slashNotSupported': 'オンコードはまだ対応していません。',
     'export.backgroundOpacity': '背景の不透明度',
     'export.backgroundOpacityAria': 'エクスポート背景の不透明度',
     'export.closePreviewBackdrop': 'プレビューモーダルを閉じる',
@@ -150,10 +151,8 @@ const messages = {
 export type TranslationKey = keyof (typeof messages)['en']
 
 const chordInputErrorMessageKeys: Record<ChordInputErrorKey, TranslationKey> = {
-  alteredNotSupported: 'errors.chord.alteredNotSupported',
   couldNotParse: 'errors.chord.couldNotParse',
   empty: 'errors.chord.empty',
-  slashNotSupported: 'errors.chord.slashNotSupported',
 }
 
 const scaleMessageKeys: Record<ScaleId, TranslationKey> = {
