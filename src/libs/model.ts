@@ -288,24 +288,17 @@ export const getNoteVisualRole = ({
       return 'root'
     }
 
-    const referenceScalePitchClasses = getReferenceScalePitchClasses(
-      noteLabelMode,
-      keyPc,
-      selectedScale,
-    )
-    if (
-      referenceScalePitchClasses !== undefined &&
-      !referenceScalePitchClasses.has(normalizedPitchClass)
-    ) {
-      return 'outOfKey'
-    }
-
     const chordTonePitchClasses = new Set(getChordTonePitchClasses(activeChordSymbol))
     if (chordTonePitchClasses.has(normalizedPitchClass)) {
       return 'default'
     }
 
-    return 'tension'
+    const chordPitchClasses = new Set(getChordPitchClasses(activeChordSymbol))
+    if (chordPitchClasses.has(normalizedPitchClass)) {
+      return 'tension'
+    }
+
+    return 'outOfKey'
   }
 
   const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, activeChordSymbol)
