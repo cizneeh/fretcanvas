@@ -210,7 +210,7 @@ const ExpandedExportSettingsContent = () => {
             </div>
           </button>
           <div className="mt-2 text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
-            クリックで拡大表示
+            Click to view full size
           </div>
         </div>
       </div>

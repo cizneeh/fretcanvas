@@ -57,9 +57,9 @@ export const ExportPanel = ({
   return (
     <div className="w-full max-w-[22rem]">
       <div className="mb-3 space-y-2">
-        <div className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface)]">
-          <span>Export Range</span>
-          <span className="rounded-full border border-[color:var(--md-sys-color-outline)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-1 text-xs font-medium text-[color:var(--md-sys-color-on-surface)]">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+          <span className="text-[color:var(--md-sys-color-on-surface-variant)]">Export Range</span>
+          <span className="font-medium text-[color:var(--md-sys-color-on-surface)]">
             {exportRangeLabel}
           </span>
         </div>
