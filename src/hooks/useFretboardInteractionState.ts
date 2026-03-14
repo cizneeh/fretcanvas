@@ -508,6 +508,10 @@ export const useFretboardInteractionState = () => {
       }
 
       if (isEmphasisShortcutPressed(isMetaKey, isCtrlKey) && !isAltKey) {
+        if (selectedPositionIds.length > 0 && selectedPositionIdSet.has(positionId)) {
+          setNotesEmphasized(selectedPositionIds, !areAllSelectedNotesEmphasized)
+          return
+        }
         toggleNoteEmphasized(positionId)
         return
       }
@@ -534,12 +538,14 @@ export const useFretboardInteractionState = () => {
     },
     [
       areAllSelectedNotesDimmed,
+      areAllSelectedNotesEmphasized,
       clearSelection,
       removeBendByFromPosition,
       selectedPositionIdSet,
       selectedPositionIds.length,
       selectedPositionIds,
       setNotesDimmed,
+      setNotesEmphasized,
       toggleNoteDimmed,
       toggleNoteEmphasized,
       togglePosition,
