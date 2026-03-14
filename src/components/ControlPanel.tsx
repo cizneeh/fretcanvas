@@ -225,7 +225,7 @@ export const ControlPanel = () => {
             ) : (
               <div className="grid gap-3 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start">
                 <div className="flex flex-col gap-2">
-                  <span className={m3FieldLabelClass}>Chord Input</span>
+                  <span className={m3FieldLabelClass}>Select Diatonic Chord</span>
                   <div className="relative">
                     <select
                       className={m3SelectClass}
@@ -260,7 +260,7 @@ export const ControlPanel = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className={m3FieldLabelClass}>Custom Chord</span>
+                  <span className={m3FieldLabelClass}>Custom Input</span>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <input
                       type="text"
