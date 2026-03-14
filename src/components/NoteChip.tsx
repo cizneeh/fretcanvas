@@ -1,7 +1,8 @@
+import type { NoteVisualRole } from '../libs/model'
+
 type NoteChipProps = {
   isHighlighted: boolean
-  isRoot: boolean
-  isOutOfScale: boolean
+  visualRole: NoteVisualRole
   isDimmed: boolean
   isSelected: boolean
   disablePreview: boolean
@@ -10,23 +11,28 @@ type NoteChipProps = {
 
 export const NoteChip = ({
   isHighlighted,
-  isRoot,
-  isOutOfScale,
+  visualRole,
   isDimmed,
   isSelected,
   disablePreview,
   label,
 }: NoteChipProps) => {
-  const highlightedToneClass = isRoot
-    ? 'border-rose-200/80 bg-rose-700/80 text-white'
-    : isOutOfScale
-      ? 'border-orange-200/75 bg-orange-500/80 text-white'
-      : 'border-cyan-100/70 bg-cyan-600/80 text-white'
-  const previewToneClass = isRoot
-    ? 'border-rose-200/65 bg-rose-500/35 text-rose-50'
-    : isOutOfScale
-      ? 'border-orange-200/65 bg-orange-400/35 text-orange-50'
-      : 'border-cyan-100/65 bg-cyan-500/35 text-cyan-50'
+  const highlightedToneClass =
+    visualRole === 'root'
+      ? 'border-rose-200/80 bg-rose-700/80 text-white'
+      : visualRole === 'outOfKey'
+        ? 'border-orange-200/75 bg-orange-500/80 text-white'
+        : visualRole === 'tension'
+          ? 'border-emerald-200/75 bg-emerald-600/80 text-white'
+          : 'border-cyan-100/70 bg-cyan-600/80 text-white'
+  const previewToneClass =
+    visualRole === 'root'
+      ? 'border-rose-200/65 bg-rose-500/35 text-rose-50'
+      : visualRole === 'outOfKey'
+        ? 'border-orange-200/65 bg-orange-400/35 text-orange-50'
+        : visualRole === 'tension'
+          ? 'border-emerald-200/65 bg-emerald-500/35 text-emerald-50'
+          : 'border-cyan-100/65 bg-cyan-500/35 text-cyan-50'
 
   if (!isHighlighted) {
     return (

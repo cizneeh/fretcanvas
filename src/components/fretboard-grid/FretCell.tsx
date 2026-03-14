@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import type { PositionId } from '../../libs/model'
+import type { NoteVisualRole, PositionId } from '../../libs/model'
 import { isCellRenderLogEnabled } from '../../libs/renderProfiler'
 import { useFretboardStore } from '../../stores/fretboardStore'
 import { NoteChip } from '../NoteChip'
@@ -8,8 +8,7 @@ type FretCellProps = {
   positionId: PositionId
   isNut: boolean
   label: string
-  isRoot: boolean
-  isOutOfScale: boolean
+  visualRole: NoteVisualRole
   isSelected: boolean
   disablePreview: boolean
   isStartAtNutLine: boolean
@@ -47,8 +46,7 @@ export const FretCell = memo(
     positionId,
     isNut,
     label,
-    isRoot,
-    isOutOfScale,
+    visualRole,
     isSelected,
     disablePreview,
     isStartAtNutLine,
@@ -121,8 +119,7 @@ export const FretCell = memo(
         ) : undefined}
         <NoteChip
           isHighlighted={isHighlighted}
-          isRoot={isRoot}
-          isOutOfScale={isOutOfScale}
+          visualRole={visualRole}
           isDimmed={isDimmed}
           isSelected={isSelected}
           disablePreview={disablePreview}

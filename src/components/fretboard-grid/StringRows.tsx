@@ -3,8 +3,7 @@ import { useShallow } from 'zustand/react/shallow'
 import {
   FRET_NUMBERS,
   getDisplayedNoteLabel,
-  getDisplayRootPc,
-  getScalePitchClasses,
+  getNoteVisualRole,
   normalizePc,
   OPEN_STRINGS,
   type PositionId,
@@ -72,9 +71,6 @@ export const StringRows = memo(
     const startHighlightFret = showExportRangeHighlight ? Math.max(0, exportFretStart - 1) : -1
     const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
     const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
-    const scalePitchClasses =
-      selectedScale === undefined ? undefined : new Set(getScalePitchClasses(keyPc, selectedScale))
-    const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
 
     return (
       <RenderProfiler id="StringRows">
@@ -88,10 +84,13 @@ export const StringRows = memo(
             {FRET_NUMBERS.map((fret) => {
               const positionId = toPositionId({ stringIndex, fret })
               const pitchClass = normalizePc(stringInfo.midi + fret)
-              const intervalFromDisplayRoot = normalizePc(pitchClass - displayRootPc)
-              const isRoot = intervalFromDisplayRoot === 0
-              const isOutOfScale =
-                scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
+              const visualRole = getNoteVisualRole({
+                pitchClass,
+                noteLabelMode,
+                keyPc,
+                selectedScale,
+                selectedChordSymbol,
+              })
               const label = getDisplayedNoteLabel(
                 pitchClass,
                 noteTextMode,
@@ -110,8 +109,7 @@ export const StringRows = memo(
                   positionId={positionId}
                   isNut={fret === 0}
                   label={label}
-                  isRoot={isRoot}
-                  isOutOfScale={isOutOfScale}
+                  visualRole={visualRole}
                   isSelected={selectedPositionIds.has(positionId)}
                   disablePreview={disableCellPreview}
                   isStartAtNutLine={isStartAtNutLine}

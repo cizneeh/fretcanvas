@@ -32,6 +32,7 @@ export type BendArrow = {
   from: PositionId
 }
 export type NoteColorVariant = 'default' | 'amber' | 'violet'
+export type NoteVisualRole = 'root' | 'default' | 'tension' | 'outOfKey'
 export type HighlightedNote = {
   positionId: PositionId
   isDimmed: boolean
@@ -186,6 +187,83 @@ export const getDisplayedNoteLabel = (
     : noteLabelMode === 'chord' && selectedChordSymbol !== undefined
       ? getChordToneLabel(pitchClass, selectedChordSymbol)
       : getLabelFromRoot(pitchClass, keyPc)
+
+const getReferenceScalePitchClasses = (
+  noteLabelMode: NoteLabelMode,
+  keyPc: PitchClass,
+  selectedScale: ScaleId | undefined,
+): Set<PitchClass> | undefined => {
+  if (noteLabelMode === 'chord') {
+    return new Set(getScalePitchClasses(keyPc, 'major'))
+  }
+
+  if (selectedScale === undefined) {
+    return undefined
+  }
+
+  return new Set(getScalePitchClasses(keyPc, selectedScale))
+}
+
+export const getNoteVisualRole = ({
+  pitchClass,
+  noteLabelMode,
+  keyPc,
+  selectedScale,
+  selectedChordSymbol,
+}: {
+  pitchClass: PitchClass
+  noteLabelMode: NoteLabelMode
+  keyPc: PitchClass
+  selectedScale: ScaleId | undefined
+  selectedChordSymbol: string | undefined
+}): NoteVisualRole => {
+  const normalizedPitchClass = normalizePc(pitchClass)
+
+  if (noteLabelMode === 'chord' && selectedChordSymbol !== undefined) {
+    const chordRootPc = getChordRootPc(selectedChordSymbol)
+    if (chordRootPc !== undefined && normalizedPitchClass === chordRootPc) {
+      return 'root'
+    }
+
+    const referenceScalePitchClasses = getReferenceScalePitchClasses(
+      noteLabelMode,
+      keyPc,
+      selectedScale,
+    )
+    if (
+      referenceScalePitchClasses !== undefined &&
+      !referenceScalePitchClasses.has(normalizedPitchClass)
+    ) {
+      return 'outOfKey'
+    }
+
+    const chordPitchClasses = new Set(getChordPitchClasses(selectedChordSymbol))
+    if (chordPitchClasses.has(normalizedPitchClass)) {
+      return 'default'
+    }
+
+    return 'tension'
+  }
+
+  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
+  if (normalizePc(normalizedPitchClass - displayRootPc) === 0) {
+    return 'root'
+  }
+
+  const referenceScalePitchClasses = getReferenceScalePitchClasses(
+    noteLabelMode,
+    keyPc,
+    selectedScale,
+  )
+  if (
+    referenceScalePitchClasses !== undefined &&
+    !referenceScalePitchClasses.has(normalizedPitchClass)
+  ) {
+    return 'outOfKey'
+  }
+
+  return 'default'
+}
 
 export const getExportTitle = (
   keyPc: PitchClass,

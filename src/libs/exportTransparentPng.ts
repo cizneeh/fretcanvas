@@ -3,9 +3,8 @@ import {
   type BendArrow,
   type Connection,
   getDisplayedNoteLabel,
-  getDisplayRootPc,
   getExportTitle,
-  getScalePitchClasses,
+  getNoteVisualRole,
   type HighlightedNote,
   MARKER_FRETS,
   type NoteLabelMode,
@@ -96,9 +95,6 @@ export const renderExportPngCanvas = ({
   ctx.font = '12px "Avenir Next", "Avenir", "Segoe UI", sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  const scalePitchClasses =
-    selectedScale === undefined ? undefined : new Set(getScalePitchClasses(keyPc, selectedScale))
-  const displayRootPc = getDisplayRootPc(noteLabelMode, keyPc, selectedChordSymbol)
 
   const drawNote = (stringIndex: number, midiBase: number, fret: number, yCenter: number) => {
     const positionId = toPositionId({
@@ -111,9 +107,13 @@ export const renderExportPngCanvas = ({
     }
 
     const pitchClass = normalizePc(midiBase + fret)
-    const intervalFromDisplayRoot = normalizePc(pitchClass - displayRootPc)
-    const isRoot = intervalFromDisplayRoot === 0
-    const isOutOfScale = scalePitchClasses !== undefined && !scalePitchClasses.has(pitchClass)
+    const visualRole = getNoteVisualRole({
+      pitchClass,
+      noteLabelMode,
+      keyPc,
+      selectedScale,
+      selectedChordSymbol,
+    })
     const label = getDisplayedNoteLabel(
       pitchClass,
       noteTextMode,
@@ -126,20 +126,26 @@ export const renderExportPngCanvas = ({
     const noteOpacity = displayedNote.isDimmed ? 0.35 : 1
     ctx.save()
     ctx.globalAlpha = noteOpacity
-    ctx.fillStyle = isRoot
-      ? 'rgba(190, 24, 93, 0.8)'
-      : isOutOfScale
-        ? 'rgba(249, 115, 22, 0.8)'
-        : 'rgba(8, 145, 178, 0.8)'
+    ctx.fillStyle =
+      visualRole === 'root'
+        ? 'rgba(190, 24, 93, 0.8)'
+        : visualRole === 'outOfKey'
+          ? 'rgba(249, 115, 22, 0.8)'
+          : visualRole === 'tension'
+            ? 'rgba(5, 150, 105, 0.8)'
+            : 'rgba(8, 145, 178, 0.8)'
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.strokeStyle = isRoot
-      ? 'rgba(254, 205, 211, 0.8)'
-      : isOutOfScale
-        ? 'rgba(254, 215, 170, 0.75)'
-        : 'rgba(207, 250, 254, 0.7)'
+    ctx.strokeStyle =
+      visualRole === 'root'
+        ? 'rgba(254, 205, 211, 0.8)'
+        : visualRole === 'outOfKey'
+          ? 'rgba(254, 215, 170, 0.75)'
+          : visualRole === 'tension'
+            ? 'rgba(209, 250, 229, 0.75)'
+            : 'rgba(207, 250, 254, 0.7)'
     ctx.lineWidth = 1.5
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
