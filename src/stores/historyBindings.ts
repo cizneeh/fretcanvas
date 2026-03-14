@@ -55,14 +55,12 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
               ? (rawFretboard as { selectedChordSymbol: string }).selectedChordSymbol
               : undefined,
         chordInput:
-          typeof rawFretboard.chordInput === 'string'
-            ? rawFretboard.chordInput
-            : typeof rawFretboard.activeChordSymbol === 'string'
-              ? rawFretboard.activeChordSymbol
-              : typeof (rawFretboard as { selectedChordSymbol?: unknown }).selectedChordSymbol ===
-                  'string'
-                ? (rawFretboard as { selectedChordSymbol: string }).selectedChordSymbol
-                : '',
+          typeof rawFretboard.activeChordSymbol === 'string'
+            ? rawFretboard.activeChordSymbol
+            : typeof (rawFretboard as { selectedChordSymbol?: unknown }).selectedChordSymbol ===
+                'string'
+              ? (rawFretboard as { selectedChordSymbol: string }).selectedChordSymbol
+              : '',
         displayedNotes: rawFretboard.displayedNotes ?? {},
         connections: rawFretboard.connections ?? {},
         bends: rawFretboard.bends ?? {},

@@ -212,17 +212,20 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         return
       }
 
-      pushHistoryBeforeChange()
       set({ chordInput: nextChordInput })
     },
 
     applyChordInput: () => {
       const current = get()
       const parsed = parseChordInput(current.chordInput)
-      if (
-        'error' in parsed ||
-        (current.activeChordSymbol === parsed.symbol && current.chordInput === parsed.symbol)
-      ) {
+      if ('error' in parsed) {
+        return
+      }
+
+      if (current.activeChordSymbol === parsed.symbol) {
+        if (current.chordInput !== parsed.symbol) {
+          set({ chordInput: parsed.symbol })
+        }
         return
       }
 
