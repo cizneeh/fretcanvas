@@ -1,4 +1,4 @@
-import { Chord, Key, Note, Scale } from 'tonal'
+import { Chord, ChordType, Key, Note, Scale } from 'tonal'
 
 // データ型定義、定数、ロジック
 
@@ -121,6 +121,35 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
   pentatonicMinor: 'Pentatonic Minor',
 }
 
+const EXPLICIT_EXTENSION_INTERVALS = {
+  b9: '9m',
+  9: '9M',
+  '#9': '9A',
+  11: '11P',
+  '#11': '11A',
+  b13: '13m',
+  13: '13M',
+} as const
+
+type ExplicitExtensionToken = keyof typeof EXPLICIT_EXTENSION_INTERVALS
+
+const EXPLICIT_EXTENSION_ORDER: Record<ExplicitExtensionToken, number> = {
+  b9: 0,
+  9: 1,
+  '#9': 2,
+  11: 3,
+  '#11': 4,
+  b13: 5,
+  13: 6,
+}
+
+type ExplicitExtensionParseResult =
+  | { kind: 'none' }
+  | { kind: 'invalid' }
+  | { kind: 'parsed'; baseInput: string; extensions: ExplicitExtensionToken[] }
+
+const registeredCustomChordTypes = new Set<string>()
+
 export type MajorDiatonicSeventhChordOption = {
   symbol: string
   label: string
@@ -142,8 +171,165 @@ export const getScaleIntervalLabelFromRoot = (pitchClass: PitchClass, rootPc: Pi
 export const getChordIntervalLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
   CHORD_INTERVAL_LABELS[normalizePc(pitchClass - rootPc)]
 
+const getIntervalDegree = (interval: string): number => Number.parseInt(interval, 10)
+
+const parseExplicitExtensionInput = (input: string): ExplicitExtensionParseResult => {
+  const trimmedInput = input.trim()
+
+  let baseInput: string | undefined
+  let extensionInput: string | undefined
+
+  if (trimmedInput.includes('(') || trimmedInput.includes(')')) {
+    const match = /^(.+?)\(([^()]*)\)$/.exec(trimmedInput)
+    if (match === null) {
+      return { kind: 'invalid' }
+    }
+
+    baseInput = match[1]?.trim()
+    extensionInput = match[2]?.trim()
+  } else if (trimmedInput.includes(',')) {
+    const [basePart, ...extensionParts] = trimmedInput.split(',')
+    baseInput = basePart?.trim()
+    extensionInput = extensionParts.join(',').trim()
+  } else {
+    return { kind: 'none' }
+  }
+
+  if (
+    baseInput === undefined ||
+    baseInput === '' ||
+    extensionInput === undefined ||
+    extensionInput === ''
+  ) {
+    return { kind: 'invalid' }
+  }
+
+  const normalizedTokens = Array.from(
+    new Set(
+      extensionInput
+        .split(',')
+        .map((token) => token.replaceAll(' ', '').trim())
+        .filter((token) => token.length > 0),
+    ),
+  )
+
+  if (normalizedTokens.length === 0) {
+    return { kind: 'invalid' }
+  }
+
+  const extensions: ExplicitExtensionToken[] = []
+  for (const token of normalizedTokens) {
+    if (!(token in EXPLICIT_EXTENSION_INTERVALS)) {
+      return { kind: 'invalid' }
+    }
+
+    extensions.push(token as ExplicitExtensionToken)
+  }
+
+  extensions.sort((left, right) => EXPLICIT_EXTENSION_ORDER[left] - EXPLICIT_EXTENSION_ORDER[right])
+
+  return {
+    kind: 'parsed',
+    baseInput,
+    extensions,
+  }
+}
+
+const registerCustomChordType = (
+  baseParsedChord: ReturnType<typeof Chord.get>,
+  extensions: ExplicitExtensionToken[],
+): string | undefined => {
+  if (baseParsedChord.tonic === null) {
+    return undefined
+  }
+
+  const customChordSymbol = `${baseParsedChord.symbol}(${extensions.join(',')})`
+  const customChordTypeAlias = customChordSymbol.slice(baseParsedChord.tonic.length)
+
+  if (registeredCustomChordTypes.has(customChordTypeAlias)) {
+    return customChordSymbol
+  }
+
+  const intervalByDegree = new Map<number, string>()
+  for (const interval of baseParsedChord.intervals) {
+    intervalByDegree.set(getIntervalDegree(interval), interval)
+  }
+
+  for (const extension of extensions) {
+    const interval = EXPLICIT_EXTENSION_INTERVALS[extension]
+    const degree = getIntervalDegree(interval)
+    const existingInterval = intervalByDegree.get(degree)
+
+    if (existingInterval === undefined) {
+      intervalByDegree.set(degree, interval)
+      continue
+    }
+
+    if (existingInterval !== interval) {
+      return undefined
+    }
+  }
+
+  const mergedIntervals = Array.from(intervalByDegree.values()).sort((left, right) => {
+    return getIntervalDegree(left) - getIntervalDegree(right)
+  })
+
+  ChordType.add(mergedIntervals, [customChordTypeAlias], `${baseParsedChord.type} with extensions`)
+  registeredCustomChordTypes.add(customChordTypeAlias)
+
+  return customChordSymbol
+}
+
+const resolveChordSymbol = (
+  input: string,
+): { parsedChord: ReturnType<typeof Chord.get>; symbol: string } | undefined => {
+  const explicitExtensionInput = parseExplicitExtensionInput(input)
+
+  if (explicitExtensionInput.kind === 'invalid') {
+    return undefined
+  }
+
+  if (explicitExtensionInput.kind === 'none') {
+    const parsedChord = Chord.get(input)
+    if (parsedChord.empty || parsedChord.tonic === null) {
+      return undefined
+    }
+
+    return {
+      parsedChord,
+      symbol: parsedChord.symbol,
+    }
+  }
+
+  const baseParsedChord = Chord.get(explicitExtensionInput.baseInput)
+  if (baseParsedChord.empty || baseParsedChord.tonic === null) {
+    return undefined
+  }
+
+  const customChordSymbol = registerCustomChordType(
+    baseParsedChord,
+    explicitExtensionInput.extensions,
+  )
+  if (customChordSymbol === undefined) {
+    return undefined
+  }
+
+  const parsedChord = Chord.get(customChordSymbol)
+  if (parsedChord.empty || parsedChord.tonic === null) {
+    return undefined
+  }
+
+  return {
+    parsedChord,
+    symbol: customChordSymbol,
+  }
+}
+
+const getResolvedChord = (chordSymbol: string): ReturnType<typeof Chord.get> =>
+  resolveChordSymbol(chordSymbol)?.parsedChord ?? Chord.get(chordSymbol)
+
 const getChordRootPc = (chordSymbol: string): PitchClass | undefined => {
-  const tonic = Chord.get(chordSymbol).tonic
+  const tonic = getResolvedChord(chordSymbol).tonic
   if (tonic === null) {
     return undefined
   }
@@ -158,7 +344,7 @@ export const getChordToneLabel = (pitchClass: PitchClass, chordSymbol: string): 
   }
 
   const intervalFromRoot = normalizePc(pitchClass - rootPc)
-  const isHalfDiminished = Chord.get(chordSymbol).intervals.includes('5d')
+  const isHalfDiminished = getResolvedChord(chordSymbol).intervals.includes('5d')
   if (isHalfDiminished && intervalFromRoot === 6) {
     return 'b5'
   }
@@ -234,13 +420,14 @@ export const parseChordInput = (
     }
   }
 
-  const parsed = Chord.get(trimmedInput)
-  if (parsed.empty || parsed.tonic === null) {
+  const resolvedChord = resolveChordSymbol(trimmedInput)
+  if (resolvedChord === undefined) {
     return {
       errorKey: 'couldNotParse',
     }
   }
 
+  const parsed = resolvedChord.parsedChord
   if (parsed.symbol.includes('/')) {
     return {
       errorKey: 'slashNotSupported',
@@ -254,7 +441,7 @@ export const parseChordInput = (
   }
 
   return {
-    symbol: parsed.symbol,
+    symbol: resolvedChord.symbol,
   }
 }
 
@@ -352,13 +539,13 @@ export const getScalePitchClasses = (keyPc: PitchClass, scaleId: ScaleId): Pitch
     .map((value) => normalizePc(value))
 
 export const getChordPitchClasses = (chordSymbol: string): PitchClass[] =>
-  Chord.get(chordSymbol)
+  getResolvedChord(chordSymbol)
     .notes.map((noteName) => Note.chroma(noteName))
     .filter((value): value is number => value !== undefined)
     .map((value) => normalizePc(value))
 
 export const getChordTonePitchClasses = (chordSymbol: string): PitchClass[] => {
-  const parsed = Chord.get(chordSymbol)
+  const parsed = getResolvedChord(chordSymbol)
 
   return parsed.intervals
     .map((interval, index) => ({
