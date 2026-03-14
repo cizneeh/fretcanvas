@@ -17,6 +17,7 @@ import {
   type ScaleId,
   toPositionId,
 } from './model'
+import { getNotePalette } from './notePalette'
 
 export type ExportTransparentPngInput = {
   keyPc: PitchClass
@@ -122,30 +123,17 @@ export const renderExportPngCanvas = ({
       selectedChordSymbol,
     )
     const xCenter = boardLeft + (fret - start + 0.5) * cellWidth
+    const palette = getNotePalette(visualRole)
 
     const noteOpacity = displayedNote.isDimmed ? 0.35 : 1
     ctx.save()
     ctx.globalAlpha = noteOpacity
-    ctx.fillStyle =
-      visualRole === 'root'
-        ? 'rgba(190, 24, 93, 0.8)'
-        : visualRole === 'outOfKey'
-          ? 'rgba(249, 115, 22, 0.8)'
-          : visualRole === 'tension'
-            ? 'rgba(22, 163, 74, 0.82)'
-            : 'rgba(8, 145, 178, 0.8)'
+    ctx.fillStyle = palette.png.fill
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.strokeStyle =
-      visualRole === 'root'
-        ? 'rgba(254, 205, 211, 0.8)'
-        : visualRole === 'outOfKey'
-          ? 'rgba(254, 215, 170, 0.75)'
-          : visualRole === 'tension'
-            ? 'rgba(220, 252, 231, 0.78)'
-            : 'rgba(207, 250, 254, 0.7)'
+    ctx.strokeStyle = palette.png.stroke
     ctx.lineWidth = 1.5
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
