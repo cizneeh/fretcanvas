@@ -132,7 +132,7 @@ export const renderExportPngCanvas = ({
         : visualRole === 'outOfKey'
           ? 'rgba(249, 115, 22, 0.8)'
           : visualRole === 'tension'
-            ? 'rgba(5, 150, 105, 0.8)'
+            ? 'rgba(22, 163, 74, 0.82)'
             : 'rgba(8, 145, 178, 0.8)'
     ctx.beginPath()
     ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
@@ -144,7 +144,7 @@ export const renderExportPngCanvas = ({
         : visualRole === 'outOfKey'
           ? 'rgba(254, 215, 170, 0.75)'
           : visualRole === 'tension'
-            ? 'rgba(209, 250, 229, 0.75)'
+            ? 'rgba(220, 252, 231, 0.78)'
             : 'rgba(207, 250, 254, 0.7)'
     ctx.lineWidth = 1.5
     ctx.beginPath()

@@ -23,7 +23,7 @@ export const NoteChip = ({
       : visualRole === 'outOfKey'
         ? 'border-orange-200/75 bg-orange-500/80 text-white'
         : visualRole === 'tension'
-          ? 'border-emerald-200/75 bg-emerald-600/80 text-white'
+          ? 'border-green-200/75 bg-green-600/80 text-white'
           : 'border-cyan-100/70 bg-cyan-600/80 text-white'
   const previewToneClass =
     visualRole === 'root'
@@ -31,7 +31,7 @@ export const NoteChip = ({
       : visualRole === 'outOfKey'
         ? 'border-orange-200/65 bg-orange-400/35 text-orange-50'
         : visualRole === 'tension'
-          ? 'border-emerald-200/65 bg-emerald-500/35 text-emerald-50'
+          ? 'border-green-200/65 bg-green-500/35 text-green-50'
           : 'border-cyan-100/65 bg-cyan-500/35 text-cyan-50'
 
   if (!isHighlighted) {
