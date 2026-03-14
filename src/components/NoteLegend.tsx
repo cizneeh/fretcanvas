@@ -1,7 +1,6 @@
 import type { NoteLabelMode, NoteVisualRole } from '../libs/model'
 import { getNotePalette } from '../libs/notePalette'
 import { useFretboardStore } from '../stores/fretboardStore'
-import { m3FieldLabelClass } from './ui/materialClasses'
 
 const legendItemsByMode: Record<
   NoteLabelMode,
@@ -30,7 +29,6 @@ export const NoteLegend = () => {
   return (
     <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[color:var(--md-sys-color-on-surface)]">
-        <span className={m3FieldLabelClass}>Legend</span>
         {legendItems.map(({ role, label }) => {
           const palette = getNotePalette(role)
 
