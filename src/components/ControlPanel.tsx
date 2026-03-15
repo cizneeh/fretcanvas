@@ -120,12 +120,12 @@ export const ControlPanel = () => {
   ]
   const baseScaleOptions: ScaleId[] = [
     'major',
-    'naturalMinor',
     'pentatonicMajor',
     'pentatonicMinor',
+    'blues',
+    'naturalMinor',
     'harmonicMinor',
     'melodicMinor',
-    'blues',
   ]
   const modeScaleOptions: ScaleId[] = [
     'ionian',
