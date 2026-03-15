@@ -50,7 +50,7 @@ function App() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
-      <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-6">
+      <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-col gap-6">
         <header className="flex items-center justify-between gap-4">
           <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Fretmap</h1>
 

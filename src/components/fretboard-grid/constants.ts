@@ -4,7 +4,7 @@ import { parsePositionId } from '../../libs/musicCore'
 export const LABEL_WIDTH = 32
 export const HEADER_ROW_HEIGHT = 32
 export const STRING_ROW_HEIGHT = 48
-export const FRET_CELL_WIDTH = 56
+export const FRET_CELL_WIDTH = 64
 export const BOARD_PADDING_X = 20
 export const BOARD_PADDING_Y = 32
 

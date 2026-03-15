@@ -4,6 +4,7 @@ import { FRET_NUMBERS } from '../libs/musicCore'
 import { RenderProfiler } from './dev/RenderProfiler'
 import { ExportRangeTrack } from './ExportRangeTrack'
 import { FretboardGrid } from './FretboardGrid'
+import { FRET_CELL_WIDTH } from './fretboard-grid/constants'
 import { NoteContextMenu } from './NoteContextMenu'
 import { NoteLegend } from './NoteLegend'
 import { SelectionContextMenu } from './SelectionContextMenu'
@@ -35,7 +36,7 @@ export const FretboardView = () => {
             <div
               className="grid"
               style={{
-                gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(3.5rem, 3.5rem))`,
+                gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(${FRET_CELL_WIDTH}px, ${FRET_CELL_WIDTH}px))`,
               }}
             >
               <ExportRangeTrack {...interaction.rangeTrackProps} />

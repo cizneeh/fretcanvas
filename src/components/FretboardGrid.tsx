@@ -140,7 +140,7 @@ export const FretboardGrid = ({
       <div
         className="grid"
         style={{
-          gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(3.5rem, 3.5rem))`,
+          gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(${FRET_CELL_WIDTH}px, ${FRET_CELL_WIDTH}px))`,
         }}
       >
         <FretHeaderRow />
