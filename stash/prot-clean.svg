@@ -1,0 +1,82 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="354"
+  height="345"
+  viewBox="0 0 354 345"
+  fill="none"
+>
+  <defs>
+    <filter id="bg-grain" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="7" />
+      <feColorMatrix
+        type="matrix"
+        values="1 0 0 0 0.02 0 1 0 0 0.01 0 0 1 0 0.03 0 0 0 0.07 0"
+      />
+    </filter>
+    <filter id="shape-grain" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="11" />
+      <feColorMatrix
+        type="matrix"
+        values="1 0 0 0 0.02 0 1 0 0 0.01 0 0 1 0 -0.01 0 0 0 0.08 0"
+      />
+    </filter>
+  </defs>
+
+  <rect width="354" height="345" fill="#10051A" />
+  <rect width="354" height="345" fill="#1A0B28" filter="url(#bg-grain)" opacity="0.35" />
+
+  <g transform="translate(187 159)">
+    <g transform="rotate(-45 -95 95)">
+      <rect x="-152" y="76" width="96" height="38" rx="19" fill="#DED787" />
+      <rect x="-80" y="82" width="34" height="26" rx="7" fill="#F8EBB4" />
+      <line x1="-83" y1="82" x2="-83" y2="108" stroke="#1F1920" stroke-width="4" />
+      <rect
+        x="-152"
+        y="76"
+        width="96"
+        height="38"
+        rx="19"
+        fill="#FFF5D8"
+        filter="url(#shape-grain)"
+        opacity="0.2"
+      />
+      <rect
+        x="-80"
+        y="82"
+        width="34"
+        height="26"
+        rx="7"
+        fill="#FFF7DE"
+        filter="url(#shape-grain)"
+        opacity="0.18"
+      />
+    </g>
+
+    <path
+      fill="#F8EBB4"
+      fill-rule="evenodd"
+      d="M 0 -107 C 59.094 -107 107 -59.094 107 0 C 107 59.094 59.094 107 0 107 C -59.094 107 -107 59.094 -107 0 C -107 -59.094 -59.094 -107 0 -107 Z M 0 -80 C -44.183 -80 -80 -44.183 -80 0 C -80 44.183 -44.183 80 0 80 C 44.183 80 80 44.183 80 0 C 80 -44.183 44.183 -80 0 -80 Z"
+      clip-rule="evenodd"
+    />
+    <path
+      fill="#FFF4D1"
+      fill-rule="evenodd"
+      d="M 0 -107 C 59.094 -107 107 -59.094 107 0 C 107 59.094 59.094 107 0 107 C -59.094 107 -107 59.094 -107 0 C -107 -59.094 -59.094 -107 0 -107 Z M 0 -80 C -44.183 -80 -80 -44.183 -80 0 C -80 44.183 -44.183 80 0 80 C 44.183 80 80 44.183 80 0 C 80 -44.183 44.183 -80 0 -80 Z"
+      filter="url(#shape-grain)"
+      opacity="0.18"
+    />
+
+    <g stroke="#79CDC7" stroke-linecap="round" stroke-width="4.5">
+      <line x1="-45" y1="-51" x2="-45" y2="53" />
+      <line x1="-4" y1="-53" x2="-4" y2="56" />
+      <line x1="37" y1="-51" x2="37" y2="52" />
+      <line x1="-62" y1="-38" x2="38" y2="-38" />
+      <line x1="-61" y1="11" x2="38" y2="11" />
+    </g>
+
+    <circle cx="37" cy="-11" r="15" fill="#CFEF92" />
+    <circle cx="-4" cy="36" r="15" fill="#66C1BF" />
+    <circle cx="37" cy="-11" r="15" fill="#E7F7AD" filter="url(#shape-grain)" opacity="0.18" />
+    <circle cx="-4" cy="36" r="15" fill="#A7F0EC" filter="url(#shape-grain)" opacity="0.14" />
+  </g>
+</svg>
