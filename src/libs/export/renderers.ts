@@ -438,7 +438,7 @@ export const renderExportSvgMarkup = ({
       svgParts.push(
         label.secondary === undefined
           ? `<text x="${xCenter}" y="${yCenter + 1.5}" fill="#ffffff" font-family="${EXPORT_SVG_FONT_STACK}" font-size="13" font-weight="600" text-anchor="middle" dominant-baseline="middle">${escapeXml(label.primary)}</text>`
-          : `<text x="${xCenter}" y="${yCenter - 5.5}" fill="#ffffff" font-family="${EXPORT_SVG_FONT_STACK}" text-anchor="middle"><tspan x="${xCenter}" dy="0" font-size="14" font-weight="600">${escapeXml(label.primary)}</tspan><tspan x="${xCenter}" dy="13" font-size="11" font-weight="500" opacity="0.85">${escapeXml(label.secondary)}</tspan></text>`,
+          : `<g fill="#ffffff" font-family="${EXPORT_SVG_FONT_STACK}" text-anchor="middle"><text x="${xCenter}" y="${yCenter - 5.5}" font-size="14" font-weight="600" dominant-baseline="middle">${escapeXml(label.primary)}</text><text x="${xCenter}" y="${yCenter + 7.5}" font-size="11" font-weight="500" opacity="0.85" dominant-baseline="middle">${escapeXml(label.secondary)}</text></g>`,
       )
       svgParts.push('</g>')
     }
