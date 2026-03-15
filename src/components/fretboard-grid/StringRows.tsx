@@ -110,6 +110,7 @@ export const StringRows = memo(
                 noteTextMode,
                 noteLabelMode,
                 keyPc,
+                selectedScale,
                 appliedChordSymbol,
               )
               const isStartFret = fret === startHighlightFret

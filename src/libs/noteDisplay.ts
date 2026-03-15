@@ -80,6 +80,7 @@ export const getDisplayedNoteLabel = (
   noteTextMode: NoteTextMode,
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
+  selectedScale: ScaleId | undefined,
   appliedChordSymbol: string | undefined,
 ): DisplayedNoteLabel => {
   const absoluteLabel = getAbsoluteNoteLabelByKey(pitchClass, keyPc)
@@ -87,7 +88,7 @@ export const getDisplayedNoteLabel = (
     noteLabelMode === 'chord' && appliedChordSymbol !== undefined
       ? getChordToneLabel(pitchClass, appliedChordSymbol)
       : noteLabelMode === 'scale'
-        ? getScaleIntervalLabelFromRoot(pitchClass, keyPc)
+        ? getScaleIntervalLabelFromRoot(pitchClass, keyPc, selectedScale)
         : getChordIntervalLabelFromRoot(pitchClass, keyPc)
 
   if (noteTextMode === 'absolute') {

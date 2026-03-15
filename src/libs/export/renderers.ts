@@ -95,6 +95,7 @@ export const renderExportPngCanvas = ({
       noteTextMode,
       noteLabelMode,
       keyPc,
+      selectedScale,
       appliedChordSymbol,
     )
     const xCenter = layout.boardLeft + (fret - layout.start + 0.5) * layout.cellWidth
@@ -417,6 +418,7 @@ export const renderExportSvgMarkup = ({
         noteTextMode,
         noteLabelMode,
         keyPc,
+        selectedScale,
         appliedChordSymbol,
       )
       const palette = getNotePalette(visualRole)

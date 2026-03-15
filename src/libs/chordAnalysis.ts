@@ -42,6 +42,14 @@ const SCALE_NAME_BY_ID: Record<ScaleId, string> = {
   locrian: 'locrian',
 }
 
+const SCALE_INTERVAL_LABEL_OVERRIDES: Partial<
+  Record<ScaleId, Partial<Record<PitchClass, string>>>
+> = {
+  lydian: { 6: '#4' },
+  locrian: { 6: 'b5' },
+  blues: { 6: 'b5' },
+}
+
 const EXPLICIT_EXTENSION_INTERVALS = {
   b9: '9m',
   9: '9M',
@@ -76,8 +84,15 @@ export type MajorDiatonicSeventhChordOption = {
   label: string
 }
 
-export const getScaleIntervalLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
-  SCALE_INTERVAL_LABELS[normalizePc(pitchClass - rootPc)]
+export const getScaleIntervalLabelFromRoot = (
+  pitchClass: PitchClass,
+  rootPc: PitchClass,
+  scaleId: ScaleId | undefined,
+): string => {
+  const intervalFromRoot = normalizePc(pitchClass - rootPc)
+  const override = scaleId === undefined ? undefined : SCALE_INTERVAL_LABEL_OVERRIDES[scaleId]
+  return override?.[intervalFromRoot] ?? SCALE_INTERVAL_LABELS[intervalFromRoot]
+}
 
 export const getChordIntervalLabelFromRoot = (pitchClass: PitchClass, rootPc: PitchClass): string =>
   CHORD_INTERVAL_LABELS[normalizePc(pitchClass - rootPc)]
