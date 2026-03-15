@@ -9,7 +9,6 @@ const LOCALE_STORAGE_KEY = 'fretmap:locale:v1'
 const messages = {
   en: {
     'app.language': 'Language',
-    'app.supportOnKoFi': 'Support on Ko-fi',
     'app.switchToEnglish': 'Switch language to English',
     'app.switchToJapanese': 'Switch language to Japanese',
     'common.cancel': 'Cancel',
@@ -122,7 +121,6 @@ const messages = {
   },
   ja: {
     'app.language': '言語',
-    'app.supportOnKoFi': 'Ko-fiで支援',
     'app.switchToEnglish': '言語を英語に切り替え',
     'app.switchToJapanese': '言語を日本語に切り替え',
     'common.cancel': 'キャンセル',
