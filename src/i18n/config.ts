@@ -92,6 +92,9 @@ const messages = {
     'scale.mixolydian': 'Mixolydian',
     'scale.aeolian': 'Aeolian',
     'scale.locrian': 'Locrian',
+    'support.aria': 'Support Fret Canvas on Ko-fi',
+    'support.tooltipBody':
+      'Donations are of course optional, but your support helps keep Fret Canvas alive.',
     'tuning.apply': 'Apply',
     'tuning.applyWarning':
       'Changing the tuning will clear the currently displayed notes on the fretboard. Continue?',
@@ -204,6 +207,8 @@ const messages = {
     'scale.mixolydian': 'ミクソリディアン',
     'scale.aeolian': 'エオリアン',
     'scale.locrian': 'ロクリアン',
+    'support.aria': 'Ko-fi で Fret Canvas を支援',
+    'support.tooltipBody': 'Ko-fi 経由で投げ銭を送れます。',
     'tuning.apply': '適用',
     'tuning.applyWarning':
       'チューニングを変更すると現在指板上に表示されている音は失われます。続けますか？',

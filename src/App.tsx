@@ -2,13 +2,17 @@ import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { ExportSettingsSection } from './components/ExportSettingsSection'
 import { FretboardView } from './components/FretboardView'
-import { m3SegmentedButtonClass, m3SegmentedContainerClass } from './components/ui/materialClasses'
+import {
+  m3SegmentedButtonClass,
+  m3SegmentedContainerClass,
+} from './components/ui/materialClasses'
 import { useI18n } from './i18n/useI18n'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
 import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
 import { useSettingsStore } from './stores/settingsStore'
 
+const SUPPORT_URL = 'https://ko-fi.com/G2G31BLRA7'
 const WEBSITE_URL = 'https://echizen.me'
 
 function App() {
@@ -93,7 +97,7 @@ function App() {
       </div>
 
       <footer
-        className="mx-auto mt-10 flex w-full max-w-[106rem] items-center gap-3 border-t px-1 pt-4 text-sm text-[color:var(--md-sys-color-on-surface-variant)]"
+        className="mx-auto mt-10 flex w-full max-w-[106rem] items-center justify-between gap-3 border-t px-1 pt-4 text-sm text-[color:var(--md-sys-color-on-surface-variant)]"
         style={{
           borderTopColor:
             'color-mix(in srgb, var(--md-sys-color-outline-variant) 90%, transparent)',
@@ -110,6 +114,29 @@ function App() {
             Shinjiro Echizen
           </a>
         </p>
+
+        <a
+          href={SUPPORT_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t('support.aria')}
+          aria-describedby="support-tooltip"
+          className="group relative m3-focus-ring shrink-0 transition-transform duration-150 hover:scale-105"
+        >
+          <span
+            id="support-tooltip"
+            role="tooltip"
+            className="pointer-events-none absolute bottom-full right-0 mb-3 w-[18rem] translate-y-1 rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-high)] px-3 py-2.5 text-left text-xs leading-5 text-[color:var(--md-sys-color-on-surface)] opacity-0 shadow-[var(--md-elevation-2)] transition-[opacity,transform] duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+          >
+            <span>{t('support.tooltipBody')}</span>
+          </span>
+          <img
+            src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+            alt="Buy Me a Coffee at ko-fi.com"
+            height="36"
+            style={{ border: 0, height: 36 }}
+          />
+        </a>
       </footer>
     </main>
   )
