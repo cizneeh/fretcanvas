@@ -35,7 +35,7 @@ export const NoteLegend = () => {
   const legendItems = legendItemsByMode[noteLabelMode]
 
   return (
-    <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
+    <div className="inline-flex rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[color:var(--md-sys-color-on-surface)]">
         {legendItems.map(({ role, labelKey }) => {
           const palette = getNotePalette(role)

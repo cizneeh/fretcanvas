@@ -137,7 +137,7 @@ export const ControlPanel = () => {
   const manualInputTooltip = t('control.manualInputTooltip')
 
   return (
-    <section className={`${m3CardClass} p-4`}>
+    <section className={`${m3CardClass} w-full max-w-[88rem] p-4`}>
       <div className="grid gap-5 xl:grid-cols-[minmax(14rem,15rem)_minmax(0,1fr)_minmax(13rem,14rem)]">
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
@@ -392,23 +392,31 @@ export const ControlPanel = () => {
 
         <div className="flex flex-col gap-4 xl:justify-between">
           <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              className={m3FilledButtonClass}
-              onClick={() => {
-                if (noteLabelMode === 'scale') {
+            {noteLabelMode === 'scale' ? (
+              <button
+                type="button"
+                className={m3FilledButtonClass}
+                onClick={() => {
                   addScaleNotes({ fretRange })
-                  return
-                }
-
-                if (canAddChordTones) {
-                  addAppliedChordNotes({ fretRange })
-                }
-              }}
-              disabled={noteLabelMode === 'scale' ? selectedScale === undefined : !canAddChordTones}
-            >
-              {noteLabelMode === 'scale' ? t('control.addScaleNotes') : t('control.addChordTones')}
-            </button>
+                }}
+                disabled={selectedScale === undefined}
+              >
+                {t('control.addScaleNotes')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={m3FilledButtonClass}
+                onClick={() => {
+                  if (canAddChordTones) {
+                    addAppliedChordNotes({ fretRange })
+                  }
+                }}
+                disabled={!canAddChordTones}
+              >
+                {t('control.addChordTones')}
+              </button>
+            )}
 
             <button type="button" className={m3OutlinedButtonClass} onClick={clearHighlightedNotes}>
               {t('common.clear')}
