@@ -50,9 +50,9 @@ function App() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
-      <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-col gap-6">
-        <header className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Fretmap</h1>
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-[color:var(--md-sys-color-outline-variant)]/80 bg-[color:var(--md-sys-color-surface-container-low)]/42 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-[106rem] items-center justify-between gap-4 px-4 py-2 md:px-8">
+          <h1 className="text-xl font-medium tracking-tight text-zinc-100/92">Fret Canvas</h1>
 
           <fieldset className={m3SegmentedContainerClass}>
             <legend className="sr-only">{t('app.language')}</legend>
@@ -79,8 +79,10 @@ function App() {
               JA
             </button>
           </fieldset>
-        </header>
+        </div>
+      </header>
 
+      <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-col gap-6 pt-10">
         <ControlPanel />
 
         <FretboardView />

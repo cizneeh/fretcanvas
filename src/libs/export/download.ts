@@ -18,7 +18,7 @@ export const getExportFilename = (
 ) => {
   const start = Math.min(input.exportFretStart, input.exportFretEnd)
   const end = Math.max(input.exportFretStart, input.exportFretEnd)
-  return `fretmap-frets-${start}-${end}.${format}`
+  return `fret-canvas-frets-${start}-${end}.${format}`
 }
 
 export const downloadExportBlob = downloadBlob
