@@ -61,11 +61,13 @@ export type StringInfo = {
 export type TuningNoteName =
   | 'C'
   | 'C#'
+  | 'Db'
   | 'D'
   | 'Eb'
   | 'E'
   | 'F'
   | 'F#'
+  | 'Gb'
   | 'G'
   | 'Ab'
   | 'A'

@@ -178,12 +178,13 @@ export const renderExportPngCanvas = ({
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
     const stringLineStartX =
       layout.start === 0 ? layout.boardLeft + layout.cellWidth / 2 : layout.boardLeft
+    const stringLabelX = layout.boardLeft - 7
     if (showExportStringLabels) {
       ctx.fillStyle = 'rgba(226, 232, 240, 0.92)'
       ctx.font = `15px ${EXPORT_CANVAS_FONT_STACK}`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(stringInfo.name, layout.paddingX + layout.labelWidth / 2, yCenter)
+      ctx.fillText(stringInfo.name, stringLabelX, yCenter)
     }
 
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'
@@ -349,9 +350,10 @@ export const renderExportSvgMarkup = ({
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
     const stringLineStartX =
       layout.start === 0 ? layout.boardLeft + layout.cellWidth / 2 : layout.boardLeft
+    const stringLabelX = layout.boardLeft - 7
     if (showExportStringLabels) {
       svgParts.push(
-        `<text x="${layout.paddingX + layout.labelWidth / 2}" y="${yCenter}" fill="rgba(226, 232, 240, 0.92)" font-family="${EXPORT_SVG_FONT_STACK}" font-size="15" text-anchor="middle" dominant-baseline="middle">${escapeXml(stringInfo.name)}</text>`,
+        `<text x="${stringLabelX}" y="${yCenter}" fill="rgba(226, 232, 240, 0.92)" font-family="${EXPORT_SVG_FONT_STACK}" font-size="15" text-anchor="middle" dominant-baseline="middle">${escapeXml(stringInfo.name)}</text>`,
       )
     }
     svgParts.push(

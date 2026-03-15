@@ -65,6 +65,9 @@ const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
       stringIndex,
       pitchClass,
       typeof candidate?.id === 'string' ? candidate.id : undefined,
+      typeof candidate?.name === 'string'
+        ? (candidate.name as Parameters<typeof getPitchClassFromTuningName>[0])
+        : undefined,
     )
   })
 }

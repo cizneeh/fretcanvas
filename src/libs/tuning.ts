@@ -12,6 +12,40 @@ const CUSTOM_TUNING_PRESETS_STORAGE_KEY = 'fretmap:custom-tuning-presets:v1'
 export const TUNING_NOTE_OPTIONS: TuningNoteName[] = [
   'C',
   'C#',
+  'Db',
+  'D',
+  'Eb',
+  'E',
+  'F',
+  'F#',
+  'Gb',
+  'G',
+  'Ab',
+  'A',
+  'Bb',
+  'B',
+]
+
+const TUNING_NOTE_TO_PITCH_CLASS: Record<TuningNoteName, PitchClass> = {
+  C: 0,
+  'C#': 1,
+  Db: 1,
+  D: 2,
+  Eb: 3,
+  E: 4,
+  F: 5,
+  'F#': 6,
+  Gb: 6,
+  G: 7,
+  Ab: 8,
+  A: 9,
+  Bb: 10,
+  B: 11,
+}
+
+const DEFAULT_TUNING_NAME_BY_PITCH_CLASS: TuningNoteName[] = [
+  'C',
+  'C#',
   'D',
   'Eb',
   'E',
@@ -70,10 +104,10 @@ const createStringId = () => {
 }
 
 export const getPitchClassFromTuningName = (note: TuningNoteName): PitchClass =>
-  TUNING_NOTE_OPTIONS.indexOf(note)
+  TUNING_NOTE_TO_PITCH_CLASS[note]
 
 export const getTuningNameFromPitchClass = (pitchClass: number): TuningNoteName =>
-  TUNING_NOTE_OPTIONS[normalizePc(pitchClass)]
+  DEFAULT_TUNING_NAME_BY_PITCH_CLASS[normalizePc(pitchClass)]
 
 export const createStringInfo = (
   _stringIndex: number,
@@ -89,11 +123,14 @@ export const getStringInfoFromPitchClass = (
   stringIndex: number,
   pitchClass: number,
   existingId?: string,
+  existingName?: TuningNoteName,
 ): StringInfo => {
   const normalizedPitchClass = normalizePc(pitchClass)
   return createStringInfo(
     stringIndex,
-    getTuningNameFromPitchClass(normalizedPitchClass),
+    existingName !== undefined && getPitchClassFromTuningName(existingName) === normalizedPitchClass
+      ? existingName
+      : getTuningNameFromPitchClass(normalizedPitchClass),
     existingId,
   )
 }
