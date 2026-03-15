@@ -50,7 +50,7 @@ export const ExportRangeTrack = ({
     <>
       <div />
       <div
-        className="relative mt-0.5 h-8"
+        className="relative mt-0.5 h-10"
         style={{ gridColumn: `2 / span ${fretColumnSpan}` }}
         onPointerDown={onTrackPointerDown}
         onPointerMove={onTrackPointerMove}
@@ -74,7 +74,7 @@ export const ExportRangeTrack = ({
         />
         {hoverPreview !== undefined ? (
           <span
-            className={`pointer-events-none absolute top-1/2 z-20 flex h-6 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-dashed text-[11px] font-semibold text-white ${
+            className={`pointer-events-none absolute top-1/2 z-20 flex h-8 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-md border border-dashed text-xs font-semibold text-white ${
               hoverPreview.handle === 'start'
                 ? 'border-cyan-200/45 bg-cyan-400/15'
                 : 'border-emerald-200/45 bg-emerald-400/15'
@@ -86,7 +86,7 @@ export const ExportRangeTrack = ({
         ) : undefined}
         <button
           type="button"
-          className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-cyan-200 bg-cyan-700/90 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+          className="absolute top-1/2 flex h-9 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-md border border-cyan-200 bg-cyan-700/90 text-xs font-semibold text-white shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
           style={{ left: `${startHandlePercent}%` }}
           data-testid="export-start-handle"
           data-export-handle="true"
@@ -99,7 +99,7 @@ export const ExportRangeTrack = ({
         </button>
         <button
           type="button"
-          className="absolute top-1/2 flex h-7 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-700/90 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
+          className="absolute top-1/2 flex h-9 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-md border border-emerald-200 bg-emerald-700/90 text-xs font-semibold text-white shadow-[0_0_0_1px_rgba(2,6,23,0.8)] transition hover:scale-105"
           style={{ left: `${endHandlePercent}%` }}
           data-testid="export-end-handle"
           data-export-handle="true"
