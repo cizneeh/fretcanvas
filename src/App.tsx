@@ -92,7 +92,13 @@ function App() {
         <ExportSettingsSection />
       </div>
 
-      <footer className="mx-auto mt-10 flex w-full max-w-[106rem] items-center gap-3 border-t border-[color:var(--md-sys-color-outline-variant)]/5 px-1 pt-4 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+      <footer
+        className="mx-auto mt-10 flex w-full max-w-[106rem] items-center gap-3 border-t px-1 pt-4 text-sm text-[color:var(--md-sys-color-on-surface-variant)]"
+        style={{
+          borderTopColor:
+            'color-mix(in srgb, var(--md-sys-color-outline-variant) 90%, transparent)',
+        }}
+      >
         <p>
           Made by{' '}
           <a
