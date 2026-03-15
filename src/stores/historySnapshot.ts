@@ -19,8 +19,8 @@ export type HistorySnapshot = {
  * コピーしないと参照が共有される
  */
 export const createHistorySnapshot = (
-  fretboard: FretboardStoreState,
-  settings: SettingsStoreState,
+  fretboard: FretboardStoreState | HistoryFretboardState,
+  settings: SettingsStoreState | HistorySettingsState,
 ): HistorySnapshot => ({
   fretboard: {
     keyPc: fretboard.keyPc,
@@ -45,6 +45,7 @@ export const createHistorySnapshot = (
     showExportStringLabels: settings.showExportStringLabels,
   },
 })
+
 const recordsEqual = <T>(
   left: Record<string, T>,
   right: Record<string, T>,
@@ -63,6 +64,18 @@ const recordsEqual = <T>(
   }
 
   return true
+}
+
+const arraysEqual = <T>(
+  left: T[],
+  right: T[],
+  itemEqual: (leftItem: T, rightItem: T) => boolean,
+) => {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  return left.every((leftItem, index) => itemEqual(leftItem, right[index]))
 }
 
 const notesEqual = (
@@ -101,7 +114,7 @@ export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnaps
     left.fretboard.noteLabelMode === right.fretboard.noteLabelMode &&
     left.fretboard.noteTextMode === right.fretboard.noteTextMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
-    recordsEqual(left.fretboard.strings, right.fretboard.strings, (leftString, rightString) => {
+    arraysEqual(left.fretboard.strings, right.fretboard.strings, (leftString, rightString) => {
       return (
         leftString.name === rightString.name && leftString.pitchClass === rightString.pitchClass
       )

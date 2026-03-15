@@ -17,6 +17,7 @@ import {
   type PositionId,
   type ScaleId,
   type StringInfo,
+  type TuningNoteName,
   toPositionId,
 } from '../libs/musicCore'
 import {
@@ -26,7 +27,6 @@ import {
   getPitchClassFromTuningName,
   getStringInfoFromPitchClass,
   stringInfoArraysEqual,
-  type TuningNoteName,
 } from '../libs/tuning'
 import { useHistoryStore } from './historyStore'
 
