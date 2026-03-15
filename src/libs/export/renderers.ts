@@ -166,6 +166,8 @@ export const renderExportPngCanvas = ({
 
   strings.forEach((stringInfo, row) => {
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
+    const stringLineStartX =
+      layout.start === 0 ? layout.boardLeft + layout.cellWidth / 2 : layout.boardLeft
     if (showExportStringLabels) {
       ctx.fillStyle = 'rgba(226, 232, 240, 0.92)'
       ctx.font = `15px ${EXPORT_CANVAS_FONT_STACK}`
@@ -177,7 +179,7 @@ export const renderExportPngCanvas = ({
     ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(layout.boardLeft, yCenter)
+    ctx.moveTo(stringLineStartX, yCenter)
     ctx.lineTo(layout.boardLeft + layout.fretCountInRange * layout.cellWidth, yCenter)
     ctx.stroke()
   })
@@ -335,13 +337,15 @@ export const renderExportSvgMarkup = ({
 
   strings.forEach((stringInfo, row) => {
     const yCenter = layout.boardTop + row * layout.rowHeight + layout.rowHeight / 2
+    const stringLineStartX =
+      layout.start === 0 ? layout.boardLeft + layout.cellWidth / 2 : layout.boardLeft
     if (showExportStringLabels) {
       svgParts.push(
         `<text x="${layout.paddingX + layout.labelWidth / 2}" y="${yCenter}" fill="rgba(226, 232, 240, 0.92)" font-family="${EXPORT_SVG_FONT_STACK}" font-size="15" text-anchor="middle" dominant-baseline="middle">${escapeXml(stringInfo.name)}</text>`,
       )
     }
     svgParts.push(
-      `<line x1="${layout.boardLeft}" y1="${yCenter}" x2="${layout.boardLeft + layout.fretCountInRange * layout.cellWidth}" y2="${yCenter}" stroke="rgba(203, 213, 225, 0.72)" stroke-width="1" />`,
+      `<line x1="${stringLineStartX}" y1="${yCenter}" x2="${layout.boardLeft + layout.fretCountInRange * layout.cellWidth}" y2="${yCenter}" stroke="rgba(203, 213, 225, 0.72)" stroke-width="1" />`,
     )
   })
 

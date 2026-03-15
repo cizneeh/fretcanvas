@@ -109,7 +109,11 @@ export const FretCell = memo(
           onNotePointerUp(positionId)
         }}
       >
-        <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-300/45" />
+        <span
+          className={`pointer-events-none absolute top-1/2 h-px -translate-y-1/2 bg-slate-300/45 ${
+            isNut ? 'left-1/2 right-0' : 'inset-x-0'
+          }`}
+        />
         {isStartAtNutLine ? (
           <span
             className={`pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-[2px] ${startMarkerColor}`}
