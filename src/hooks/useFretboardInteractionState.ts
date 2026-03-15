@@ -76,7 +76,7 @@ export const useFretboardInteractionState = () => {
   const toPercentFromRangeBoundary = (fret: number, handle: 'start' | 'end') =>
     (handle === 'start' ? fret / fretCellCount : (fret + 1) / fretCellCount) * 100
 
-  const toFretFromClientX = (clientX: number) => {
+  const toTrackUnitsFromClientX = (clientX: number) => {
     const track = trackRef.current
     if (track === undefined) {
       return undefined
@@ -85,7 +85,16 @@ export const useFretboardInteractionState = () => {
     const rect = track.getBoundingClientRect()
     const relativeX = clientX - rect.left
     const ratio = rect.width > 0 ? relativeX / rect.width : 0
-    return clampFret(Math.round(ratio * fretCellCount - 0.5))
+    return Math.max(0, Math.min(ratio * fretCellCount, fretCellCount))
+  }
+
+  const toFretFromTrackUnits = (trackUnits: number, handle: 'start' | 'end') =>
+    clampFret(handle === 'start' ? Math.round(trackUnits) : Math.round(trackUnits) - 1)
+
+  const getNearestHandleFromTrackUnits = (trackUnits: number): 'start' | 'end' => {
+    const startDistance = Math.abs(trackUnits - exportFretStart)
+    const endDistance = Math.abs(trackUnits - (exportFretEnd + 1))
+    return startDistance <= endDistance ? 'start' : 'end'
   }
 
   const toBoardPoint = useCallback((clientX: number, clientY: number) => {
@@ -226,10 +235,11 @@ export const useFretboardInteractionState = () => {
     handle: 'start' | 'end',
     skipHistory: boolean,
   ) => {
-    const nextFret = toFretFromClientX(clientX)
-    if (nextFret === undefined) {
+    const trackUnits = toTrackUnitsFromClientX(clientX)
+    if (trackUnits === undefined) {
       return
     }
+    const nextFret = toFretFromTrackUnits(trackUnits, handle)
 
     if (handle === 'start') {
       handleExportFretStartChange(nextFret, { skipHistory })
@@ -249,24 +259,18 @@ export const useFretboardInteractionState = () => {
     cancelBufferedEdit()
   }
 
-  const getNearestHandle = (fret: number): 'start' | 'end' => {
-    const startDistance = Math.abs(fret - exportFretStart)
-    const endDistance = Math.abs(fret - exportFretEnd)
-    return startDistance <= endDistance ? 'start' : 'end'
-  }
-
   const handleTrackClickMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const target = event.target
     if (target instanceof HTMLElement && target.closest('[data-export-handle="true"]') !== null) {
       return
     }
 
-    const nextFret = toFretFromClientX(event.clientX)
-    if (nextFret === undefined) {
+    const trackUnits = toTrackUnitsFromClientX(event.clientX)
+    if (trackUnits === undefined) {
       return
     }
 
-    const nextHandle = getNearestHandle(nextFret)
+    const nextHandle = getNearestHandleFromTrackUnits(trackUnits)
     const snapshot = captureSnapshot()
     if (snapshot !== undefined) {
       beginBufferedEdit(snapshot)
@@ -280,14 +284,15 @@ export const useFretboardInteractionState = () => {
 
   const handleTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (draggingHandle === undefined) {
-      const nextFret = toFretFromClientX(event.clientX)
-      if (nextFret === undefined) {
+      const trackUnits = toTrackUnitsFromClientX(event.clientX)
+      if (trackUnits === undefined) {
         setHoverPreview(undefined)
         return
       }
+      const nextHandle = getNearestHandleFromTrackUnits(trackUnits)
       setHoverPreview({
-        fret: nextFret,
-        handle: getNearestHandle(nextFret),
+        fret: toFretFromTrackUnits(trackUnits, nextHandle),
+        handle: nextHandle,
       })
       return
     }
