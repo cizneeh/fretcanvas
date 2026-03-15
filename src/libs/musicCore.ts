@@ -1,6 +1,20 @@
 /** number of 0~11. 0 is C, 1 is C#, 2 is D, 3 is Eb, 4 is E, 5 is F, 6 is F#, 7 is G, 8 is Ab, 9 is A, 10 is Bb, 11 is B. */
 export type PitchClass = number
-export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
+export type ScaleId =
+  | 'major'
+  | 'naturalMinor'
+  | 'pentatonicMajor'
+  | 'pentatonicMinor'
+  | 'harmonicMinor'
+  | 'melodicMinor'
+  | 'blues'
+  | 'ionian'
+  | 'dorian'
+  | 'phrygian'
+  | 'lydian'
+  | 'mixolydian'
+  | 'aeolian'
+  | 'locrian'
 export type NoteLabelMode = 'scale' | 'chord'
 export type NoteTextMode = 'interval' | 'absolute' | 'combined'
 export type ChordInputErrorKey = 'couldNotParse' | 'empty'

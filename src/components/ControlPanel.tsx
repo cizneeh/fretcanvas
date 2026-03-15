@@ -118,7 +118,24 @@ export const ControlPanel = () => {
     { value: 'absolute', label: t('control.absolute') },
     { value: 'combined', label: t('control.combined') },
   ]
-  const scaleOptions: ScaleId[] = ['major', 'naturalMinor', 'pentatonicMajor', 'pentatonicMinor']
+  const baseScaleOptions: ScaleId[] = [
+    'major',
+    'naturalMinor',
+    'pentatonicMajor',
+    'pentatonicMinor',
+    'harmonicMinor',
+    'melodicMinor',
+    'blues',
+  ]
+  const modeScaleOptions: ScaleId[] = [
+    'ionian',
+    'dorian',
+    'phrygian',
+    'lydian',
+    'mixolydian',
+    'aeolian',
+    'locrian',
+  ]
   const chordTonePitchClasses =
     appliedChordSymbol === undefined
       ? new Set<PitchClass>()
@@ -228,11 +245,18 @@ export const ControlPanel = () => {
                     }}
                   >
                     <option value="">{t('control.selectScale')}</option>
-                    {scaleOptions.map((scaleId) => (
+                    {baseScaleOptions.map((scaleId) => (
                       <option key={scaleId} value={scaleId}>
                         {getScaleLabel(locale, scaleId)}
                       </option>
                     ))}
+                    <optgroup label={t('control.modesGroup')}>
+                      {modeScaleOptions.map((scaleId) => (
+                        <option key={scaleId} value={scaleId}>
+                          {getScaleLabel(locale, scaleId)}
+                        </option>
+                      ))}
+                    </optgroup>
                   </select>
                   <svg
                     className={m3SelectChevronClass}

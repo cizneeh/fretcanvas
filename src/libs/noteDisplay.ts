@@ -31,6 +31,16 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
   naturalMinor: 'Natural Minor',
   pentatonicMajor: 'Pentatonic Major',
   pentatonicMinor: 'Pentatonic Minor',
+  harmonicMinor: 'Harmonic Minor',
+  melodicMinor: 'Melodic Minor',
+  blues: 'Blues',
+  ionian: 'Ionian',
+  dorian: 'Dorian',
+  phrygian: 'Phrygian',
+  lydian: 'Lydian',
+  mixolydian: 'Mixolydian',
+  aeolian: 'Aeolian',
+  locrian: 'Locrian',
 }
 
 const getAccidentalPreferenceByKey = (keyPc: PitchClass): 'sharp' | 'flat' => {

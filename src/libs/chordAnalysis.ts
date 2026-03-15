@@ -30,6 +30,16 @@ const SCALE_NAME_BY_ID: Record<ScaleId, string> = {
   naturalMinor: 'minor',
   pentatonicMajor: 'major pentatonic',
   pentatonicMinor: 'minor pentatonic',
+  harmonicMinor: 'harmonic minor',
+  melodicMinor: 'melodic minor',
+  blues: 'blues',
+  ionian: 'ionian',
+  dorian: 'dorian',
+  phrygian: 'phrygian',
+  lydian: 'lydian',
+  mixolydian: 'mixolydian',
+  aeolian: 'aeolian',
+  locrian: 'locrian',
 }
 
 const EXPLICIT_EXTENSION_INTERVALS = {
