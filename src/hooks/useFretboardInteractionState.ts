@@ -732,6 +732,8 @@ export const useFretboardInteractionState = () => {
         pendingSelectionStart !== undefined ||
         selectedPositionIds.length > 0,
       selectionRect,
+      exportHoverPreview:
+        draggingHandle !== undefined || hoverPreview === undefined ? undefined : hoverPreview,
       onSelectClosestHandleToFret: setClosestHandleToFret,
       onBoardPointerDown: handleBoardPointerDown,
       onNotePointerDown: handleNotePointerDown,

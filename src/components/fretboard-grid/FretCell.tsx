@@ -14,6 +14,9 @@ type FretCellProps = {
   isStartAtNutLine: boolean
   isStartFret: boolean
   isEndFret: boolean
+  isPreviewStartAtNutLine: boolean
+  isPreviewStartFret: boolean
+  isPreviewEndFret: boolean
   startMarkerColor: string
   endMarkerColor: string
   onNoteClick: (
@@ -52,6 +55,9 @@ export const FretCell = memo(
     isStartAtNutLine,
     isStartFret,
     isEndFret,
+    isPreviewStartAtNutLine,
+    isPreviewStartFret,
+    isPreviewEndFret,
     startMarkerColor,
     endMarkerColor,
     onNoteClick,
@@ -109,15 +115,24 @@ export const FretCell = memo(
             className={`pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-[2px] ${startMarkerColor}`}
           />
         ) : undefined}
+        {isPreviewStartAtNutLine && !isStartAtNutLine ? (
+          <span className="pointer-events-none absolute bottom-0 left-0 top-0 z-[9] w-[2px] bg-cyan-300/35" />
+        ) : undefined}
         {isStartFret && !isStartAtNutLine ? (
           <span
             className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${startMarkerColor}`}
           />
         ) : undefined}
+        {isPreviewStartFret && !isStartFret ? (
+          <span className="pointer-events-none absolute bottom-0 right-[-1px] top-0 z-[9] w-[2px] bg-cyan-300/35" />
+        ) : undefined}
         {isEndFret ? (
           <span
             className={`pointer-events-none absolute bottom-0 right-[-1px] top-0 z-10 w-[2px] ${endMarkerColor}`}
           />
+        ) : undefined}
+        {isPreviewEndFret && !isEndFret ? (
+          <span className="pointer-events-none absolute bottom-0 right-[-1px] top-0 z-[9] w-[2px] bg-emerald-300/35" />
         ) : undefined}
         <NoteChip
           isHighlighted={isHighlighted}

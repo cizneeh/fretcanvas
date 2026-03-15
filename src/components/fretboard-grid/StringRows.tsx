@@ -11,6 +11,12 @@ import { FretCell } from './FretCell'
 type StringRowsProps = {
   selectedPositionIds: Set<PositionId>
   disableCellPreview: boolean
+  exportHoverPreview:
+    | {
+        fret: number
+        handle: 'start' | 'end'
+      }
+    | undefined
   onNotePointerDown: (
     positionId: PositionId,
     isHighlighted: boolean,
@@ -41,6 +47,7 @@ export const StringRows = memo(
   ({
     selectedPositionIds,
     disableCellPreview,
+    exportHoverPreview,
     onNotePointerDown,
     onNoteClick,
     onNoteContextMenu,
@@ -109,6 +116,16 @@ export const StringRows = memo(
               const isEndFret = showExportRangeHighlight && fret === exportFretEnd
               const isStartAtNutLine =
                 showExportRangeHighlight && exportFretStart === 0 && fret === 0
+              const isPreviewStartAtNutLine =
+                exportHoverPreview?.handle === 'start' &&
+                exportHoverPreview.fret === 0 &&
+                fret === 0
+              const isPreviewStartFret =
+                exportHoverPreview?.handle === 'start' &&
+                exportHoverPreview.fret > 0 &&
+                fret === exportHoverPreview.fret - 1
+              const isPreviewEndFret =
+                exportHoverPreview?.handle === 'end' && fret === exportHoverPreview.fret
 
               return (
                 <FretCell
@@ -122,6 +139,9 @@ export const StringRows = memo(
                   isStartAtNutLine={isStartAtNutLine}
                   isStartFret={isStartFret}
                   isEndFret={isEndFret}
+                  isPreviewStartAtNutLine={isPreviewStartAtNutLine}
+                  isPreviewStartFret={isPreviewStartFret}
+                  isPreviewEndFret={isPreviewEndFret}
                   startMarkerColor={startMarkerColor}
                   endMarkerColor={endMarkerColor}
                   onNotePointerDown={onNotePointerDown}

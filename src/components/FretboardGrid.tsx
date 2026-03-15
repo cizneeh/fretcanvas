@@ -31,6 +31,12 @@ type FretboardGridProps = {
         height: number
       }
     | undefined
+  exportHoverPreview:
+    | {
+        fret: number
+        handle: 'start' | 'end'
+      }
+    | undefined
   selectedPositionIds: Set<PositionId>
   disableCellPreview: boolean
   onSelectClosestHandleToFret: (fret: number) => void
@@ -66,6 +72,7 @@ type FretboardGridProps = {
 export const FretboardGrid = ({
   previewConnection,
   selectionRect,
+  exportHoverPreview,
   selectedPositionIds,
   disableCellPreview,
   onSelectClosestHandleToFret,
@@ -148,6 +155,7 @@ export const FretboardGrid = ({
         <StringRows
           selectedPositionIds={selectedPositionIds}
           disableCellPreview={disableCellPreview}
+          exportHoverPreview={exportHoverPreview}
           onNotePointerDown={onNotePointerDown}
           onNoteClick={onNoteClick}
           onNoteContextMenu={onNoteContextMenu}
