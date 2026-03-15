@@ -16,6 +16,11 @@ export type PersistedHistory = {
   locale?: AppLocale
 }
 
+const normalizeNoteTextMode = (noteTextMode: unknown): FretboardStoreState['noteTextMode'] =>
+  noteTextMode === 'absolute' || noteTextMode === 'combined' || noteTextMode === 'interval'
+    ? noteTextMode
+    : 'interval'
+
 const normalizeDisplayedNotes = (
   displayedNotes: FretboardStoreState['displayedNotes'] | undefined,
 ): FretboardStoreState['displayedNotes'] =>
@@ -79,7 +84,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         keyPc: rawFretboard.keyPc ?? 0,
         selectedScale: rawFretboard.selectedScale,
         noteLabelMode: rawFretboard.noteLabelMode ?? 'scale',
-        noteTextMode: rawFretboard.noteTextMode ?? 'interval',
+        noteTextMode: normalizeNoteTextMode(rawFretboard.noteTextMode),
         strings: normalizedStrings,
         draftStrings: normalizedStrings,
         draftPresetId: getMatchingInstrumentPresetId(normalizedStrings) ?? 'custom',

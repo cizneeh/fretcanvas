@@ -116,6 +116,7 @@ export const ControlPanel = () => {
   const labelOptions: { value: NoteTextMode; label: string }[] = [
     { value: 'interval', label: t('control.interval') },
     { value: 'absolute', label: t('control.absolute') },
+    { value: 'combined', label: t('control.combined') },
   ]
   const scaleOptions: ScaleId[] = ['major', 'naturalMinor', 'pentatonicMajor', 'pentatonicMinor']
   const chordTonePitchClasses =

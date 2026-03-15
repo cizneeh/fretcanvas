@@ -18,6 +18,11 @@ import {
   type ScaleId,
 } from './musicCore'
 
+export type DisplayedNoteLabel = {
+  primary: string
+  secondary?: string
+}
+
 const SHARP_NOTE_LABELS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const FLAT_NOTE_LABELS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 
@@ -66,14 +71,28 @@ export const getDisplayedNoteLabel = (
   noteLabelMode: NoteLabelMode,
   keyPc: PitchClass,
   appliedChordSymbol: string | undefined,
-): string =>
-  noteTextMode === 'absolute'
-    ? getAbsoluteNoteLabelByKey(pitchClass, keyPc)
-    : noteLabelMode === 'chord' && appliedChordSymbol !== undefined
+): DisplayedNoteLabel => {
+  const absoluteLabel = getAbsoluteNoteLabelByKey(pitchClass, keyPc)
+  const intervalLabel =
+    noteLabelMode === 'chord' && appliedChordSymbol !== undefined
       ? getChordToneLabel(pitchClass, appliedChordSymbol)
       : noteLabelMode === 'scale'
         ? getScaleIntervalLabelFromRoot(pitchClass, keyPc)
         : getChordIntervalLabelFromRoot(pitchClass, keyPc)
+
+  if (noteTextMode === 'absolute') {
+    return { primary: absoluteLabel }
+  }
+
+  if (noteTextMode === 'interval') {
+    return { primary: intervalLabel }
+  }
+
+  return {
+    primary: absoluteLabel,
+    secondary: intervalLabel,
+  }
+}
 
 const getReferenceScalePitchClasses = (
   noteLabelMode: NoteLabelMode,

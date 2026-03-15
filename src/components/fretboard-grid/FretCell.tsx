@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { NoteVisualRole, PositionId } from '../../libs/musicCore'
+import type { DisplayedNoteLabel } from '../../libs/noteDisplay'
 import { isCellRenderLogEnabled } from '../../libs/renderProfiler'
 import { useFretboardStore } from '../../stores/fretboardStore'
 import { NoteChip } from '../NoteChip'
@@ -7,7 +8,7 @@ import { NoteChip } from '../NoteChip'
 type FretCellProps = {
   positionId: PositionId
   isNut: boolean
-  label: string
+  label: DisplayedNoteLabel
   visualRole: NoteVisualRole
   isSelected: boolean
   disablePreview: boolean

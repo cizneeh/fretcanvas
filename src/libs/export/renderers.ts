@@ -99,6 +99,8 @@ export const renderExportPngCanvas = ({
     )
     const xCenter = layout.boardLeft + (fret - layout.start + 0.5) * layout.cellWidth
     const palette = getNotePalette(visualRole)
+    const noteRadius = label.secondary === undefined ? 16 : 18
+    const emphasisRadius = label.secondary === undefined ? 18.75 : 20.75
 
     ctx.save()
     ctx.globalAlpha = displayedNote.isDimmed ? 0.35 : 1
@@ -106,29 +108,36 @@ export const renderExportPngCanvas = ({
       ctx.strokeStyle = 'rgba(248, 250, 252, 0.94)'
       ctx.lineWidth = 2.25
       ctx.beginPath()
-      ctx.arc(xCenter, yCenter, 18.75, 0, Math.PI * 2)
+      ctx.arc(xCenter, yCenter, emphasisRadius, 0, Math.PI * 2)
       ctx.stroke()
     }
     ctx.fillStyle = palette.png.fill
     ctx.beginPath()
-    ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
+    ctx.arc(xCenter, yCenter, noteRadius, 0, Math.PI * 2)
     ctx.fill()
 
     ctx.strokeStyle = palette.png.stroke
     ctx.lineWidth = 1.5
     ctx.beginPath()
-    ctx.arc(xCenter, yCenter, 16, 0, Math.PI * 2)
+    ctx.arc(xCenter, yCenter, noteRadius, 0, Math.PI * 2)
     ctx.stroke()
 
     ctx.fillStyle = '#ffffff'
-    ctx.font = `600 13px ${EXPORT_CANVAS_FONT_STACK}`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'
     ctx.shadowBlur = 2
     ctx.shadowOffsetX = 0
     ctx.shadowOffsetY = 1
-    ctx.fillText(label, xCenter, yCenter + 1.5)
+    if (label.secondary === undefined) {
+      ctx.font = `600 13px ${EXPORT_CANVAS_FONT_STACK}`
+      ctx.fillText(label.primary, xCenter, yCenter + 1.5)
+    } else {
+      ctx.font = `600 14px ${EXPORT_CANVAS_FONT_STACK}`
+      ctx.fillText(label.primary, xCenter, yCenter - 5.5)
+      ctx.font = `500 11px ${EXPORT_CANVAS_FONT_STACK}`
+      ctx.fillText(label.secondary, xCenter, yCenter + 7.5)
+    }
     ctx.shadowColor = 'transparent'
     ctx.shadowBlur = 0
     ctx.shadowOffsetX = 0
@@ -412,18 +421,24 @@ export const renderExportSvgMarkup = ({
       )
       const palette = getNotePalette(visualRole)
       const xCenter = layout.boardLeft + (fret - layout.start + 0.5) * layout.cellWidth
+      const noteRadius = label.secondary === undefined ? 16 : 18
+      const emphasisRadius = label.secondary === undefined ? 18.75 : 20.75
       svgParts.push(`<g opacity="${displayedNote.isDimmed ? 0.35 : 1}">`)
       if (displayedNote.isEmphasized) {
         svgParts.push(
-          `<circle cx="${xCenter}" cy="${yCenter}" r="18.75" fill="none" stroke="rgba(248, 250, 252, 0.94)" stroke-width="2.25" />`,
+          `<circle cx="${xCenter}" cy="${yCenter}" r="${emphasisRadius}" fill="none" stroke="rgba(248, 250, 252, 0.94)" stroke-width="2.25" />`,
         )
       }
-      svgParts.push(`<circle cx="${xCenter}" cy="${yCenter}" r="16" fill="${palette.png.fill}" />`)
       svgParts.push(
-        `<circle cx="${xCenter}" cy="${yCenter}" r="16" fill="none" stroke="${palette.png.stroke}" stroke-width="1.5" />`,
+        `<circle cx="${xCenter}" cy="${yCenter}" r="${noteRadius}" fill="${palette.png.fill}" />`,
       )
       svgParts.push(
-        `<text x="${xCenter}" y="${yCenter + 1.5}" fill="#ffffff" font-family="${EXPORT_SVG_FONT_STACK}" font-size="13" font-weight="600" text-anchor="middle" dominant-baseline="middle">${escapeXml(label)}</text>`,
+        `<circle cx="${xCenter}" cy="${yCenter}" r="${noteRadius}" fill="none" stroke="${palette.png.stroke}" stroke-width="1.5" />`,
+      )
+      svgParts.push(
+        label.secondary === undefined
+          ? `<text x="${xCenter}" y="${yCenter + 1.5}" fill="#ffffff" font-family="${EXPORT_SVG_FONT_STACK}" font-size="13" font-weight="600" text-anchor="middle" dominant-baseline="middle">${escapeXml(label.primary)}</text>`
+          : `<text x="${xCenter}" y="${yCenter - 5.5}" fill="#ffffff" font-family="${EXPORT_SVG_FONT_STACK}" text-anchor="middle"><tspan x="${xCenter}" dy="0" font-size="14" font-weight="600">${escapeXml(label.primary)}</tspan><tspan x="${xCenter}" dy="13" font-size="11" font-weight="500" opacity="0.85">${escapeXml(label.secondary)}</tspan></text>`,
       )
       svgParts.push('</g>')
     }

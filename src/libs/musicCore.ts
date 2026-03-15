@@ -2,7 +2,7 @@
 export type PitchClass = number
 export type ScaleId = 'major' | 'naturalMinor' | 'pentatonicMajor' | 'pentatonicMinor'
 export type NoteLabelMode = 'scale' | 'chord'
-export type NoteTextMode = 'interval' | 'absolute'
+export type NoteTextMode = 'interval' | 'absolute' | 'combined'
 export type ChordInputErrorKey = 'couldNotParse' | 'empty'
 
 /**
