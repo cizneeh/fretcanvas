@@ -73,7 +73,8 @@ export const useFretboardInteractionState = () => {
   const maxFret = FRET_NUMBERS.length - 1
   const fretCellCount = FRET_NUMBERS.length
   const clampFret = (value: number) => Math.max(0, Math.min(value, maxFret))
-  const toPercentFromFretCenter = (fret: number) => ((fret + 0.5) / fretCellCount) * 100
+  const toPercentFromRangeBoundary = (fret: number, handle: 'start' | 'end') =>
+    (handle === 'start' ? fret / fretCellCount : (fret + 1) / fretCellCount) * 100
 
   const toFretFromClientX = (clientX: number) => {
     const track = trackRef.current
@@ -696,19 +697,21 @@ export const useFretboardInteractionState = () => {
         : undefined,
     rangeTrackProps: {
       fretColumnSpan: FRET_NUMBERS.length,
-      startRangePercent: toPercentFromFretCenter(Math.min(exportFretStart, exportFretEnd)),
+      startRangePercent: toPercentFromRangeBoundary(
+        Math.min(exportFretStart, exportFretEnd),
+        'start',
+      ),
       rangeWidthPercent:
-        ((Math.max(exportFretStart, exportFretEnd) - Math.min(exportFretStart, exportFretEnd)) /
-          fretCellCount) *
-        100,
-      startHandlePercent: toPercentFromFretCenter(exportFretStart),
-      endHandlePercent: toPercentFromFretCenter(exportFretEnd),
+        toPercentFromRangeBoundary(Math.max(exportFretStart, exportFretEnd), 'end') -
+        toPercentFromRangeBoundary(Math.min(exportFretStart, exportFretEnd), 'start'),
+      startHandlePercent: toPercentFromRangeBoundary(exportFretStart, 'start'),
+      endHandlePercent: toPercentFromRangeBoundary(exportFretEnd, 'end'),
       hoverPreview:
         draggingHandle !== undefined || hoverPreview === undefined
           ? undefined
           : {
               handle: hoverPreview.handle,
-              percent: toPercentFromFretCenter(hoverPreview.fret),
+              percent: toPercentFromRangeBoundary(hoverPreview.fret, hoverPreview.handle),
             },
       onTrackRefChange: (node: HTMLDivElement | undefined) => {
         trackRef.current = node
