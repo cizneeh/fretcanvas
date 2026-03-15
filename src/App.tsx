@@ -9,6 +9,8 @@ import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
 import { useSettingsStore } from './stores/settingsStore'
 
+const KO_FI_URL = 'https://ko-fi.com/G2G31BLRA7'
+
 function App() {
   const { locale, t } = useI18n()
   const setLocale = useSettingsStore((state) => state.setLocale)
@@ -54,31 +56,43 @@ function App() {
         <div className="mx-auto flex w-full max-w-[106rem] items-center justify-between gap-4 px-4 py-2 md:px-8">
           <h1 className="text-xl font-medium tracking-tight text-zinc-100/92">Fret Canvas</h1>
 
-          <fieldset className={m3SegmentedContainerClass}>
-            <legend className="sr-only">{t('app.language')}</legend>
-            <button
-              type="button"
-              aria-pressed={locale === 'en'}
-              className={m3SegmentedButtonClass(locale === 'en')}
-              aria-label={t('app.switchToEnglish')}
-              onClick={() => {
-                setLocale('en')
-              }}
+          <div className="flex items-center gap-2">
+            <a
+              href={KO_FI_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="m3-focus-ring inline-flex min-h-10 items-center rounded-[var(--md-shape-md)] border border-transparent bg-[#7c96c2] px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#8aa3cd] active:bg-[#6c86b1]"
+              aria-label={t('app.supportOnKoFi')}
             >
-              EN
-            </button>
-            <button
-              type="button"
-              aria-pressed={locale === 'ja'}
-              className={m3SegmentedButtonClass(locale === 'ja')}
-              aria-label={t('app.switchToJapanese')}
-              onClick={() => {
-                setLocale('ja')
-              }}
-            >
-              JA
-            </button>
-          </fieldset>
+              {t('app.supportOnKoFi')}
+            </a>
+
+            <fieldset className={m3SegmentedContainerClass}>
+              <legend className="sr-only">{t('app.language')}</legend>
+              <button
+                type="button"
+                aria-pressed={locale === 'en'}
+                className={m3SegmentedButtonClass(locale === 'en')}
+                aria-label={t('app.switchToEnglish')}
+                onClick={() => {
+                  setLocale('en')
+                }}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                aria-pressed={locale === 'ja'}
+                className={m3SegmentedButtonClass(locale === 'ja')}
+                aria-label={t('app.switchToJapanese')}
+                onClick={() => {
+                  setLocale('ja')
+                }}
+              >
+                JA
+              </button>
+            </fieldset>
+          </div>
         </div>
       </header>
 
