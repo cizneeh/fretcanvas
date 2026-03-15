@@ -6,6 +6,8 @@ import {
   getChordToneLabel,
   getChordTonePitchClasses,
   getMajorDiatonicSeventhChordOptions,
+  getScaleIntervalLabelFromRoot,
+  getScalePitchClasses,
   parseChordInput,
 } from '../libs/chordAnalysis'
 import {
@@ -149,6 +151,15 @@ export const ControlPanel = () => {
           intervalLabel: getChordToneLabel(pitchClass, appliedChordSymbol),
           isChordTone: chordTonePitchClasses.has(pitchClass),
         }))
+  const selectedScaleNotes =
+    selectedScale === undefined
+      ? []
+      : getScalePitchClasses(keyPc, selectedScale).map((pitchClass) => ({
+          pitchClass,
+          absoluteLabel: getAbsoluteNoteLabelByKey(pitchClass, keyPc),
+          intervalLabel: getScaleIntervalLabelFromRoot(pitchClass, keyPc, selectedScale),
+          isRoot: pitchClass === keyPc,
+        }))
   const rootTonePalette = getNotePalette('root')
   const defaultTonePalette = getNotePalette('default')
   const tensionTonePalette = getNotePalette('tension')
@@ -273,6 +284,26 @@ export const ControlPanel = () => {
                     />
                   </svg>
                 </div>
+                {selectedScaleNotes.length > 0 ? (
+                  <div className="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] px-3 py-2">
+                    <div className={`mb-2 ${m3FieldLabelClass}`}>{t('control.scaleNotes')}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedScaleNotes.map((note) => {
+                        const palette = note.isRoot ? rootTonePalette : defaultTonePalette
+
+                        return (
+                          <span
+                            key={`${note.pitchClass}-${note.intervalLabel}`}
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${palette.web.previewToneClass}`}
+                          >
+                            <span>{note.absoluteLabel}</span>
+                            <span className="text-[10px] opacity-80">{note.intervalLabel}</span>
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : undefined}
               </div>
             ) : (
               <div className="grid gap-3 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start">
