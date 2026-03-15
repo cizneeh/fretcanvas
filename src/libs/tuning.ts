@@ -61,7 +61,13 @@ export type CustomTuningPreset = {
   strings: StringInfo[]
 }
 
-const toStringId = (stringIndex: number) => String(stringIndex + 1)
+const createStringId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `string:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 8)}`
+}
 
 export const getPitchClassFromTuningName = (note: TuningNoteName): PitchClass =>
   TUNING_NOTE_OPTIONS.indexOf(note)
@@ -69,8 +75,12 @@ export const getPitchClassFromTuningName = (note: TuningNoteName): PitchClass =>
 export const getTuningNameFromPitchClass = (pitchClass: number): TuningNoteName =>
   TUNING_NOTE_OPTIONS[normalizePc(pitchClass)]
 
-export const createStringInfo = (stringIndex: number, note: TuningNoteName): StringInfo => ({
-  id: toStringId(stringIndex),
+export const createStringInfo = (
+  _stringIndex: number,
+  note: TuningNoteName,
+  existingId: string = createStringId(),
+): StringInfo => ({
+  id: existingId,
   name: note,
   pitchClass: getPitchClassFromTuningName(note),
 })
@@ -78,18 +88,19 @@ export const createStringInfo = (stringIndex: number, note: TuningNoteName): Str
 export const getStringInfoFromPitchClass = (
   stringIndex: number,
   pitchClass: number,
+  existingId?: string,
 ): StringInfo => {
   const normalizedPitchClass = normalizePc(pitchClass)
-  return {
-    id: toStringId(stringIndex),
-    name: getTuningNameFromPitchClass(normalizedPitchClass),
-    pitchClass: normalizedPitchClass,
-  }
+  return createStringInfo(
+    stringIndex,
+    getTuningNameFromPitchClass(normalizedPitchClass),
+    existingId,
+  )
 }
 
 export const cloneStrings = (strings: StringInfo[]): StringInfo[] =>
-  strings.map((stringInfo, stringIndex) => ({
-    id: toStringId(stringIndex),
+  strings.map((stringInfo, _stringIndex) => ({
+    id: stringInfo.id || createStringId(),
     name: stringInfo.name,
     pitchClass: stringInfo.pitchClass,
   }))

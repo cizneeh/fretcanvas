@@ -106,7 +106,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     const trimmedStrings = sourceStrings
       .slice(0, clampStringCount(nextCount))
       .map((stringInfo, stringIndex) =>
-        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass),
+        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass, stringInfo.id),
       )
 
     while (trimmedStrings.length < clampStringCount(nextCount)) {
@@ -256,7 +256,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
     setDraftStrings: (nextStrings) => {
       const normalizedStrings = nextStrings.map((stringInfo, stringIndex) =>
-        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass),
+        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass, stringInfo.id),
       )
       const nextPresetId = getMatchingInstrumentPresetId(normalizedStrings) ?? 'custom'
       const current = get()
@@ -299,7 +299,9 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
       const nextStrings = current.draftStrings
         .filter((_, index) => index !== stringIndex)
-        .map((stringInfo, index) => getStringInfoFromPitchClass(index, stringInfo.pitchClass))
+        .map((stringInfo, index) =>
+          getStringInfoFromPitchClass(index, stringInfo.pitchClass, stringInfo.id),
+        )
 
       if (
         current.draftPresetId === (getMatchingInstrumentPresetId(nextStrings) ?? 'custom') &&
@@ -327,7 +329,9 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       }
 
       const nextDraftStrings = current.draftStrings.map((stringInfo, index) =>
-        index === stringIndex ? getStringInfoFromPitchClass(index, nextPitchClass) : stringInfo,
+        index === stringIndex
+          ? getStringInfoFromPitchClass(index, nextPitchClass, stringInfo.id)
+          : stringInfo,
       )
 
       set({
@@ -339,7 +343,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
     resetDraftStrings: () => {
       const current = get()
       const nextDraftStrings = current.strings.map((stringInfo, stringIndex) =>
-        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass),
+        getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass, stringInfo.id),
       )
       const nextPresetId = getMatchingInstrumentPresetId(current.strings) ?? 'custom'
 
@@ -365,7 +369,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
       pushHistoryBeforeChange()
       set({
         strings: current.draftStrings.map((stringInfo, stringIndex) =>
-          getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass),
+          getStringInfoFromPitchClass(stringIndex, stringInfo.pitchClass, stringInfo.id),
         ),
         displayedNotes: {},
         connections: {},

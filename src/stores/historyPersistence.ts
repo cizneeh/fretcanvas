@@ -45,6 +45,7 @@ const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
   return strings.map((stringInfo, stringIndex) => {
     const candidate = stringInfo as
       | {
+          id?: string
           pitchClass?: number
           midi?: number
           name?: string
@@ -60,7 +61,11 @@ const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
                 candidate.name as Parameters<typeof getPitchClassFromTuningName>[0],
               )
             : (getDefaultStrings()[stringIndex]?.pitchClass ?? 4)
-    return getStringInfoFromPitchClass(stringIndex, pitchClass)
+    return getStringInfoFromPitchClass(
+      stringIndex,
+      pitchClass,
+      typeof candidate?.id === 'string' ? candidate.id : undefined,
+    )
   })
 }
 
