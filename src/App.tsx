@@ -14,6 +14,7 @@ import { useSettingsStore } from './stores/settingsStore'
 
 const SUPPORT_URL = 'https://ko-fi.com/G2G31BLRA7'
 const WEBSITE_URL = 'https://echizen.me'
+const X_URL = 'https://x.com/cizneeh'
 
 function App() {
   const { locale, t } = useI18n()
@@ -103,17 +104,32 @@ function App() {
             'color-mix(in srgb, var(--md-sys-color-outline-variant) 90%, transparent)',
         }}
       >
-        <p>
-          Made by{' '}
-          <a
-            href={WEBSITE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="m3-focus-ring underline decoration-[color:var(--md-sys-color-outline)] underline-offset-4 transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] hover:decoration-[color:var(--md-sys-color-on-surface)]"
-          >
-            Shinjiro Echizen
-          </a>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p>
+            Made by{' '}
+            <a
+              href={WEBSITE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="m3-focus-ring underline decoration-[color:var(--md-sys-color-outline)] underline-offset-4 transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] hover:decoration-[color:var(--md-sys-color-on-surface)]"
+            >
+              Shinjiro Echizen
+            </a>
+          </p>
+
+          <p>
+            {t('footer.feedbackPrefix')}
+            <a
+              href={X_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="m3-focus-ring underline decoration-[color:var(--md-sys-color-outline)] underline-offset-4 transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] hover:decoration-[color:var(--md-sys-color-on-surface)]"
+            >
+              X
+            </a>
+            {t('footer.feedbackSuffix')}
+          </p>
+        </div>
 
         <a
           href={SUPPORT_URL}
