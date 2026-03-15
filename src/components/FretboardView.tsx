@@ -31,7 +31,7 @@ export const FretboardView = () => {
             </RenderProfiler>
           </div>
 
-          <div className={`${m3CardClass} w-full px-3 pb-2 pt-1`}>
+          <div className={`${m3CardClass} w-full px-5 pb-2 pt-1`}>
             <div
               className="grid"
               style={{
