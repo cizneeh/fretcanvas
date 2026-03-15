@@ -21,7 +21,7 @@ export const FretboardView = () => {
       </div>
 
       <div className="overflow-x-auto py-4">
-        <div className="w-max min-w-full space-y-3">
+        <div className="w-max min-w-full space-y-2">
           <div className="w-full rounded-md bg-black ring-1 ring-inset ring-zinc-700">
             <RenderProfiler id="FretboardGrid">
               <FretboardGrid
@@ -31,8 +31,7 @@ export const FretboardView = () => {
             </RenderProfiler>
           </div>
 
-          <div className={`${m3CardClass} w-full p-3`}>
-            <div className={`mb-2 ${m3FieldLabelClass}`}>{t('export.range')}</div>
+          <div className={`${m3CardClass} w-full px-3 pb-2 pt-1`}>
             <div
               className="grid"
               style={{
@@ -41,6 +40,7 @@ export const FretboardView = () => {
             >
               <ExportRangeTrack {...interaction.rangeTrackProps} />
             </div>
+            <div className={`mt-1 ${m3FieldLabelClass}`}>{t('export.range')}</div>
           </div>
         </div>
       </div>

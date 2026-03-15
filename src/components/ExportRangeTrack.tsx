@@ -50,7 +50,7 @@ export const ExportRangeTrack = ({
     <>
       <div />
       <div
-        className="relative mt-2 h-8"
+        className="relative mt-0.5 h-8"
         style={{ gridColumn: `2 / span ${fretColumnSpan}` }}
         onPointerDown={onTrackPointerDown}
         onPointerMove={onTrackPointerMove}
