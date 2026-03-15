@@ -1,8 +1,8 @@
-# Fretmap Concept
+# Fret Canvas Concept
 
 ## 目的
 
-Fretmap は、ギター演奏動画（Instagram / YouTube など）に重ねて表示するための指板マップを作るツール。
+Fret Canvas は、ギター演奏動画（Instagram / YouTube など）に重ねて表示するための指板マップを作るツール。
 
 「このフレーズでどのポジションを弾いているか」「どのスケール上の音か」を、視聴者に直感的に伝えることを目的とする。
 
