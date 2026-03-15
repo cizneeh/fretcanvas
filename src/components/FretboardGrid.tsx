@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { type BendArrow, FRET_NUMBERS, type PositionId } from '../libs/musicCore'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
@@ -13,7 +13,6 @@ import {
 import { FretHeaderRow } from './fretboard-grid/FretHeaderRow'
 import { FretMarkerRow } from './fretboard-grid/FretMarkerRow'
 import { StringRows } from './fretboard-grid/StringRows'
-import { TuningMenu } from './TuningMenu'
 
 type FretboardGridProps = {
   previewConnection:
@@ -67,6 +66,7 @@ type FretboardGridProps = {
   onBoardPointerMove: (clientX: number, clientY: number) => void
   onBoardPointerUpOrCancel: () => void
   onBoardRefChange: (node: HTMLDivElement | undefined) => void
+  onOpenTuningMenu: (anchorElement: HTMLButtonElement) => void
 }
 
 export const FretboardGrid = ({
@@ -84,8 +84,8 @@ export const FretboardGrid = ({
   onBoardPointerMove,
   onBoardPointerUpOrCancel,
   onBoardRefChange,
+  onOpenTuningMenu,
 }: FretboardGridProps) => {
-  const [tuningMenuAnchor, setTuningMenuAnchor] = useState<HTMLElement | null>(null)
   const connectionsById = useFretboardStore((state) => state.connections)
   const bendsById = useFretboardStore((state) => state.bends)
   const strings = useFretboardStore((state) => state.strings)
@@ -115,13 +115,6 @@ export const FretboardGrid = ({
       onPointerCancel={onBoardPointerUpOrCancel}
       onPointerLeave={onBoardPointerUpOrCancel}
     >
-      <TuningMenu
-        anchorElement={tuningMenuAnchor}
-        onClose={() => {
-          setTuningMenuAnchor(null)
-        }}
-      />
-
       <ConnectionLayer
         svgWidth={svgWidth}
         svgHeight={svgHeight}
@@ -159,9 +152,7 @@ export const FretboardGrid = ({
           onNotePointerDown={onNotePointerDown}
           onNoteClick={onNoteClick}
           onNoteContextMenu={onNoteContextMenu}
-          onOpenTuningMenu={(anchorElement) => {
-            setTuningMenuAnchor(anchorElement)
-          }}
+          onOpenTuningMenu={onOpenTuningMenu}
           onNotePointerUp={onNotePointerUp}
         />
 

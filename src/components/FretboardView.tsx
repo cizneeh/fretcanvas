@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
 import { useI18n } from '../i18n/useI18n'
 import { FRET_NUMBERS } from '../libs/musicCore'
@@ -8,16 +9,34 @@ import { FRET_CELL_WIDTH } from './fretboard-grid/constants'
 import { NoteContextMenu } from './NoteContextMenu'
 import { NoteLegend } from './NoteLegend'
 import { SelectionContextMenu } from './SelectionContextMenu'
-import { m3CardClass, m3FieldLabelClass } from './ui/materialClasses'
+import { TuningMenu } from './TuningMenu'
+import { m3CardClass, m3FieldLabelClass, m3OutlinedButtonClass } from './ui/materialClasses'
 
 export const FretboardView = () => {
   const { t } = useI18n()
   const interaction = useFretboardInteractionState()
+  const [tuningMenuAnchor, setTuningMenuAnchor] = useState<HTMLElement | null>(null)
 
   return (
     <section className="select-none">
-      <div className="mb-1">
+      <TuningMenu
+        anchorElement={tuningMenuAnchor}
+        onClose={() => {
+          setTuningMenuAnchor(null)
+        }}
+      />
+
+      <div className="mb-1 flex items-center justify-between gap-3">
         <NoteLegend />
+        <button
+          type="button"
+          className={`${m3OutlinedButtonClass} min-h-9 shrink-0 px-3 py-1.5 text-xs`}
+          onClick={(event) => {
+            setTuningMenuAnchor(event.currentTarget)
+          }}
+        >
+          {t('tuning.title')}
+        </button>
       </div>
 
       <div className="overflow-x-auto py-4">
@@ -26,6 +45,9 @@ export const FretboardView = () => {
             <RenderProfiler id="FretboardGrid">
               <FretboardGrid
                 previewConnection={interaction.previewConnection}
+                onOpenTuningMenu={(anchorElement) => {
+                  setTuningMenuAnchor(anchorElement)
+                }}
                 {...interaction.gridProps}
               />
             </RenderProfiler>

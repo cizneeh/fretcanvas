@@ -84,7 +84,7 @@ export const StringRows = memo(
             <div className="flex h-12 items-center justify-center pr-2">
               <button
                 type="button"
-                className="m3-focus-ring rounded-md border border-transparent px-2 py-1 text-base text-slate-300 transition-colors hover:border-cyan-200/30 hover:bg-cyan-200/10 hover:text-slate-50 focus-visible:border-cyan-200/30 focus-visible:bg-cyan-200/10 focus-visible:text-slate-50"
+                className="m3-focus-ring rounded-md border border-cyan-300/0 px-2 py-1 text-base font-medium text-slate-300 transition-[background-color,border-color,color,box-shadow,transform] hover:-translate-y-px hover:border-cyan-200/55 hover:bg-cyan-200/18 hover:text-white hover:shadow-[0_0_0_1px_rgba(103,232,249,0.12)] focus-visible:-translate-y-px focus-visible:border-cyan-200/55 focus-visible:bg-cyan-200/18 focus-visible:text-white focus-visible:shadow-[0_0_0_1px_rgba(103,232,249,0.12)]"
                 aria-label={`${stringInfo.name} ${t('tuning.openMenu')}`}
                 onClick={(event) => {
                   onOpenTuningMenu(event.currentTarget)
