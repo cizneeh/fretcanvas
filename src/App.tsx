@@ -9,6 +9,8 @@ import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
 import { useSettingsStore } from './stores/settingsStore'
 
+const WEBSITE_URL = 'https://echizen.me'
+
 function App() {
   const { locale, t } = useI18n()
   const setLocale = useSettingsStore((state) => state.setLocale)
@@ -49,7 +51,7 @@ function App() {
   }, [undo, redo])
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
+    <main className="flex min-h-screen flex-col bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
       <header className="fixed inset-x-0 top-0 z-30 bg-[color:var(--md-sys-color-surface-container-low)]/42 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[106rem] items-center justify-between gap-4 px-4 py-2 md:px-8">
           <h1 className="text-xl font-medium tracking-tight text-zinc-100/92">Fret Canvas</h1>
@@ -82,13 +84,27 @@ function App() {
         </div>
       </header>
 
-      <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-col gap-6 pt-10">
+      <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-1 flex-col gap-6 pt-10">
         <ControlPanel />
 
         <FretboardView />
 
         <ExportSettingsSection />
       </div>
+
+      <footer className="mx-auto mt-10 flex w-full max-w-[106rem] items-center gap-3 border-t border-[color:var(--md-sys-color-outline-variant)]/5 px-1 pt-4 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+        <p>
+          Made by{' '}
+          <a
+            href={WEBSITE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="m3-focus-ring underline decoration-[color:var(--md-sys-color-outline)] underline-offset-4 transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] hover:decoration-[color:var(--md-sys-color-on-surface)]"
+          >
+            Shinjiro Echizen
+          </a>
+        </p>
+      </footer>
     </main>
   )
 }
