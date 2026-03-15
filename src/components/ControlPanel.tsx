@@ -174,7 +174,7 @@ export const ControlPanel = () => {
             </div>
           </label>
 
-          <div className="flex max-w-[11.5rem] flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <span className={m3FieldLabelClass}>{t('control.noteLabels')}</span>
             <div className={`${m3SegmentedContainerClass} w-full`}>
               {labelOptions.map((labelOption) => (
@@ -193,7 +193,7 @@ export const ControlPanel = () => {
             </div>
           </div>
 
-          <div className="flex max-w-[12rem] flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <span className={m3FieldLabelClass}>{t('control.mode')}</span>
             <div className={`${m3SegmentedContainerClass} w-full`}>
               {modeOptions.map((modeOption) => (
