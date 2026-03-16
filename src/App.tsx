@@ -2,10 +2,7 @@ import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { ExportSettingsSection } from './components/ExportSettingsSection'
 import { FretboardView } from './components/FretboardView'
-import {
-  m3SegmentedButtonClass,
-  m3SegmentedContainerClass,
-} from './components/ui/materialClasses'
+import { m3SegmentedButtonClass, m3SegmentedContainerClass } from './components/ui/materialClasses'
 import { useI18n } from './i18n/useI18n'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
 import { initializeHistoryBindings } from './stores/historyBindings'
