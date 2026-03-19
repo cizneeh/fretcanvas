@@ -1,4 +1,3 @@
-import { persistLocalePreference } from '../i18n/config'
 import { useFretboardStore } from './fretboardStore'
 import { loadPersistedHistory, savePersistedHistory } from './historyPersistence'
 import {
@@ -26,7 +25,6 @@ const persistHistoryToLocalStorage = () => {
 
   savePersistedHistory({
     current: captureCurrentSnapshot(),
-    locale: useSettingsStore.getState().locale,
   })
 }
 
@@ -62,11 +60,6 @@ export const initializeHistoryBindings = () => {
         useSettingsStore.setState(nextSettingsState)
       },
     })
-
-    if (persisted.locale !== undefined) {
-      useSettingsStore.setState({ locale: persisted.locale })
-      persistLocalePreference(persisted.locale)
-    }
   }
   isHydrating = false
 

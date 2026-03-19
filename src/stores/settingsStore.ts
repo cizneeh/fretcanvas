@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { type AppLocale, getDefaultLocale, persistLocalePreference } from '../i18n/config'
+import { type AppLocale, getDefaultLocale } from '../i18n/config'
 import { FRET_COUNT } from '../libs/musicCore'
 import { useHistoryStore } from './historyStore'
 
@@ -59,7 +59,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
         return
       }
 
-      persistLocalePreference(nextLocale)
       set({ locale: nextLocale })
     },
 

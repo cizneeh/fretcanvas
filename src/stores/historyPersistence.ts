@@ -1,4 +1,3 @@
-import type { AppLocale } from '../i18n/config'
 import {
   getDefaultStrings,
   getMatchingInstrumentPresetId,
@@ -13,7 +12,6 @@ const HISTORY_STORAGE_KEY = 'fretmap:history:v1'
 
 export type PersistedHistory = {
   current: HistorySnapshot
-  locale?: AppLocale
 }
 
 const normalizeNoteTextMode = (noteTextMode: unknown): FretboardStoreState['noteTextMode'] =>
@@ -117,10 +115,8 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         showExportRangeHighlight: rawSettings.showExportRangeHighlight ?? true,
         showExportTitle: rawSettings.showExportTitle ?? false,
         showExportStringLabels: rawSettings.showExportStringLabels ?? true,
-        locale: candidate.locale === 'ja' || candidate.locale === 'en' ? candidate.locale : 'en',
       },
     ),
-    locale: candidate.locale === 'ja' || candidate.locale === 'en' ? candidate.locale : undefined,
   }
 }
 

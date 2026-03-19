@@ -5,26 +5,29 @@ import { SITE_NAME } from '../../libs/site'
 import { LanguageSwitch } from './LanguageSwitch'
 
 type HeaderProps = {
+  alternatePath: string
+  appPath: string
+  currentPath: string
   aboutPath: string
   locale: AppLocale
   pageKind: 'app' | 'about'
 }
 
-const { aboutPath, locale, pageKind } = Astro.props
+const { alternatePath, appPath, currentPath, aboutPath, locale, pageKind } = Astro.props
 const aboutLabel = translate(locale, 'nav.about')
 const appLabel = translate(locale, 'nav.app')
 ---
 
 <header class="fixed inset-x-0 top-0 z-30 bg-[color:var(--md-sys-color-surface-container-low)]/42 backdrop-blur-md">
   <div class="mx-auto flex w-full max-w-[106rem] items-center justify-between gap-4 px-4 py-2 md:px-8">
-    <a href="/" class="text-xl font-medium tracking-tight text-zinc-100/92 no-underline">
+    <a href={appPath} class="text-xl font-medium tracking-tight text-zinc-100/92 no-underline">
       {SITE_NAME}
     </a>
 
     <div class="flex items-center gap-3">
       {pageKind === 'about' && (
         <a
-          href="/"
+          href={appPath}
           class="m3-focus-ring text-sm text-[color:var(--md-sys-color-on-surface-variant)] no-underline transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)]"
         >
           {appLabel}
@@ -40,7 +43,12 @@ const appLabel = translate(locale, 'nav.app')
         {aboutLabel}
       </a>
 
-      <LanguageSwitch client:load initialLocale={locale} pageKind={pageKind} aboutPath={aboutPath} />
+      <LanguageSwitch
+        client:load
+        alternatePath={alternatePath}
+        currentPath={currentPath}
+        initialLocale={locale}
+      />
     </div>
   </div>
 </header>

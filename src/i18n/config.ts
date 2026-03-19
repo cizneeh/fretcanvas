@@ -4,7 +4,13 @@ export type AppLocale = 'ja' | 'en'
 
 type TranslationValues = Record<string, number | string>
 
-export const LOCALE_STORAGE_KEY = 'fretmap:locale:v1'
+export const LOCALE_COOKIE_KEY = 'fretcanvas_locale'
+
+declare global {
+  interface Window {
+    __FRET_CANVAS_LOCALE__?: AppLocale
+  }
+}
 
 const messages = {
   en: {
@@ -298,9 +304,9 @@ export const translate = (
 
 export const getDefaultLocale = (): AppLocale => {
   if (typeof window !== 'undefined') {
-    const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
-    if (storedLocale === 'ja' || storedLocale === 'en') {
-      return storedLocale
+    const bootstrapLocale = window.__FRET_CANVAS_LOCALE__
+    if (bootstrapLocale === 'ja' || bootstrapLocale === 'en') {
+      return bootstrapLocale
     }
   }
 
@@ -312,11 +318,12 @@ export const getDefaultLocale = (): AppLocale => {
 }
 
 export const persistLocalePreference = (locale: AppLocale) => {
-  if (typeof window === 'undefined') {
+  if (typeof document === 'undefined') {
     return
   }
 
-  window.localStorage.setItem(LOCALE_STORAGE_KEY, locale)
+  // biome-ignore lint/suspicious/noDocumentCookie: locale cookie is required for SSR redirect behavior.
+  document.cookie = `${LOCALE_COOKIE_KEY}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`
 }
 
 export const getScaleLabel = (locale: AppLocale, scaleId: ScaleId): string =>

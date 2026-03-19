@@ -1,67 +1,26 @@
-import { useEffect, useState } from 'react'
-import { type AppLocale, LOCALE_STORAGE_KEY, persistLocalePreference } from '../../i18n/config'
-import { useSettingsStore } from '../../stores/settingsStore'
+import { useState } from 'react'
+import { type AppLocale, persistLocalePreference } from '../../i18n/config'
 import { m3SegmentedButtonClass, m3SegmentedContainerClass } from '../ui/materialClasses'
 
 type LanguageSwitchProps = {
+  currentPath: string
   initialLocale: AppLocale
-  pageKind: 'app' | 'about'
-  aboutPath: string
+  alternatePath: string
 }
 
-const getStoredLocale = (): AppLocale | undefined => {
-  if (typeof window === 'undefined') {
-    return undefined
-  }
-
-  const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
-  return storedLocale === 'ja' || storedLocale === 'en' ? storedLocale : undefined
-}
-
-export function LanguageSwitch({ initialLocale, pageKind, aboutPath }: LanguageSwitchProps) {
-  const appLocale = useSettingsStore((state) => state.locale)
-  const setAppLocale = useSettingsStore((state) => state.setLocale)
-  const [aboutLocale, setAboutLocale] = useState<AppLocale>(initialLocale)
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  const activeLocale = pageKind === 'app' ? (isMounted ? appLocale : initialLocale) : aboutLocale
-
-  useEffect(() => {
-    if (pageKind !== 'app') {
-      return
-    }
-
-    const nextLocale = getStoredLocale() ?? appLocale
-    const aboutLink = document.getElementById('shell-about-link')
-    if (aboutLink instanceof HTMLAnchorElement) {
-      aboutLink.href = nextLocale === 'ja' ? '/ja/about' : aboutPath
-    }
-  }, [appLocale, aboutPath, pageKind])
+export function LanguageSwitch({ currentPath, initialLocale, alternatePath }: LanguageSwitchProps) {
+  const [activeLocale, setActiveLocale] = useState<AppLocale>(initialLocale)
 
   const handleLocaleChange = (nextLocale: AppLocale) => {
-    if (pageKind === 'app') {
-      setAppLocale(nextLocale)
-      document.documentElement.lang = nextLocale
-
-      const aboutLink = document.getElementById('shell-about-link')
-      if (aboutLink instanceof HTMLAnchorElement) {
-        aboutLink.href = nextLocale === 'ja' ? '/ja/about' : aboutPath
-      }
-      return
-    }
-
-    if (nextLocale === aboutLocale) {
+    if (nextLocale === activeLocale) {
       return
     }
 
     persistLocalePreference(nextLocale)
-    setAboutLocale(nextLocale)
+    setActiveLocale(nextLocale)
     document.documentElement.lang = nextLocale
-    window.location.href = nextLocale === 'ja' ? '/ja/about' : '/en/about'
+    window.location.href =
+      currentPath.startsWith('/ja') && nextLocale === 'ja' ? currentPath : alternatePath
   }
 
   return (

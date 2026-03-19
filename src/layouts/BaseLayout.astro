@@ -6,15 +6,19 @@ import Footer from '../components/shell/Footer.astro'
 import Header from '../components/shell/Header.astro'
 
 type LayoutProps = {
+  alternatePath: string
   aboutPath: string
+  appPath: string
   canonicalPath: string
+  currentPath: string
   description: string
   locale: AppLocale
   pageKind: 'app' | 'about'
   title: string
 }
 
-const { aboutPath, canonicalPath, description, locale, pageKind, title } = Astro.props
+const { alternatePath, aboutPath, appPath, canonicalPath, currentPath, description, locale, pageKind, title } =
+  Astro.props
 const canonicalUrl = new URL(canonicalPath, SITE_URL).toString()
 const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
 ---
@@ -40,15 +44,25 @@ const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={`${SITE_URL}/favicon.png`} />
-    {pageKind === 'about' && <link rel="alternate" hreflang="en" href={`${SITE_URL}/en/about`} />}
+    {pageKind === 'about' && <link rel="alternate" hreflang="en" href={`${SITE_URL}/about`} />}
     {pageKind === 'about' && <link rel="alternate" hreflang="ja" href={`${SITE_URL}/ja/about`} />}
     {pageKind === 'about' && (
-      <link rel="alternate" hreflang="x-default" href={`${SITE_URL}/en/about`} />
+      <link rel="alternate" hreflang="x-default" href={`${SITE_URL}/about`} />
     )}
+    <script is:inline define:vars={{ locale }}>
+      window.__FRET_CANVAS_LOCALE__ = locale
+    </script>
   </head>
   <body class="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-zinc-100">
     <div class="flex min-h-screen flex-col">
-      <Header aboutPath={aboutPath} locale={locale} pageKind={pageKind} />
+      <Header
+        aboutPath={aboutPath}
+        alternatePath={alternatePath}
+        appPath={appPath}
+        currentPath={currentPath}
+        locale={locale}
+        pageKind={pageKind}
+      />
       <slot />
       <Footer locale={locale} />
     </div>
