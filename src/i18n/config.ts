@@ -317,6 +317,7 @@ export const getDefaultLocale = (): AppLocale => {
   return navigator.language.toLowerCase().startsWith('ja') ? 'ja' : 'en'
 }
 
+// 言語設定のcookieを保存する
 export const persistLocalePreference = (locale: AppLocale) => {
   if (typeof document === 'undefined') {
     return

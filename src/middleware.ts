@@ -52,6 +52,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const pathLocale = getPathLocale(pathname)
   const localeCookie = cookies.get(LOCALE_COOKIE_KEY)?.value
 
+  // cookie が未設定のリクエストでだけ Accept-Language を見て日本語URLへリダイレクトする。
+  // cookie は言語切替時のクライアント側処理でも、言語付きURLのレスポンス時にも更新される。
+  // そのため一度でも言語が確定した後は、以後の判定は cookie と URL が基準になる。
   if (localeCookie === undefined) {
     const japaneseRedirectPath = getJapaneseRedirectPath(pathname)
 
