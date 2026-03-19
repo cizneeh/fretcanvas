@@ -4,7 +4,7 @@ export type AppLocale = 'ja' | 'en'
 
 type TranslationValues = Record<string, number | string>
 
-const LOCALE_STORAGE_KEY = 'fretmap:locale:v1'
+export const LOCALE_STORAGE_KEY = 'fretmap:locale:v1'
 
 const messages = {
   en: {
@@ -80,6 +80,8 @@ const messages = {
     'legend.root': 'Root',
     'legend.scaleTone': 'Scale Tone',
     'legend.tension': 'Tension',
+    'nav.about': 'About',
+    'nav.app': 'App',
     'scale.major': 'Major',
     'scale.naturalMinor': 'Natural Minor',
     'scale.pentatonicMajor': 'Pentatonic Major',
@@ -197,6 +199,8 @@ const messages = {
     'legend.root': 'ルート',
     'legend.scaleTone': 'スケール内',
     'legend.tension': 'テンション',
+    'nav.about': 'About',
+    'nav.app': 'アプリ',
     'scale.major': 'メジャー',
     'scale.naturalMinor': 'ナチュラルマイナー',
     'scale.pentatonicMajor': 'メジャーペンタトニック',

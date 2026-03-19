@@ -1,0 +1,15 @@
+---
+import App from '../App'
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  aboutPath="/en/about"
+  canonicalPath="/"
+  description="Fret Canvas is a guitar fretboard visualization tool for mapping scales, chord tones, tunings, and export clean fretboard diagrams for content creators."
+  locale="en"
+  pageKind="app"
+  title="Fret Canvas"
+>
+  <App client:only="react" />
+</BaseLayout>

@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/latest/schema.json",
   "files": {
-    "includes": ["**", "!**/node_modules"]
+    "includes": ["**", "!**/*.astro", "!**/node_modules"]
   },
   "vcs": {
     "enabled": true,

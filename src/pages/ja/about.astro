@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  aboutPath="/ja/about"
+  canonicalPath="/ja/about"
+  description="Fret Canvas は、スケールやコードトーン、チューニングを可視化し、指板図を PNG / SVG で書き出せるツールです。"
+  locale="ja"
+  pageKind="about"
+  title="Fret Canvas について"
+>
+  <main class="mx-auto flex w-full max-w-[72rem] flex-1 px-4 pb-10 pt-16 md:px-8">
+    <article class="w-full rounded-[var(--md-shape-lg)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container)] p-6 shadow-[var(--md-elevation-1)] md:p-8">
+      <h1 class="text-3xl font-semibold tracking-tight text-[color:var(--md-sys-color-on-surface)]">
+        Fret Canvas について
+      </h1>
+      <p class="mt-4 max-w-[56rem] text-base leading-7 text-[color:var(--md-sys-color-on-surface-variant)]">
+        Fret Canvas は、ギターや弦楽器の指板を可視化するためのツールです。スケール、コードトーン、
+        チューニングを整理して、学習や制作に使える図を PNG / SVG で書き出せます。
+      </p>
+
+      <section class="mt-8 grid gap-4 md:grid-cols-2">
+        <div class="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-5">
+          <h2 class="text-base font-medium text-[color:var(--md-sys-color-on-surface)]">
+            できること
+          </h2>
+          <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-[color:var(--md-sys-color-on-surface-variant)]">
+            <li>スケールやコードトーンを指板上で可視化</li>
+            <li>カスタムチューニングや保存済みプリセットを利用</li>
+            <li>書き出し範囲を調整してプレビューを確認</li>
+            <li>PNG / SVG で図を出力</li>
+          </ul>
+        </div>
+
+        <div class="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-5">
+          <h2 class="text-base font-medium text-[color:var(--md-sys-color-on-surface)]">
+            想定ユーザー
+          </h2>
+          <p class="mt-3 text-sm leading-6 text-[color:var(--md-sys-color-on-surface-variant)]">
+            指板上の音の並びを確認したいプレイヤー、教材を作りたい講師、図をきれいに出力したいコンテンツ制作者を想定しています。
+          </p>
+        </div>
+      </section>
+    </article>
+  </main>
+</BaseLayout>

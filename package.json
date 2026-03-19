@@ -4,13 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "astro dev",
+    "build": "astro build",
     "lint": "tsc --noEmit && biome check .",
     "fix": "biome check . --write .",
-    "preview": "vite preview"
+    "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/node": "^10.0.2",
+    "@astrojs/react": "^5.0.0",
+    "astro": "^6.0.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tonal": "^6.4.3",
