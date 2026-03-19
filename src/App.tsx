@@ -46,15 +46,13 @@ function App() {
   }, [undo, redo])
 
   return (
-    <main className="mx-auto flex w-full max-w-[106rem] flex-1 flex-col gap-6 px-4 pb-8 pt-14 md:px-8">
-      <div className="flex w-full min-w-0 flex-1 flex-col gap-6">
-        <ControlPanel />
+    <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-1 flex-col gap-6 pt-10">
+      <ControlPanel />
 
-        <FretboardView />
+      <FretboardView />
 
-        <ExportSettingsSection />
-      </div>
-    </main>
+      <ExportSettingsSection />
+    </div>
   )
 }
 
