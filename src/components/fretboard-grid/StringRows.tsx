@@ -1,10 +1,9 @@
-import { Fragment, memo } from 'react'
+import { Fragment, memo, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useI18n } from '../../i18n/useI18n'
 import { FRET_NUMBERS, normalizePc, type PositionId, toPositionId } from '../../libs/musicCore'
 import { getDisplayedNoteLabel, getNoteVisualRole } from '../../libs/noteDisplay'
 import { useFretboardStore } from '../../stores/fretboardStore'
-import { useSettingsStore } from '../../stores/settingsStore'
 import { RenderProfiler } from '../dev/RenderProfiler'
 import { FretCell } from './FretCell'
 
@@ -66,20 +65,40 @@ export const StringRows = memo(
           strings: state.strings,
         })),
       )
-    const { exportFretStart, exportFretEnd, showExportRangeHighlight } = useSettingsStore(
-      useShallow((state) => ({
-        exportFretStart: state.exportFretStart,
-        exportFretEnd: state.exportFretEnd,
-        showExportRangeHighlight: state.showExportRangeHighlight,
-      })),
+    const stringRows = useMemo(
+      () =>
+        strings.map((stringInfo, stringIndex) => ({
+          stringInfo,
+          cells: FRET_NUMBERS.map((fret) => {
+            const positionId = toPositionId({ stringIndex, fret })
+            const pitchClass = normalizePc(stringInfo.pitchClass + fret)
+            return {
+              fret,
+              positionId,
+              label: getDisplayedNoteLabel(
+                pitchClass,
+                noteTextMode,
+                noteLabelMode,
+                keyPc,
+                selectedScale,
+                appliedChordSymbol,
+              ),
+              visualRole: getNoteVisualRole({
+                pitchClass,
+                noteLabelMode,
+                keyPc,
+                selectedScale,
+                appliedChordSymbol,
+              }),
+            }
+          }),
+        })),
+      [appliedChordSymbol, keyPc, noteLabelMode, noteTextMode, selectedScale, strings],
     )
-    const startHighlightFret = showExportRangeHighlight ? Math.max(0, exportFretStart - 1) : -1
-    const startMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-cyan-300'
-    const endMarkerColor = exportFretStart === exportFretEnd ? 'bg-fuchsia-300' : 'bg-emerald-300'
 
     return (
       <RenderProfiler id="StringRows">
-        {strings.map((stringInfo, stringIndex) => (
+        {stringRows.map(({ stringInfo, cells }) => (
           <Fragment key={stringInfo.id}>
             <div className="flex h-12 items-center justify-center pr-2">
               <button
@@ -95,28 +114,7 @@ export const StringRows = memo(
             </div>
 
             {/* 各マスは弦の pitch class と fret 番号から音名を決める。ノート自体は絶対音高を持たない。 */}
-            {FRET_NUMBERS.map((fret) => {
-              const positionId = toPositionId({ stringIndex, fret })
-              const pitchClass = normalizePc(stringInfo.pitchClass + fret)
-              const visualRole = getNoteVisualRole({
-                pitchClass,
-                noteLabelMode,
-                keyPc,
-                selectedScale,
-                appliedChordSymbol,
-              })
-              const label = getDisplayedNoteLabel(
-                pitchClass,
-                noteTextMode,
-                noteLabelMode,
-                keyPc,
-                selectedScale,
-                appliedChordSymbol,
-              )
-              const isStartFret = fret === startHighlightFret
-              const isEndFret = showExportRangeHighlight && fret === exportFretEnd
-              const isStartAtNutLine =
-                showExportRangeHighlight && exportFretStart === 0 && fret === 0
+            {cells.map(({ fret, positionId, label, visualRole }) => {
               const isPreviewStartAtNutLine =
                 exportHoverPreview?.handle === 'start' &&
                 exportHoverPreview.fret === 0 &&
@@ -131,20 +129,16 @@ export const StringRows = memo(
               return (
                 <FretCell
                   key={`${stringInfo.id}-${fret}`}
+                  fret={fret}
                   positionId={positionId}
                   isNut={fret === 0}
                   label={label}
                   visualRole={visualRole}
                   isSelected={selectedPositionIds.has(positionId)}
                   disablePreview={disableCellPreview}
-                  isStartAtNutLine={isStartAtNutLine}
-                  isStartFret={isStartFret}
-                  isEndFret={isEndFret}
                   isPreviewStartAtNutLine={isPreviewStartAtNutLine}
                   isPreviewStartFret={isPreviewStartFret}
                   isPreviewEndFret={isPreviewEndFret}
-                  startMarkerColor={startMarkerColor}
-                  endMarkerColor={endMarkerColor}
                   onNotePointerDown={onNotePointerDown}
                   onNoteClick={onNoteClick}
                   onNoteContextMenu={onNoteContextMenu}

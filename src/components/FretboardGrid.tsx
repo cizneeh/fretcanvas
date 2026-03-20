@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { type BendArrow, FRET_NUMBERS, type PositionId } from '../libs/musicCore'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { ConnectionLayer } from './fretboard-grid/ConnectionLayer'
@@ -69,95 +69,97 @@ type FretboardGridProps = {
   onOpenTuningMenu: (anchorElement: HTMLButtonElement) => void
 }
 
-export const FretboardGrid = ({
-  previewConnection,
-  selectionRect,
-  exportHoverPreview,
-  selectedPositionIds,
-  disableCellPreview,
-  onSelectClosestHandleToFret,
-  onBoardPointerDown,
-  onNotePointerDown,
-  onNoteClick,
-  onNoteContextMenu,
-  onNotePointerUp,
-  onBoardPointerMove,
-  onBoardPointerUpOrCancel,
-  onBoardRefChange,
-  onOpenTuningMenu,
-}: FretboardGridProps) => {
-  const connectionsById = useFretboardStore((state) => state.connections)
-  const bendsById = useFretboardStore((state) => state.bends)
-  const strings = useFretboardStore((state) => state.strings)
-  const removeConnection = useFretboardStore((state) => state.removeConnection)
-  const removeBend = useFretboardStore((state) => state.removeBend)
-  const connections = useMemo(() => Object.values(connectionsById), [connectionsById])
-  const bends = useMemo(() => Object.values(bendsById) as BendArrow[], [bendsById])
+export const FretboardGrid = memo(
+  ({
+    previewConnection,
+    selectionRect,
+    exportHoverPreview,
+    selectedPositionIds,
+    disableCellPreview,
+    onSelectClosestHandleToFret,
+    onBoardPointerDown,
+    onNotePointerDown,
+    onNoteClick,
+    onNoteContextMenu,
+    onNotePointerUp,
+    onBoardPointerMove,
+    onBoardPointerUpOrCancel,
+    onBoardRefChange,
+    onOpenTuningMenu,
+  }: FretboardGridProps) => {
+    const connectionsById = useFretboardStore((state) => state.connections)
+    const bendsById = useFretboardStore((state) => state.bends)
+    const strings = useFretboardStore((state) => state.strings)
+    const removeConnection = useFretboardStore((state) => state.removeConnection)
+    const removeBend = useFretboardStore((state) => state.removeBend)
+    const connections = useMemo(() => Object.values(connectionsById), [connectionsById])
+    const bends = useMemo(() => Object.values(bendsById) as BendArrow[], [bendsById])
 
-  const gridWidth = LABEL_WIDTH + FRET_NUMBERS.length * FRET_CELL_WIDTH
-  const gridHeight = HEADER_ROW_HEIGHT + strings.length * STRING_ROW_HEIGHT
-  const svgWidth = BOARD_PADDING_X * 2 + gridWidth
-  const svgHeight = BOARD_PADDING_Y * 2 + gridHeight
+    const gridWidth = LABEL_WIDTH + FRET_NUMBERS.length * FRET_CELL_WIDTH
+    const gridHeight = HEADER_ROW_HEIGHT + strings.length * STRING_ROW_HEIGHT
+    const svgWidth = BOARD_PADDING_X * 2 + gridWidth
+    const svgHeight = BOARD_PADDING_Y * 2 + gridHeight
 
-  return (
-    <div
-      ref={(node) => {
-        onBoardRefChange(node ?? undefined)
-      }}
-      className="relative inline-block min-w-full px-5 py-8"
-      onPointerDown={(event) => {
-        onBoardPointerDown(event.clientX, event.clientY, event.target)
-      }}
-      onPointerMove={(event) => {
-        onBoardPointerMove(event.clientX, event.clientY)
-      }}
-      onPointerUp={onBoardPointerUpOrCancel}
-      onPointerCancel={onBoardPointerUpOrCancel}
-      onPointerLeave={onBoardPointerUpOrCancel}
-    >
-      <ConnectionLayer
-        svgWidth={svgWidth}
-        svgHeight={svgHeight}
-        connections={connections}
-        bends={bends}
-        previewConnection={previewConnection}
-        onRemoveConnection={removeConnection}
-        onRemoveBend={removeBend}
-      />
-
-      {selectionRect !== undefined ? (
-        <div
-          className="pointer-events-none absolute z-[6] rounded-sm border border-dashed border-cyan-200/80 bg-cyan-200/10"
-          style={{
-            left: selectionRect.left,
-            top: selectionRect.top,
-            width: selectionRect.width,
-            height: selectionRect.height,
-          }}
-        />
-      ) : undefined}
-
+    return (
       <div
-        className="grid"
-        style={{
-          gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(${FRET_CELL_WIDTH}px, ${FRET_CELL_WIDTH}px))`,
+        ref={(node) => {
+          onBoardRefChange(node ?? undefined)
         }}
+        className="relative inline-block min-w-full px-5 py-8"
+        onPointerDown={(event) => {
+          onBoardPointerDown(event.clientX, event.clientY, event.target)
+        }}
+        onPointerMove={(event) => {
+          onBoardPointerMove(event.clientX, event.clientY)
+        }}
+        onPointerUp={onBoardPointerUpOrCancel}
+        onPointerCancel={onBoardPointerUpOrCancel}
+        onPointerLeave={onBoardPointerUpOrCancel}
       >
-        <FretHeaderRow />
-
-        <StringRows
-          selectedPositionIds={selectedPositionIds}
-          disableCellPreview={disableCellPreview}
-          exportHoverPreview={exportHoverPreview}
-          onNotePointerDown={onNotePointerDown}
-          onNoteClick={onNoteClick}
-          onNoteContextMenu={onNoteContextMenu}
-          onOpenTuningMenu={onOpenTuningMenu}
-          onNotePointerUp={onNotePointerUp}
+        <ConnectionLayer
+          svgWidth={svgWidth}
+          svgHeight={svgHeight}
+          connections={connections}
+          bends={bends}
+          previewConnection={previewConnection}
+          onRemoveConnection={removeConnection}
+          onRemoveBend={removeBend}
         />
 
-        <FretMarkerRow onSelectClosestHandleToFret={onSelectClosestHandleToFret} />
+        {selectionRect !== undefined ? (
+          <div
+            className="pointer-events-none absolute z-[6] rounded-sm border border-dashed border-cyan-200/80 bg-cyan-200/10"
+            style={{
+              left: selectionRect.left,
+              top: selectionRect.top,
+              width: selectionRect.width,
+              height: selectionRect.height,
+            }}
+          />
+        ) : undefined}
+
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: `2rem repeat(${FRET_NUMBERS.length}, minmax(${FRET_CELL_WIDTH}px, ${FRET_CELL_WIDTH}px))`,
+          }}
+        >
+          <FretHeaderRow />
+
+          <StringRows
+            selectedPositionIds={selectedPositionIds}
+            disableCellPreview={disableCellPreview}
+            exportHoverPreview={exportHoverPreview}
+            onNotePointerDown={onNotePointerDown}
+            onNoteClick={onNoteClick}
+            onNoteContextMenu={onNoteContextMenu}
+            onOpenTuningMenu={onOpenTuningMenu}
+            onNotePointerUp={onNotePointerUp}
+          />
+
+          <FretMarkerRow onSelectClosestHandleToFret={onSelectClosestHandleToFret} />
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  },
+)

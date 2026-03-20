@@ -1,25 +1,23 @@
 import { memo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import type { NoteVisualRole, PositionId } from '../../libs/musicCore'
 import type { DisplayedNoteLabel } from '../../libs/noteDisplay'
 import { isCellRenderLogEnabled } from '../../libs/renderProfiler'
 import { useFretboardStore } from '../../stores/fretboardStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 import { NoteChip } from '../NoteChip'
 
 type FretCellProps = {
+  fret: number
   positionId: PositionId
   isNut: boolean
   label: DisplayedNoteLabel
   visualRole: NoteVisualRole
   isSelected: boolean
   disablePreview: boolean
-  isStartAtNutLine: boolean
-  isStartFret: boolean
-  isEndFret: boolean
   isPreviewStartAtNutLine: boolean
   isPreviewStartFret: boolean
   isPreviewEndFret: boolean
-  startMarkerColor: string
-  endMarkerColor: string
   onNoteClick: (
     positionId: PositionId,
     isMetaKey: boolean,
@@ -47,20 +45,16 @@ type FretCellProps = {
 
 export const FretCell = memo(
   ({
+    fret,
     positionId,
     isNut,
     label,
     visualRole,
     isSelected,
     disablePreview,
-    isStartAtNutLine,
-    isStartFret,
-    isEndFret,
     isPreviewStartAtNutLine,
     isPreviewStartFret,
     isPreviewEndFret,
-    startMarkerColor,
-    endMarkerColor,
     onNoteClick,
     onNotePointerDown,
     onNotePointerUp,
@@ -70,6 +64,25 @@ export const FretCell = memo(
     const isHighlighted = displayedNote !== undefined
     const isDimmed = displayedNote?.isDimmed ?? false
     const isEmphasized = displayedNote?.isEmphasized ?? false
+    const { isStartAtNutLine, isStartFret, isEndFret, startMarkerColor, endMarkerColor } =
+      useSettingsStore(
+        useShallow((state) => {
+          const showExportRangeHighlight = state.showExportRangeHighlight
+          const startHighlightFret = showExportRangeHighlight
+            ? Math.max(0, state.exportFretStart - 1)
+            : -1
+          const markerColor =
+            state.exportFretStart === state.exportFretEnd ? 'bg-fuchsia-300' : undefined
+
+          return {
+            isStartAtNutLine: showExportRangeHighlight && state.exportFretStart === 0 && fret === 0,
+            isStartFret: fret === startHighlightFret,
+            isEndFret: showExportRangeHighlight && fret === state.exportFretEnd,
+            startMarkerColor: markerColor ?? 'bg-cyan-300',
+            endMarkerColor: markerColor ?? 'bg-emerald-300',
+          }
+        }),
+      )
 
     if (isCellRenderLogEnabled()) {
       console.debug('[CellRender]', positionId, {
@@ -151,4 +164,20 @@ export const FretCell = memo(
       </button>
     )
   },
+  (previousProps, nextProps) =>
+    previousProps.fret === nextProps.fret &&
+    previousProps.positionId === nextProps.positionId &&
+    previousProps.isNut === nextProps.isNut &&
+    previousProps.visualRole === nextProps.visualRole &&
+    previousProps.isSelected === nextProps.isSelected &&
+    previousProps.disablePreview === nextProps.disablePreview &&
+    previousProps.isPreviewStartAtNutLine === nextProps.isPreviewStartAtNutLine &&
+    previousProps.isPreviewStartFret === nextProps.isPreviewStartFret &&
+    previousProps.isPreviewEndFret === nextProps.isPreviewEndFret &&
+    previousProps.onNoteClick === nextProps.onNoteClick &&
+    previousProps.onNotePointerDown === nextProps.onNotePointerDown &&
+    previousProps.onNotePointerUp === nextProps.onNotePointerUp &&
+    previousProps.onNoteContextMenu === nextProps.onNoteContextMenu &&
+    previousProps.label.primary === nextProps.label.primary &&
+    previousProps.label.secondary === nextProps.label.secondary,
 )

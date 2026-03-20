@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { getPositionBounds } from '../components/fretboard-grid/constants'
 import { FRET_NUMBERS, getBendId, type PositionId } from '../libs/musicCore'
 import {
@@ -20,7 +21,6 @@ import { useHistoryStore } from '../stores/historyStore'
 import { useSettingsStore } from '../stores/settingsStore'
 
 export const useFretboardInteractionState = () => {
-  const displayedNotes = useFretboardStore((state) => state.displayedNotes)
   const exportFretStart = useSettingsStore((state) => state.exportFretStart)
   const exportFretEnd = useSettingsStore((state) => state.exportFretEnd)
   const togglePosition = useFretboardStore((state) => state.togglePosition)
@@ -70,13 +70,21 @@ export const useFretboardInteractionState = () => {
     { x: number; y: number } | undefined
   >(undefined)
 
+  const selectedNotes = useFretboardStore(
+    useShallow((state) =>
+      selectedPositionIds.map((positionId) => state.displayedNotes[positionId]),
+    ),
+  )
   const maxFret = FRET_NUMBERS.length - 1
   const fretCellCount = FRET_NUMBERS.length
-  const clampFret = (value: number) => Math.max(0, Math.min(value, maxFret))
-  const toPercentFromRangeBoundary = (fret: number, handle: 'start' | 'end') =>
-    (handle === 'start' ? fret / fretCellCount : (fret + 1) / fretCellCount) * 100
+  const clampFret = useCallback((value: number) => Math.max(0, Math.min(value, maxFret)), [maxFret])
+  const toPercentFromRangeBoundary = useCallback(
+    (fret: number, handle: 'start' | 'end') =>
+      (handle === 'start' ? fret / fretCellCount : (fret + 1) / fretCellCount) * 100,
+    [],
+  )
 
-  const toTrackUnitsFromClientX = (clientX: number) => {
+  const toTrackUnitsFromClientX = useCallback((clientX: number) => {
     const track = trackRef.current
     if (track === undefined) {
       return undefined
@@ -86,16 +94,22 @@ export const useFretboardInteractionState = () => {
     const relativeX = clientX - rect.left
     const ratio = rect.width > 0 ? relativeX / rect.width : 0
     return Math.max(0, Math.min(ratio * fretCellCount, fretCellCount))
-  }
+  }, [])
 
-  const toFretFromTrackUnits = (trackUnits: number, handle: 'start' | 'end') =>
-    clampFret(handle === 'start' ? Math.round(trackUnits) : Math.round(trackUnits) - 1)
+  const toFretFromTrackUnits = useCallback(
+    (trackUnits: number, handle: 'start' | 'end') =>
+      clampFret(handle === 'start' ? Math.round(trackUnits) : Math.round(trackUnits) - 1),
+    [clampFret],
+  )
 
-  const getNearestHandleFromTrackUnits = (trackUnits: number): 'start' | 'end' => {
-    const startDistance = Math.abs(trackUnits - exportFretStart)
-    const endDistance = Math.abs(trackUnits - (exportFretEnd + 1))
-    return startDistance <= endDistance ? 'start' : 'end'
-  }
+  const getNearestHandleFromTrackUnits = useCallback(
+    (trackUnits: number): 'start' | 'end' => {
+      const startDistance = Math.abs(trackUnits - exportFretStart)
+      const endDistance = Math.abs(trackUnits - (exportFretEnd + 1))
+      return startDistance <= endDistance ? 'start' : 'end'
+    },
+    [exportFretEnd, exportFretStart],
+  )
 
   const toBoardPoint = useCallback((clientX: number, clientY: number) => {
     const board = boardRef.current
@@ -114,6 +128,14 @@ export const useFretboardInteractionState = () => {
     setPendingConnectStart(undefined)
     setDragConnectFrom(undefined)
     setDragPointer(undefined)
+  }, [])
+
+  const handleTrackRefChange = useCallback((node: HTMLDivElement | undefined) => {
+    trackRef.current = node
+  }, [])
+
+  const handleBoardRefChange = useCallback((node: HTMLDivElement | undefined) => {
+    boardRef.current = node
   }, [])
 
   const clearSelection = useCallback(() => {
@@ -175,16 +197,12 @@ export const useFretboardInteractionState = () => {
 
   const selectedPositionIdSet = useMemo(() => new Set(selectedPositionIds), [selectedPositionIds])
   const areAllSelectedNotesDimmed = useMemo(
-    () =>
-      selectedPositionIds.length > 0 &&
-      selectedPositionIds.every((positionId) => displayedNotes[positionId]?.isDimmed === true),
-    [displayedNotes, selectedPositionIds],
+    () => selectedNotes.length > 0 && selectedNotes.every((note) => note?.isDimmed === true),
+    [selectedNotes],
   )
   const areAllSelectedNotesEmphasized = useMemo(
-    () =>
-      selectedPositionIds.length > 0 &&
-      selectedPositionIds.every((positionId) => displayedNotes[positionId]?.isEmphasized === true),
-    [displayedNotes, selectedPositionIds],
+    () => selectedNotes.length > 0 && selectedNotes.every((note) => note?.isEmphasized === true),
+    [selectedNotes],
   )
 
   useEffect(() => {
@@ -230,26 +248,30 @@ export const useFretboardInteractionState = () => {
     }
   }, [clearSelection])
 
-  const updateHandleFromClientX = (
-    clientX: number,
-    handle: 'start' | 'end',
-    skipHistory: boolean,
-  ) => {
-    const trackUnits = toTrackUnitsFromClientX(clientX)
-    if (trackUnits === undefined) {
-      return
-    }
-    const nextFret = toFretFromTrackUnits(trackUnits, handle)
+  const updateHandleFromClientX = useCallback(
+    (clientX: number, handle: 'start' | 'end', skipHistory: boolean) => {
+      const trackUnits = toTrackUnitsFromClientX(clientX)
+      if (trackUnits === undefined) {
+        return
+      }
+      const nextFret = toFretFromTrackUnits(trackUnits, handle)
 
-    if (handle === 'start') {
-      handleExportFretStartChange(nextFret, { skipHistory })
-      return
-    }
+      if (handle === 'start') {
+        handleExportFretStartChange(nextFret, { skipHistory })
+        return
+      }
 
-    handleExportFretEndChange(nextFret, { skipHistory })
-  }
+      handleExportFretEndChange(nextFret, { skipHistory })
+    },
+    [
+      handleExportFretEndChange,
+      handleExportFretStartChange,
+      toFretFromTrackUnits,
+      toTrackUnitsFromClientX,
+    ],
+  )
 
-  const commitBufferedEditFromCurrentSnapshot = () => {
+  const commitBufferedEditFromCurrentSnapshot = useCallback(() => {
     const snapshot = captureSnapshot()
     if (snapshot !== undefined) {
       commitBufferedEdit(snapshot)
@@ -257,64 +279,82 @@ export const useFretboardInteractionState = () => {
     }
 
     cancelBufferedEdit()
-  }
+  }, [cancelBufferedEdit, captureSnapshot, commitBufferedEdit])
 
-  const handleTrackClickMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const target = event.target
-    if (target instanceof HTMLElement && target.closest('[data-export-handle="true"]') !== null) {
-      return
-    }
-
-    const trackUnits = toTrackUnitsFromClientX(event.clientX)
-    if (trackUnits === undefined) {
-      return
-    }
-
-    const nextHandle = getNearestHandleFromTrackUnits(trackUnits)
-    const snapshot = captureSnapshot()
-    if (snapshot !== undefined) {
-      beginBufferedEdit(snapshot)
-    }
-
-    event.currentTarget.setPointerCapture(event.pointerId)
-    setDraggingHandle(nextHandle)
-    setHoverPreview(undefined)
-    updateHandleFromClientX(event.clientX, nextHandle, true)
-  }
-
-  const handleTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (draggingHandle === undefined) {
-      const trackUnits = toTrackUnitsFromClientX(event.clientX)
-      if (trackUnits === undefined) {
-        setHoverPreview(undefined)
+  const handleTrackClickMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const target = event.target
+      if (target instanceof HTMLElement && target.closest('[data-export-handle="true"]') !== null) {
         return
       }
+
+      const trackUnits = toTrackUnitsFromClientX(event.clientX)
+      if (trackUnits === undefined) {
+        return
+      }
+
       const nextHandle = getNearestHandleFromTrackUnits(trackUnits)
-      setHoverPreview({
-        fret: toFretFromTrackUnits(trackUnits, nextHandle),
-        handle: nextHandle,
-      })
-      return
-    }
+      const snapshot = captureSnapshot()
+      if (snapshot !== undefined) {
+        beginBufferedEdit(snapshot)
+      }
 
-    updateHandleFromClientX(event.clientX, draggingHandle, true)
-  }
+      event.currentTarget.setPointerCapture(event.pointerId)
+      setDraggingHandle(nextHandle)
+      setHoverPreview(undefined)
+      updateHandleFromClientX(event.clientX, nextHandle, true)
+    },
+    [
+      beginBufferedEdit,
+      captureSnapshot,
+      getNearestHandleFromTrackUnits,
+      toTrackUnitsFromClientX,
+      updateHandleFromClientX,
+    ],
+  )
 
-  const handleTrackPointerUp = () => {
+  const handleTrackPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (draggingHandle === undefined) {
+        const trackUnits = toTrackUnitsFromClientX(event.clientX)
+        if (trackUnits === undefined) {
+          setHoverPreview(undefined)
+          return
+        }
+        const nextHandle = getNearestHandleFromTrackUnits(trackUnits)
+        setHoverPreview({
+          fret: toFretFromTrackUnits(trackUnits, nextHandle),
+          handle: nextHandle,
+        })
+        return
+      }
+
+      updateHandleFromClientX(event.clientX, draggingHandle, true)
+    },
+    [
+      draggingHandle,
+      getNearestHandleFromTrackUnits,
+      toFretFromTrackUnits,
+      toTrackUnitsFromClientX,
+      updateHandleFromClientX,
+    ],
+  )
+
+  const handleTrackPointerUp = useCallback(() => {
     if (draggingHandle !== undefined) {
       commitBufferedEditFromCurrentSnapshot()
     }
     setDraggingHandle(undefined)
-  }
+  }, [commitBufferedEditFromCurrentSnapshot, draggingHandle])
 
-  const handleTrackPointerCancel = () => {
+  const handleTrackPointerCancel = useCallback(() => {
     if (draggingHandle !== undefined) {
       cancelBufferedEdit()
     }
     setDraggingHandle(undefined)
-  }
+  }, [cancelBufferedEdit, draggingHandle])
 
-  const handleTrackPointerLeave = () => {
+  const handleTrackPointerLeave = useCallback(() => {
     if (draggingHandle === undefined) {
       setHoverPreview(undefined)
       return
@@ -322,17 +362,20 @@ export const useFretboardInteractionState = () => {
 
     commitBufferedEditFromCurrentSnapshot()
     setDraggingHandle(undefined)
-  }
+  }, [commitBufferedEditFromCurrentSnapshot, draggingHandle])
 
-  const setClosestHandleToFret = (fret: number) => {
-    const startDistance = Math.abs(fret - exportFretStart)
-    const endDistance = Math.abs(fret - exportFretEnd)
-    if (startDistance <= endDistance) {
-      handleExportFretStartChange(fret)
-      return
-    }
-    handleExportFretEndChange(fret)
-  }
+  const setClosestHandleToFret = useCallback(
+    (fret: number) => {
+      const startDistance = Math.abs(fret - exportFretStart)
+      const endDistance = Math.abs(fret - exportFretEnd)
+      if (startDistance <= endDistance) {
+        handleExportFretStartChange(fret)
+        return
+      }
+      handleExportFretEndChange(fret)
+    },
+    [exportFretEnd, exportFretStart, handleExportFretEndChange, handleExportFretStartChange],
+  )
 
   const handleNotePointerDown = useCallback(
     (
@@ -645,8 +688,8 @@ export const useFretboardInteractionState = () => {
     }
   }, [handleDeleteSelectedNotes, selectedPositionIds.length])
 
-  const createRangeHandlePointerHandlers = (handle: 'start' | 'end') => ({
-    onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const handleRangeStartPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
       event.preventDefault()
       event.currentTarget.setPointerCapture(event.pointerId)
       const snapshot = captureSnapshot()
@@ -654,26 +697,160 @@ export const useFretboardInteractionState = () => {
         beginBufferedEdit(snapshot)
       }
       setHoverPreview(undefined)
-      setDraggingHandle(handle)
-      updateHandleFromClientX(event.clientX, handle, true)
+      setDraggingHandle('start')
+      updateHandleFromClientX(event.clientX, 'start', true)
     },
-    onPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => {
-      if (draggingHandle !== handle) {
+    [beginBufferedEdit, captureSnapshot, updateHandleFromClientX],
+  )
+
+  const handleRangeEndPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      const snapshot = captureSnapshot()
+      if (snapshot !== undefined) {
+        beginBufferedEdit(snapshot)
+      }
+      setHoverPreview(undefined)
+      setDraggingHandle('end')
+      updateHandleFromClientX(event.clientX, 'end', true)
+    },
+    [beginBufferedEdit, captureSnapshot, updateHandleFromClientX],
+  )
+
+  const handleRangeStartPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (draggingHandle !== 'start') {
         return
       }
-      updateHandleFromClientX(event.clientX, handle, true)
+      updateHandleFromClientX(event.clientX, 'start', true)
     },
-    onPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => {
+    [draggingHandle, updateHandleFromClientX],
+  )
+
+  const handleRangeEndPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (draggingHandle !== 'end') {
+        return
+      }
+      updateHandleFromClientX(event.clientX, 'end', true)
+    },
+    [draggingHandle, updateHandleFromClientX],
+  )
+
+  const handleRangeStartPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId)
       }
       commitBufferedEditFromCurrentSnapshot()
       setDraggingHandle(undefined)
     },
-  })
+    [commitBufferedEditFromCurrentSnapshot],
+  )
 
-  const startHandlePointerHandlers = createRangeHandlePointerHandlers('start')
-  const endHandlePointerHandlers = createRangeHandlePointerHandlers('end')
+  const handleRangeEndPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+      commitBufferedEditFromCurrentSnapshot()
+      setDraggingHandle(undefined)
+    },
+    [commitBufferedEditFromCurrentSnapshot],
+  )
+
+  const rangeTrackProps = useMemo(
+    () => ({
+      fretColumnSpan: FRET_NUMBERS.length,
+      startRangePercent: toPercentFromRangeBoundary(
+        Math.min(exportFretStart, exportFretEnd),
+        'start',
+      ),
+      rangeWidthPercent:
+        toPercentFromRangeBoundary(Math.max(exportFretStart, exportFretEnd), 'end') -
+        toPercentFromRangeBoundary(Math.min(exportFretStart, exportFretEnd), 'start'),
+      startHandlePercent: toPercentFromRangeBoundary(exportFretStart, 'start'),
+      endHandlePercent: toPercentFromRangeBoundary(exportFretEnd, 'end'),
+      hoverPreview:
+        draggingHandle !== undefined || hoverPreview === undefined
+          ? undefined
+          : {
+              handle: hoverPreview.handle,
+              percent: toPercentFromRangeBoundary(hoverPreview.fret, hoverPreview.handle),
+            },
+      onTrackRefChange: handleTrackRefChange,
+      onTrackPointerDown: handleTrackClickMove,
+      onTrackPointerMove: handleTrackPointerMove,
+      onTrackPointerUp: handleTrackPointerUp,
+      onTrackPointerCancel: handleTrackPointerCancel,
+      onTrackPointerLeave: handleTrackPointerLeave,
+      onStartPointerDown: handleRangeStartPointerDown,
+      onStartPointerMove: handleRangeStartPointerMove,
+      onStartPointerUp: handleRangeStartPointerUp,
+      onEndPointerDown: handleRangeEndPointerDown,
+      onEndPointerMove: handleRangeEndPointerMove,
+      onEndPointerUp: handleRangeEndPointerUp,
+    }),
+    [
+      draggingHandle,
+      exportFretEnd,
+      exportFretStart,
+      handleRangeEndPointerDown,
+      handleRangeEndPointerMove,
+      handleRangeEndPointerUp,
+      handleRangeStartPointerDown,
+      handleRangeStartPointerMove,
+      handleRangeStartPointerUp,
+      handleTrackClickMove,
+      handleTrackPointerCancel,
+      handleTrackPointerLeave,
+      handleTrackPointerMove,
+      handleTrackPointerUp,
+      handleTrackRefChange,
+      hoverPreview,
+      toPercentFromRangeBoundary,
+    ],
+  )
+
+  const gridProps = useMemo(
+    () => ({
+      selectedPositionIds: selectedPositionIdSet,
+      disableCellPreview:
+        selectionRect !== undefined ||
+        pendingSelectionStart !== undefined ||
+        selectedPositionIds.length > 0,
+      selectionRect,
+      exportHoverPreview:
+        draggingHandle !== undefined || hoverPreview === undefined ? undefined : hoverPreview,
+      onSelectClosestHandleToFret: setClosestHandleToFret,
+      onBoardPointerDown: handleBoardPointerDown,
+      onNotePointerDown: handleNotePointerDown,
+      onNoteClick: handleNoteClick,
+      onNoteContextMenu: handleNoteContextMenu,
+      onNotePointerUp: handleNotePointerUp,
+      onBoardPointerMove: handleBoardPointerMove,
+      onBoardPointerUpOrCancel: handleBoardPointerUpOrCancel,
+      onBoardRefChange: handleBoardRefChange,
+    }),
+    [
+      draggingHandle,
+      handleBoardPointerDown,
+      handleBoardPointerMove,
+      handleBoardPointerUpOrCancel,
+      handleBoardRefChange,
+      handleNoteClick,
+      handleNoteContextMenu,
+      handleNotePointerDown,
+      handleNotePointerUp,
+      hoverPreview,
+      pendingSelectionStart,
+      selectedPositionIdSet,
+      selectedPositionIds.length,
+      selectionRect,
+      setClosestHandleToFret,
+    ],
+  )
 
   return {
     trackRef,
@@ -700,59 +877,7 @@ export const useFretboardInteractionState = () => {
             toY: dragPointer.y,
           }
         : undefined,
-    rangeTrackProps: {
-      fretColumnSpan: FRET_NUMBERS.length,
-      startRangePercent: toPercentFromRangeBoundary(
-        Math.min(exportFretStart, exportFretEnd),
-        'start',
-      ),
-      rangeWidthPercent:
-        toPercentFromRangeBoundary(Math.max(exportFretStart, exportFretEnd), 'end') -
-        toPercentFromRangeBoundary(Math.min(exportFretStart, exportFretEnd), 'start'),
-      startHandlePercent: toPercentFromRangeBoundary(exportFretStart, 'start'),
-      endHandlePercent: toPercentFromRangeBoundary(exportFretEnd, 'end'),
-      hoverPreview:
-        draggingHandle !== undefined || hoverPreview === undefined
-          ? undefined
-          : {
-              handle: hoverPreview.handle,
-              percent: toPercentFromRangeBoundary(hoverPreview.fret, hoverPreview.handle),
-            },
-      onTrackRefChange: (node: HTMLDivElement | undefined) => {
-        trackRef.current = node
-      },
-      onTrackPointerDown: handleTrackClickMove,
-      onTrackPointerMove: handleTrackPointerMove,
-      onTrackPointerUp: handleTrackPointerUp,
-      onTrackPointerCancel: handleTrackPointerCancel,
-      onTrackPointerLeave: handleTrackPointerLeave,
-      onStartPointerDown: startHandlePointerHandlers.onPointerDown,
-      onStartPointerMove: startHandlePointerHandlers.onPointerMove,
-      onStartPointerUp: startHandlePointerHandlers.onPointerUp,
-      onEndPointerDown: endHandlePointerHandlers.onPointerDown,
-      onEndPointerMove: endHandlePointerHandlers.onPointerMove,
-      onEndPointerUp: endHandlePointerHandlers.onPointerUp,
-    },
-    gridProps: {
-      selectedPositionIds: selectedPositionIdSet,
-      disableCellPreview:
-        selectionRect !== undefined ||
-        pendingSelectionStart !== undefined ||
-        selectedPositionIds.length > 0,
-      selectionRect,
-      exportHoverPreview:
-        draggingHandle !== undefined || hoverPreview === undefined ? undefined : hoverPreview,
-      onSelectClosestHandleToFret: setClosestHandleToFret,
-      onBoardPointerDown: handleBoardPointerDown,
-      onNotePointerDown: handleNotePointerDown,
-      onNoteClick: handleNoteClick,
-      onNoteContextMenu: handleNoteContextMenu,
-      onNotePointerUp: handleNotePointerUp,
-      onBoardPointerMove: handleBoardPointerMove,
-      onBoardPointerUpOrCancel: handleBoardPointerUpOrCancel,
-      onBoardRefChange: (node: HTMLDivElement | undefined) => {
-        boardRef.current = node
-      },
-    },
+    rangeTrackProps,
+    gridProps,
   }
 }

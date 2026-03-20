@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useFretboardInteractionState } from '../hooks/useFretboardInteractionState'
 import { useI18n } from '../i18n/useI18n'
 import { FRET_NUMBERS } from '../libs/musicCore'
@@ -16,6 +16,9 @@ export const FretboardView = () => {
   const { t } = useI18n()
   const interaction = useFretboardInteractionState()
   const [tuningMenuAnchor, setTuningMenuAnchor] = useState<HTMLElement | null>(null)
+  const handleOpenTuningMenu = useCallback((anchorElement: HTMLButtonElement) => {
+    setTuningMenuAnchor(anchorElement)
+  }, [])
 
   return (
     <section className="select-none">
@@ -45,9 +48,7 @@ export const FretboardView = () => {
             <RenderProfiler id="FretboardGrid">
               <FretboardGrid
                 previewConnection={interaction.previewConnection}
-                onOpenTuningMenu={(anchorElement) => {
-                  setTuningMenuAnchor(anchorElement)
-                }}
+                onOpenTuningMenu={handleOpenTuningMenu}
                 {...interaction.gridProps}
               />
             </RenderProfiler>
