@@ -7,11 +7,7 @@ import LanguageSwitch from './LanguageSwitch.astro'
 const locale = getRouteLocale(Astro.currentLocale)
 const currentPath = Astro.url.pathname
 const appPath = getAppPath(locale)
-const aboutPath = getAboutPath(locale)
 const alternatePath = getAlternatePath(locale, currentPath)
-const aboutLabel = translate(locale, 'nav.about')
-const appLabel = translate(locale, 'nav.app')
-const isAboutPage = currentPath === '/about' || currentPath === '/ja/about'
 ---
 
 <header class="fixed inset-x-0 top-0 z-30 bg-[color:var(--md-sys-color-surface-container-low)]/42 backdrop-blur-md">
@@ -21,24 +17,6 @@ const isAboutPage = currentPath === '/about' || currentPath === '/ja/about'
     </a>
 
     <div class="flex items-center gap-3">
-      {isAboutPage && (
-        <a
-          href={appPath}
-          class="m3-focus-ring text-sm text-[color:var(--md-sys-color-on-surface-variant)] no-underline transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)]"
-        >
-          {appLabel}
-        </a>
-      )}
-
-      <a
-        id="shell-about-link"
-        href={aboutPath}
-        aria-current={isAboutPage ? 'page' : undefined}
-        class="m3-focus-ring text-sm text-[color:var(--md-sys-color-on-surface-variant)] no-underline transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] aria-[current=page]:text-[color:var(--md-sys-color-on-surface)]"
-      >
-        {aboutLabel}
-      </a>
-
       <LanguageSwitch
         alternatePath={alternatePath}
         initialLocale={locale}
