@@ -17,8 +17,17 @@ interface Props {
   title: string
 }
 
-const { alternatePath, aboutPath, appPath, canonicalPath, currentPath, description, locale, pageKind, title } =
-  Astro.props
+const {
+  alternatePath,
+  aboutPath,
+  appPath,
+  canonicalPath,
+  currentPath,
+  description,
+  locale,
+  pageKind,
+  title,
+} = Astro.props
 const canonicalUrl = new URL(canonicalPath, SITE_URL).toString()
 const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
 ---
@@ -26,7 +35,7 @@ const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
 <!doctype html>
 <html lang={locale}>
   <head>
-    <meta charset="UTF-8" />
+    <meta  charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
