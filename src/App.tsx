@@ -8,6 +8,8 @@ import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from '
 import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
 
+// SSR時点で、/は日本語、/jaは日本語のHTMLを打sう必要がある
+// そのため、サーバーサイドで言語情報を渡す必要があるため、propsになっている
 type AppProps = {
   initialLocale: AppLocale
 }
