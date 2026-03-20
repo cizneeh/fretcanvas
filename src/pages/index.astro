@@ -1,0 +1,14 @@
+---
+import App from '../App'
+import { getRouteLocale } from '../i18n/routing'
+import BaseLayout from '../layouts/BaseLayout.astro'
+
+const locale = getRouteLocale(Astro.currentLocale)
+---
+
+<BaseLayout
+  description="Fret Canvas is a guitar fretboard visualization tool for mapping scales, chord tones, tunings, and export clean fretboard diagrams for content creators."
+  title="Fret Canvas"
+>
+  <App client:load initialLocale={locale} />
+</BaseLayout>

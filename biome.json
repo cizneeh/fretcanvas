@@ -27,12 +27,32 @@
       }
     }
   },
+  "html": {
+    "experimentalFullSupportEnabled": false
+  },
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
       "semicolons": "asNeeded"
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConst": "off",
+            "useImportType": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ],
   "assist": {
     "enabled": true,
     "actions": {

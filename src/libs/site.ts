@@ -1,0 +1,5 @@
+export const SITE_NAME = 'Fret Canvas'
+export const SITE_URL = 'https://fretcanvas.app'
+export const SUPPORT_URL = 'https://ko-fi.com/G2G31BLRA7'
+export const WEBSITE_URL = 'https://echizen.me'
+export const X_URL = 'https://x.com/cizneeh'

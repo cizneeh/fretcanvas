@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  description="About Fret Canvas: a visual fretboard tool for scales, chord tones, tuning workflows, and export-ready diagrams."
+  title="About | Fret Canvas"
+>
+  <div class="mx-auto flex w-full max-w-[56rem] flex-1 pt-14">
+    <article class="w-full pb-8">
+      <h1 class="text-4xl font-semibold tracking-tight text-[color:var(--md-sys-color-on-surface)] md:text-5xl">
+        About Fret Canvas
+      </h1>
+      <p class="mt-6 max-w-[46rem] text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+        Fret Canvas lets you visualize notes on the fretboard interactively from chords and scales.
+        You can also click directly on the fretboard to add or remove notes manually.
+      </p>
+      <p class="mt-6 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+        I used to use an iPad to hand-draw chord and scale notes on fretboard diagrams to practice. It worked but was a bit cumbersome, and it was awkward to keep drawing while holding the instrument. Fret Canvas was built to make that
+        process faster and easier to handle directly in the browser.
+      </p>
+      <p class="mt-6 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+        You can select an area of the fretboard image and export it as an image file.
+      </p>
+
+      <section class="mt-12 border-t border-[color:var(--md-sys-color-outline-variant)]/70 pt-8">
+        <h2 class="text-xl font-semibold text-[color:var(--md-sys-color-on-surface)]">Q&amp;A</h2>
+
+        <div class="mt-6 space-y-8">
+          <section>
+            <h3 class="text-base font-semibold text-[color:var(--md-sys-color-on-surface)]">
+              Can I use exported images on my own website or in videos?
+            </h3>
+            <p class="mt-3 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+              Yes. Feel free to use them anywhere. No need to ask first.<br />
+              Credit is not required, but it would be appreciated.
+            </p>
+          </section>
+
+          <section>
+            <h3 class="text-base font-semibold text-[color:var(--md-sys-color-on-surface)]">
+              Does it support bass or other string instruments?
+            </h3>
+            <p class="mt-3 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+              Yes. It supports bass and other string instruments. You can change the number of strings and the tuning from the <span class="font-medium">Tuning</span>
+              menu.
+            </p>
+          </section>
+        </div>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

@@ -4,7 +4,7 @@ export type AppLocale = 'ja' | 'en'
 
 type TranslationValues = Record<string, number | string>
 
-const LOCALE_STORAGE_KEY = 'fretmap:locale:v1'
+export const LOCALE_COOKIE_KEY = 'fretcanvas_locale'
 
 const messages = {
   en: {
@@ -80,6 +80,8 @@ const messages = {
     'legend.root': 'Root',
     'legend.scaleTone': 'Scale Tone',
     'legend.tension': 'Tension',
+    'nav.about': 'About',
+    'nav.app': 'App',
     'scale.major': 'Major',
     'scale.naturalMinor': 'Natural Minor',
     'scale.pentatonicMajor': 'Pentatonic Major',
@@ -189,14 +191,16 @@ const messages = {
     'export.endHandle': '終了フレットをドラッグ',
     'export.title.scale': '{note} {scaleName}スケール',
     'export.viewFullSize': 'クリックで拡大表示',
-    'footer.feedbackPrefix': 'バグ報告や feedback は ',
-    'footer.feedbackSuffix': ' の DM まで。',
+    'footer.feedbackPrefix': 'バグ報告やフィードバックは',
+    'footer.feedbackSuffix': 'のDMまで。',
     'legend.chordTone': 'コードトーン',
     'legend.nonChordTone': 'コード外',
     'legend.nonScaleTone': 'スケール外',
     'legend.root': 'ルート',
     'legend.scaleTone': 'スケール内',
     'legend.tension': 'テンション',
+    'nav.about': 'About',
+    'nav.app': 'アプリ',
     'scale.major': 'メジャー',
     'scale.naturalMinor': 'ナチュラルマイナー',
     'scale.pentatonicMajor': 'メジャーペンタトニック',
@@ -291,29 +295,6 @@ export const translate = (
   key: TranslationKey,
   values?: TranslationValues,
 ): string => formatMessage(messages[locale][key], values)
-
-export const getDefaultLocale = (): AppLocale => {
-  if (typeof window !== 'undefined') {
-    const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
-    if (storedLocale === 'ja' || storedLocale === 'en') {
-      return storedLocale
-    }
-  }
-
-  if (typeof navigator === 'undefined') {
-    return 'en'
-  }
-
-  return navigator.language.toLowerCase().startsWith('ja') ? 'ja' : 'en'
-}
-
-export const persistLocalePreference = (locale: AppLocale) => {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  window.localStorage.setItem(LOCALE_STORAGE_KEY, locale)
-}
 
 export const getScaleLabel = (locale: AppLocale, scaleId: ScaleId): string =>
   translate(locale, scaleMessageKeys[scaleId])

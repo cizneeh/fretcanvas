@@ -1,0 +1,73 @@
+---
+import { translate } from '../../i18n/config'
+import { getAboutPath, getRouteLocale } from '../../i18n/routing'
+import { SUPPORT_URL, WEBSITE_URL, X_URL } from '../../libs/site'
+
+const locale = getRouteLocale(Astro.currentLocale)
+const aboutPath = getAboutPath(locale)
+const aboutLabel = locale === 'ja' ? 'Fret Canvasについて' : 'About Fret Canvas'
+---
+
+<footer
+  class="mx-auto mt-10 flex w-full max-w-[106rem] items-center justify-between gap-3 border-t px-1 pt-4 text-sm text-[color:var(--md-sys-color-on-surface-variant)]"
+  style="border-top-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 90%, transparent);"
+>
+  <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+    <p>
+      Made by{' '}
+      <a
+        href={WEBSITE_URL}
+        target="_blank"
+        rel="noreferrer"
+        class="m3-focus-ring underline decoration-[color:var(--md-sys-color-outline)] underline-offset-4 transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] hover:decoration-[color:var(--md-sys-color-on-surface)]"
+      >
+        Shinjiro Echizen
+      </a>
+    </p>
+
+    <p>
+      {translate(locale, 'footer.feedbackPrefix')}
+      <a
+        href={X_URL}
+        target="_blank"
+        rel="noreferrer"
+        class="m3-focus-ring underline decoration-[color:var(--md-sys-color-outline)] underline-offset-4 transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] hover:decoration-[color:var(--md-sys-color-on-surface)]"
+      >
+        X
+      </a>
+      {translate(locale, 'footer.feedbackSuffix')}
+    </p>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <a
+      href={aboutPath}
+      class="m3-focus-ring text-sm text-[color:var(--md-sys-color-on-surface-variant)] no-underline transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)]"
+    >
+      {aboutLabel}
+    </a>
+
+    <a
+      href={SUPPORT_URL}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={translate(locale, 'support.aria')}
+      aria-describedby="support-tooltip"
+      class="group relative m3-focus-ring shrink-0 transition-transform duration-150 hover:scale-105"
+    >
+      <span
+        id="support-tooltip"
+        role="tooltip"
+        class="pointer-events-none absolute bottom-full right-0 mb-3 w-[18rem] translate-y-1 rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-high)] px-3 py-2.5 text-left text-xs leading-5 text-[color:var(--md-sys-color-on-surface)] opacity-0 shadow-[var(--md-elevation-2)] transition-[opacity,transform] duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+      >
+        <span>{translate(locale, 'support.tooltipBody')}</span>
+      </span>
+      <img
+        src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+        alt="Buy Me a Coffee at ko-fi.com"
+        height="36"
+        style="border: 0; height: 36px;"
+      />
+    </a>
+  </div>
+</footer>

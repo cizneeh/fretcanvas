@@ -1,0 +1,61 @@
+---
+import { getLocalizedCurrentPath, getRouteLocale } from '../i18n/routing'
+import { SITE_NAME, SITE_URL } from '../libs/site'
+import '../index.css'
+import Footer from '../components/shell/Footer.astro'
+import Header from '../components/shell/Header.astro'
+
+interface Props {
+  description: string
+  title: string
+}
+
+const { description, title } = Astro.props
+const locale = getRouteLocale(Astro.currentLocale)
+const canonicalPath = Astro.url.pathname
+const canonicalUrl = new URL(canonicalPath, SITE_URL).toString()
+const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
+const englishAlternateUrl = new URL(
+  getLocalizedCurrentPath('en', canonicalPath),
+  SITE_URL,
+).toString()
+const japaneseAlternateUrl = new URL(
+  getLocalizedCurrentPath('ja', canonicalPath),
+  SITE_URL,
+).toString()
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta  charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={locale === 'ja' ? 'en_US' : 'ja_JP'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={`${SITE_URL}/favicon.png`} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${SITE_URL}/favicon.png`} />
+    <link rel="alternate" hreflang="en" href={englishAlternateUrl} />
+    <link rel="alternate" hreflang="ja" href={japaneseAlternateUrl} />
+    <link rel="alternate" hreflang="x-default" href={englishAlternateUrl} />
+  </head>
+  <body>
+    <main class="flex min-h-screen flex-col bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
+      <Header />
+      <slot />
+      <Footer />
+    </main>
+  </body>
+</html>
