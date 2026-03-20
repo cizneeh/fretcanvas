@@ -2,12 +2,25 @@ import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { ExportSettingsSection } from './components/ExportSettingsSection'
 import { FretboardView } from './components/FretboardView'
-import { useI18n } from './i18n/useI18n'
+import type { AppLocale } from './i18n/config'
+import { LocaleOverrideContext, useI18n } from './i18n/useI18n'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
 import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
 
-function App() {
+type AppProps = {
+  initialLocale: AppLocale
+}
+
+function App({ initialLocale }: AppProps) {
+  return (
+    <LocaleOverrideContext.Provider value={initialLocale}>
+      <AppBody />
+    </LocaleOverrideContext.Provider>
+  )
+}
+
+function AppBody() {
   const { locale } = useI18n()
 
   useEffect(() => {

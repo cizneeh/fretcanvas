@@ -1,8 +1,10 @@
-import { useSettingsStore } from '../stores/settingsStore'
-import { type TranslationKey, translate } from './config'
+import { createContext, useContext } from 'react'
+import { type AppLocale, type TranslationKey, translate } from './config'
+
+export const LocaleOverrideContext = createContext<AppLocale | undefined>(undefined)
 
 export const useI18n = () => {
-  const locale = useSettingsStore((state) => state.locale)
+  const locale = useContext(LocaleOverrideContext) ?? 'en'
 
   return {
     locale,

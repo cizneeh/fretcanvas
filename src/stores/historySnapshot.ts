@@ -2,7 +2,7 @@ import { getMatchingInstrumentPresetId } from '../libs/tuning'
 import type { FretboardStoreState } from './fretboardStore'
 import type { SettingsStoreState } from './settingsStore'
 
-type HistorySettingsState = Omit<SettingsStoreState, 'locale'>
+type HistorySettingsState = SettingsStoreState
 type HistoryFretboardState = Omit<FretboardStoreState, 'draftPresetId' | 'draftStrings'>
 
 /**

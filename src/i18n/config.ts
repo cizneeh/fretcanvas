@@ -6,12 +6,6 @@ type TranslationValues = Record<string, number | string>
 
 export const LOCALE_COOKIE_KEY = 'fretcanvas_locale'
 
-declare global {
-  interface Window {
-    __FRET_CANVAS_LOCALE__?: AppLocale
-  }
-}
-
 const messages = {
   en: {
     'app.language': 'Language',
@@ -301,21 +295,6 @@ export const translate = (
   key: TranslationKey,
   values?: TranslationValues,
 ): string => formatMessage(messages[locale][key], values)
-
-export const getDefaultLocale = (): AppLocale => {
-  if (typeof window !== 'undefined') {
-    const bootstrapLocale = window.__FRET_CANVAS_LOCALE__
-    if (bootstrapLocale === 'ja' || bootstrapLocale === 'en') {
-      return bootstrapLocale
-    }
-  }
-
-  if (typeof navigator === 'undefined') {
-    return 'en'
-  }
-
-  return navigator.language.toLowerCase().startsWith('ja') ? 'ja' : 'en'
-}
 
 // 言語設定のcookieを保存する
 export const persistLocalePreference = (locale: AppLocale) => {

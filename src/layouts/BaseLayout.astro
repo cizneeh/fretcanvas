@@ -58,9 +58,6 @@ const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
     {pageKind === 'about' && (
       <link rel="alternate" hreflang="x-default" href={`${SITE_URL}/about`} />
     )}
-    <script is:inline define:vars={{ locale }}>
-      window.__FRET_CANVAS_LOCALE__ = locale
-    </script>
   </head>
   <body>
     <main class="flex min-h-screen flex-col bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
