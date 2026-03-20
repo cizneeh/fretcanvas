@@ -37,5 +37,8 @@ export const getAppPath = (locale: AppLocale): string => getLocalizedPath(locale
 
 export const getAboutPath = (locale: AppLocale): string => getLocalizedPath(locale, 'about')
 
+export const getLocalizedCurrentPath = (locale: AppLocale, pathname: string): string =>
+  getLocalizedPath(locale, toLocalizedPathArg(pathname))
+
 export const getAlternatePath = (locale: AppLocale, pathname: string): string =>
   getLocalizedPath(getAlternateLocale(locale), toLocalizedPathArg(pathname))
