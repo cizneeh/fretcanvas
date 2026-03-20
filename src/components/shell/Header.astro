@@ -2,7 +2,7 @@
 import { translate } from '../../i18n/config'
 import { getAboutPath, getAlternatePath, getAppPath, getRouteLocale } from '../../i18n/routing'
 import { SITE_NAME } from '../../libs/site'
-import { LanguageSwitch } from './LanguageSwitch'
+import LanguageSwitch from './LanguageSwitch.astro'
 
 const locale = getRouteLocale(Astro.currentLocale)
 const currentPath = Astro.url.pathname
@@ -40,7 +40,6 @@ const isAboutPage = currentPath === '/about' || currentPath === '/ja/about'
       </a>
 
       <LanguageSwitch
-        client:load
         alternatePath={alternatePath}
         initialLocale={locale}
       />

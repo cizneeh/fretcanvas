@@ -1,0 +1,52 @@
+---
+import type { AppLocale } from '../../i18n/config'
+import { m3SegmentedButtonClass, m3SegmentedContainerClass } from '../ui/materialClasses'
+
+interface Props {
+  alternatePath: string
+  initialLocale: AppLocale
+}
+
+const { alternatePath, initialLocale } = Astro.props
+const isEnglishActive = initialLocale === 'en'
+const englishHref = isEnglishActive ? undefined : alternatePath
+const japaneseHref = isEnglishActive ? alternatePath : undefined
+---
+
+<fieldset class={m3SegmentedContainerClass}>
+  <legend class="sr-only">Language</legend>
+  {englishHref === undefined ? (
+    <span
+      aria-current="true"
+      aria-label="Switch language to English"
+      class={m3SegmentedButtonClass(true)}
+    >
+      EN
+    </span>
+  ) : (
+    <a
+      href={englishHref}
+      aria-label="Switch language to English"
+      class={m3SegmentedButtonClass(false)}
+    >
+      EN
+    </a>
+  )}
+  {japaneseHref === undefined ? (
+    <span
+      aria-current="true"
+      aria-label="Switch language to Japanese"
+      class={m3SegmentedButtonClass(true)}
+    >
+      JA
+    </span>
+  ) : (
+    <a
+      href={japaneseHref}
+      aria-label="Switch language to Japanese"
+      class={m3SegmentedButtonClass(false)}
+    >
+      JA
+    </a>
+  )}
+</fieldset>

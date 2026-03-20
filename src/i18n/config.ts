@@ -296,16 +296,6 @@ export const translate = (
   values?: TranslationValues,
 ): string => formatMessage(messages[locale][key], values)
 
-// 言語設定のcookieを保存する
-export const persistLocalePreference = (locale: AppLocale) => {
-  if (typeof document === 'undefined') {
-    return
-  }
-
-  // biome-ignore lint/suspicious/noDocumentCookie: locale cookie is required for SSR redirect behavior.
-  document.cookie = `${LOCALE_COOKIE_KEY}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`
-}
-
 export const getScaleLabel = (locale: AppLocale, scaleId: ScaleId): string =>
   translate(locale, scaleMessageKeys[scaleId])
 
