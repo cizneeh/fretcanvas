@@ -4,11 +4,6 @@ import { getAboutPath, getAlternatePath, getAppPath, getRouteLocale } from '../.
 import { SITE_NAME } from '../../libs/site'
 import { LanguageSwitch } from './LanguageSwitch'
 
-interface Props {
-  pageKind: 'app' | 'about'
-}
-
-const { pageKind } = Astro.props
 const locale = getRouteLocale(Astro.currentLocale)
 const currentPath = Astro.url.pathname
 const appPath = getAppPath(locale)
@@ -16,6 +11,7 @@ const aboutPath = getAboutPath(locale)
 const alternatePath = getAlternatePath(locale, currentPath)
 const aboutLabel = translate(locale, 'nav.about')
 const appLabel = translate(locale, 'nav.app')
+const isAboutPage = currentPath === '/about' || currentPath === '/ja/about'
 ---
 
 <header class="fixed inset-x-0 top-0 z-30 bg-[color:var(--md-sys-color-surface-container-low)]/42 backdrop-blur-md">
@@ -25,7 +21,7 @@ const appLabel = translate(locale, 'nav.app')
     </a>
 
     <div class="flex items-center gap-3">
-      {pageKind === 'about' && (
+      {isAboutPage && (
         <a
           href={appPath}
           class="m3-focus-ring text-sm text-[color:var(--md-sys-color-on-surface-variant)] no-underline transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)]"
@@ -37,7 +33,7 @@ const appLabel = translate(locale, 'nav.app')
       <a
         id="shell-about-link"
         href={aboutPath}
-        aria-current={pageKind === 'about' ? 'page' : undefined}
+        aria-current={isAboutPage ? 'page' : undefined}
         class="m3-focus-ring text-sm text-[color:var(--md-sys-color-on-surface-variant)] no-underline transition-colors duration-150 hover:text-[color:var(--md-sys-color-on-surface)] aria-[current=page]:text-[color:var(--md-sys-color-on-surface)]"
       >
         {aboutLabel}

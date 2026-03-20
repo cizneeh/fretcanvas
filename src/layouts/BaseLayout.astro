@@ -7,15 +7,15 @@ import Header from '../components/shell/Header.astro'
 
 interface Props {
   description: string
-  pageKind: 'app' | 'about'
   title: string
 }
 
-const { description, pageKind, title } = Astro.props
+const { description, title } = Astro.props
 const locale = getRouteLocale(Astro.currentLocale)
 const canonicalPath = Astro.url.pathname
 const canonicalUrl = new URL(canonicalPath, SITE_URL).toString()
 const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
+const isAboutPage = canonicalPath === '/about' || canonicalPath === '/ja/about'
 ---
 
 <!doctype html>
@@ -39,19 +39,19 @@ const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={`${SITE_URL}/favicon.png`} />
-    {pageKind === 'about' && (
+    {isAboutPage && (
       <link rel="alternate" hreflang="en" href={new URL(getAboutPath('en'), SITE_URL).toString()} />
     )}
-    {pageKind === 'about' && (
+    {isAboutPage && (
       <link rel="alternate" hreflang="ja" href={new URL(getAboutPath('ja'), SITE_URL).toString()} />
     )}
-    {pageKind === 'about' && (
+    {isAboutPage && (
       <link rel="alternate" hreflang="x-default" href={new URL(getAboutPath('en'), SITE_URL).toString()} />
     )}
   </head>
   <body>
     <main class="flex min-h-screen flex-col bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
-      <Header pageKind={pageKind} />
+      <Header />
       <slot />
       <Footer />
     </main>

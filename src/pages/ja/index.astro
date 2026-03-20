@@ -8,7 +8,6 @@ const locale = getRouteLocale(Astro.currentLocale)
 
 <BaseLayout
   description="Fret Canvas は、スケールやコードトーン、チューニングを可視化し、指板図を PNG / SVG で書き出せるツールです。"
-  pageKind="app"
   title="Fret Canvas"
 >
   <App client:load initialLocale={locale} />
