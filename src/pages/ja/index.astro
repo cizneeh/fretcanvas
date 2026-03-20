@@ -14,5 +14,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   pageKind="app"
   title="Fret Canvas"
 >
-  <App client:only="react" />
+  <App client:only="react">
+    <div
+      slot="fallback"
+      aria-hidden="true"
+      class="mx-auto flex w-full min-w-0 max-w-[106rem] flex-1 flex-col gap-6 pt-10"
+    />
+  </App>
 </BaseLayout>
