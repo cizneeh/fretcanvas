@@ -8,10 +8,12 @@
     "build": "astro build",
     "lint": "astro check && tsc --noEmit && biome check .",
     "fix": "biome check . --write .",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "preview:worker": "npm run build && wrangler dev --config dist/server/wrangler.json",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/node": "^10.0.2",
+    "@astrojs/cloudflare": "^13.1.2",
     "@astrojs/react": "^5.0.0",
     "astro": "^6.0.5",
     "react": "^19.2.0",
@@ -28,6 +30,7 @@
     "autoprefixer": "^10.4.27",
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "wrangler": "^4.76.0"
   }
 }

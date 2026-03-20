@@ -1,4 +1,4 @@
-import node from '@astrojs/node'
+import cloudflare from '@astrojs/cloudflare'
 import react from '@astrojs/react'
 import { defineConfig } from 'astro/config'
 import { SITE_URL } from './src/libs/site'
@@ -6,8 +6,8 @@ import { SITE_URL } from './src/libs/site'
 export default defineConfig({
   site: SITE_URL,
   output: 'server',
-  adapter: node({
-    mode: 'standalone',
+  adapter: cloudflare({
+    configPath: './wrangler.jsonc',
   }),
   integrations: [react()],
   i18n: {
