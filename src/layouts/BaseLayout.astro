@@ -1,33 +1,19 @@
 ---
-import type { AppLocale } from '../i18n/config'
+import { getAboutPath, getRouteLocale } from '../i18n/routing'
 import { SITE_NAME, SITE_URL } from '../libs/site'
 import '../index.css'
 import Footer from '../components/shell/Footer.astro'
 import Header from '../components/shell/Header.astro'
 
 interface Props {
-  alternatePath: string
-  aboutPath: string
-  appPath: string
-  canonicalPath: string
-  currentPath: string
   description: string
-  locale: AppLocale
   pageKind: 'app' | 'about'
   title: string
 }
 
-const {
-  alternatePath,
-  aboutPath,
-  appPath,
-  canonicalPath,
-  currentPath,
-  description,
-  locale,
-  pageKind,
-  title,
-} = Astro.props
+const { description, pageKind, title } = Astro.props
+const locale = getRouteLocale(Astro.currentLocale)
+const canonicalPath = Astro.url.pathname
 const canonicalUrl = new URL(canonicalPath, SITE_URL).toString()
 const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
 ---
@@ -53,24 +39,21 @@ const ogLocale = locale === 'ja' ? 'ja_JP' : 'en_US'
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={`${SITE_URL}/favicon.png`} />
-    {pageKind === 'about' && <link rel="alternate" hreflang="en" href={`${SITE_URL}/about`} />}
-    {pageKind === 'about' && <link rel="alternate" hreflang="ja" href={`${SITE_URL}/ja/about`} />}
     {pageKind === 'about' && (
-      <link rel="alternate" hreflang="x-default" href={`${SITE_URL}/about`} />
+      <link rel="alternate" hreflang="en" href={new URL(getAboutPath('en'), SITE_URL).toString()} />
+    )}
+    {pageKind === 'about' && (
+      <link rel="alternate" hreflang="ja" href={new URL(getAboutPath('ja'), SITE_URL).toString()} />
+    )}
+    {pageKind === 'about' && (
+      <link rel="alternate" hreflang="x-default" href={new URL(getAboutPath('en'), SITE_URL).toString()} />
     )}
   </head>
   <body>
     <main class="flex min-h-screen flex-col bg-gradient-to-b from-black via-zinc-950 to-black px-4 py-8 text-zinc-100 md:px-8">
-      <Header
-        aboutPath={aboutPath}
-        alternatePath={alternatePath}
-        appPath={appPath}
-        currentPath={currentPath}
-        locale={locale}
-        pageKind={pageKind}
-      />
+      <Header pageKind={pageKind} />
       <slot />
-      <Footer locale={locale} />
+      <Footer />
     </main>
   </body>
 </html>

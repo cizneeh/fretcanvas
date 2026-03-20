@@ -1,19 +1,19 @@
 ---
-import type { AppLocale } from '../../i18n/config'
 import { translate } from '../../i18n/config'
+import { getAboutPath, getAlternatePath, getAppPath, getRouteLocale } from '../../i18n/routing'
 import { SITE_NAME } from '../../libs/site'
 import { LanguageSwitch } from './LanguageSwitch'
 
 interface Props {
-  alternatePath: string
-  appPath: string
-  currentPath: string
-  aboutPath: string
-  locale: AppLocale
   pageKind: 'app' | 'about'
 }
 
-const { alternatePath, appPath, currentPath, aboutPath, locale, pageKind } = Astro.props
+const { pageKind } = Astro.props
+const locale = getRouteLocale(Astro.currentLocale)
+const currentPath = Astro.url.pathname
+const appPath = getAppPath(locale)
+const aboutPath = getAboutPath(locale)
+const alternatePath = getAlternatePath(locale, currentPath)
 const aboutLabel = translate(locale, 'nav.about')
 const appLabel = translate(locale, 'nav.app')
 ---
@@ -46,7 +46,6 @@ const appLabel = translate(locale, 'nav.app')
       <LanguageSwitch
         client:load
         alternatePath={alternatePath}
-        currentPath={currentPath}
         initialLocale={locale}
       />
     </div>

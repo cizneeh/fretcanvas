@@ -3,12 +3,11 @@ import { type AppLocale, persistLocalePreference } from '../../i18n/config'
 import { m3SegmentedButtonClass, m3SegmentedContainerClass } from '../ui/materialClasses'
 
 type LanguageSwitchProps = {
-  currentPath: string
   initialLocale: AppLocale
   alternatePath: string
 }
 
-export function LanguageSwitch({ currentPath, initialLocale, alternatePath }: LanguageSwitchProps) {
+export function LanguageSwitch({ initialLocale, alternatePath }: LanguageSwitchProps) {
   const [activeLocale, setActiveLocale] = useState<AppLocale>(initialLocale)
 
   const handleLocaleChange = (nextLocale: AppLocale) => {
@@ -19,8 +18,7 @@ export function LanguageSwitch({ currentPath, initialLocale, alternatePath }: La
     persistLocalePreference(nextLocale)
     setActiveLocale(nextLocale)
     document.documentElement.lang = nextLocale
-    window.location.href =
-      currentPath.startsWith('/ja') && nextLocale === 'ja' ? currentPath : alternatePath
+    window.location.href = alternatePath
   }
 
   return (

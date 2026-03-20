@@ -1,13 +1,9 @@
 ---
-import type { AppLocale } from '../../i18n/config'
 import { translate } from '../../i18n/config'
+import { getRouteLocale } from '../../i18n/routing'
 import { SUPPORT_URL, WEBSITE_URL, X_URL } from '../../libs/site'
 
-interface Props {
-  locale: AppLocale
-}
-
-const { locale } = Astro.props
+const locale = getRouteLocale(Astro.currentLocale)
 ---
 
 <footer

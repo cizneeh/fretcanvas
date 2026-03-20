@@ -1,18 +1,15 @@
 ---
 import App from '../../App'
+import { getRouteLocale } from '../../i18n/routing'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+
+const locale = getRouteLocale(Astro.currentLocale)
 ---
 
 <BaseLayout
-  aboutPath="/ja/about"
-  alternatePath="/"
-  appPath="/ja"
-  canonicalPath="/ja"
-  currentPath="/ja"
   description="Fret Canvas は、スケールやコードトーン、チューニングを可視化し、指板図を PNG / SVG で書き出せるツールです。"
-  locale="ja"
   pageKind="app"
   title="Fret Canvas"
 >
-  <App client:load initialLocale="ja" />
+  <App client:load initialLocale={locale} />
 </BaseLayout>
