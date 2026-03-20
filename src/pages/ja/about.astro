@@ -6,36 +6,48 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   description="Fret Canvas は、スケールやコードトーン、チューニングを可視化し、指板図を PNG / SVG で書き出せるツールです。"
   title="Fret Canvas について"
 >
-  <div class="mx-auto flex w-full max-w-[72rem] flex-1 pt-10">
-    <article class="w-full rounded-[var(--md-shape-lg)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container)] p-6 shadow-[var(--md-elevation-1)] md:p-8">
-      <h1 class="text-3xl font-semibold tracking-tight text-[color:var(--md-sys-color-on-surface)]">
+  <div class="mx-auto flex w-full max-w-[56rem] flex-1 pt-14">
+    <article class="w-full pb-8">
+      <h1 class="text-4xl font-semibold tracking-tight text-[color:var(--md-sys-color-on-surface)] md:text-5xl">
         Fret Canvas について
       </h1>
-      <p class="mt-4 max-w-[56rem] text-base leading-7 text-[color:var(--md-sys-color-on-surface-variant)]">
-        Fret Canvas は、ギターや弦楽器の指板を可視化するためのツールです。スケール、コードトーン、
-        チューニングを整理して、学習や制作に使える図を PNG / SVG で書き出せます。
+      <p class="mt-6 max-w-[46rem] text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+        Fret Canvasは、コードやスケールを元に、インタラクティブに指板上の音を可視化できます。<br />
+        また、指板上をクリックすることで手動で音を追加・削除することもできます。
+      </p>
+      <p class="mt-6 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+        制作者は元々ギター練習の上で、iPadのノートアプリで各コードやスケールの音を指板図上に手書きで描いていました。しかし手書きは面倒かつ、手や腕を細かく動かさないと行けないので楽器を抱えたまま描くのが大変でした。なのでWeb上で簡単に操作できるアプリとしてFret Canvasを作りました。
+      </p>
+      <p class="mt-6 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+        指板の画像は範囲を選択した上で画像としてエクスポートできます。
       </p>
 
-      <section class="mt-8 grid gap-4 md:grid-cols-2">
-        <div class="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-5">
-          <h2 class="text-base font-medium text-[color:var(--md-sys-color-on-surface)]">
-            できること
-          </h2>
-          <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-[color:var(--md-sys-color-on-surface-variant)]">
-            <li>スケールやコードトーンを指板上で可視化</li>
-            <li>カスタムチューニングや保存済みプリセットを利用</li>
-            <li>書き出し範囲を調整してプレビューを確認</li>
-            <li>PNG / SVG で図を出力</li>
-          </ul>
-        </div>
+      <section class="mt-12 border-t border-[color:var(--md-sys-color-outline-variant)]/70 pt-8">
+        <h2 class="text-xl font-semibold text-[color:var(--md-sys-color-on-surface)]">Q&amp;A</h2>
 
-        <div class="rounded-[var(--md-shape-md)] border border-[color:var(--md-sys-color-outline-variant)] bg-[color:var(--md-sys-color-surface-container-low)] p-5">
-          <h2 class="text-base font-medium text-[color:var(--md-sys-color-on-surface)]">
-            想定ユーザー
-          </h2>
-          <p class="mt-3 text-sm leading-6 text-[color:var(--md-sys-color-on-surface-variant)]">
-            指板上の音の並びを確認したいプレイヤー、教材を作りたい講師、図をきれいに出力したいコンテンツ制作者を想定しています。
-          </p>
+        <div class="mt-6 space-y-8">
+          <section>
+            <h3 class="text-base font-semibold text-[color:var(--md-sys-color-on-surface)]">
+              エクスポートした画像は自身のWebサイトや動画に使っていい？
+            </h3>
+            <p class="mt-3 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+              はい。商用利用を含めて自由に使って大丈夫ですし、事前の連絡も不要です。必須ではありませんが、もし credit を付けてもらえたら嬉しいです。
+            </p>
+            <p class="mt-3 text-sm leading-7 text-[color:var(--md-sys-color-on-surface-variant)]">
+              例: <span class="font-medium">指板図作成: https://fretcanvas.app </span>
+            </p>
+          </section>
+
+          <section>
+            <h3 class="text-base font-semibold text-[color:var(--md-sys-color-on-surface)]">
+              ベースにも対応してますか？
+            </h3>
+            <p class="mt-3 text-base leading-8 text-[color:var(--md-sys-color-on-surface-variant)]">
+              はい。ベースを含む他の弦楽器にも対応できます。弦数やチューニングはアプリ上の
+              <span class="font-medium"> Tuning </span>
+              メニューから変更できます。
+            </p>
+          </section>
         </div>
       </section>
     </article>
