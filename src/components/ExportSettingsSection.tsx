@@ -4,9 +4,9 @@ import { useI18n } from '../i18n/useI18n'
 import {
   type ExportGraphicInput,
   exportPng,
-  exportSvg,
   renderExportPngCanvas,
-  renderExportSvgMarkup,
+  // exportSvg,
+  // renderExportSvgMarkup,
 } from '../libs/export'
 import { useFretboardStore } from '../stores/fretboardStore'
 import { useHistoryStore } from '../stores/historyStore'
@@ -54,7 +54,7 @@ const ExpandedExportSettingsContent = () => {
   const {
     exportFretStart,
     exportFretEnd,
-    exportFormat,
+    exportFormat: storedExportFormat,
     backgroundOpacityPercent,
     showExportTitle,
     showExportStringLabels,
@@ -128,38 +128,43 @@ const ExpandedExportSettingsContent = () => {
     ],
   )
 
+  const exportFormat = 'png' as const
+
   useEffect(() => {
-    let nextPreviewUrl: string | undefined
+    if (storedExportFormat === 'svg') {
+      setExportFormat('png')
+    }
+  }, [storedExportFormat, setExportFormat])
 
+  useEffect(() => {
     try {
-      if (exportFormat === 'svg') {
-        const svgMarkup = renderExportSvgMarkup(exportInput)
-        const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
-        nextPreviewUrl = URL.createObjectURL(blob)
-      } else {
-        const canvas = renderExportPngCanvas(exportInput)
-        if (canvas === undefined) {
-          setPreviewUrl(undefined)
-          setPreviewErrorKey('export.previewFailed')
-          return
-        }
-
-        nextPreviewUrl = canvas.toDataURL('image/png', 1)
+      const canvas = renderExportPngCanvas(exportInput)
+      if (canvas === undefined) {
+        setPreviewUrl(undefined)
+        setPreviewErrorKey('export.previewFailed')
+        return
       }
 
-      setPreviewUrl(nextPreviewUrl)
+      // SVG export is temporarily disabled for monetization testing.
+      // if (exportFormat === 'svg') {
+      //   const svgMarkup = renderExportSvgMarkup(exportInput)
+      //   const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' })
+      //   nextPreviewUrl = URL.createObjectURL(blob)
+      // } else {
+      //   const canvas = renderExportPngCanvas(exportInput)
+      //   if (canvas === undefined) {
+      //     setPreviewUrl(undefined)
+      //     setPreviewErrorKey('export.previewFailed')
+      //     return
+      //   }
+      //
+      //   nextPreviewUrl = canvas.toDataURL('image/png', 1)
+      // }
+      setPreviewUrl(canvas.toDataURL('image/png', 1))
       setPreviewErrorKey(undefined)
     } catch {
       setPreviewUrl(undefined)
-      setPreviewErrorKey(
-        exportFormat === 'svg' ? 'export.previewFailed' : 'export.previewCreateFailed',
-      )
-    }
-
-    return () => {
-      if (exportFormat === 'svg' && nextPreviewUrl !== undefined) {
-        URL.revokeObjectURL(nextPreviewUrl)
-      }
+      setPreviewErrorKey('export.previewCreateFailed')
     }
   }, [exportFormat, exportInput])
 
@@ -192,7 +197,6 @@ const ExpandedExportSettingsContent = () => {
           backgroundOpacityPercent={backgroundOpacityPercent}
           showExportTitle={showExportTitle}
           showExportStringLabels={showExportStringLabels}
-          onExportFormatChange={setExportFormat}
           onBackgroundOpacityPercentChange={handleBackgroundOpacityPercentChange}
           onShowExportTitleChange={setShowExportTitle}
           onShowExportStringLabelsChange={setShowExportStringLabels}
@@ -211,11 +215,11 @@ const ExpandedExportSettingsContent = () => {
             }
           }}
           onExport={() => {
-            if (exportFormat === 'svg') {
-              exportSvg(exportInput)
-              return
-            }
-
+            // SVG export is temporarily disabled for monetization testing.
+            // if (exportFormat === 'svg') {
+            //   exportSvg(exportInput)
+            //   return
+            // }
             exportPng(exportInput)
           }}
         />

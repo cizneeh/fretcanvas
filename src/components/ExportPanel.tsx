@@ -7,8 +7,8 @@ import {
   m3FilledButtonClass,
   m3InputClass,
   m3OutlinedButtonClass,
-  m3SegmentedButtonClass,
-  m3SegmentedContainerClass,
+  // m3SegmentedButtonClass,
+  // m3SegmentedContainerClass,
 } from './ui/materialClasses'
 
 type ExportPanelProps = {
@@ -18,7 +18,6 @@ type ExportPanelProps = {
   backgroundOpacityPercent: number
   showExportTitle: boolean
   showExportStringLabels: boolean
-  onExportFormatChange: (nextFormat: ExportFormat) => void
   onBackgroundOpacityPercentChange: (
     nextOpacity: number,
     options?: {
@@ -39,7 +38,6 @@ export const ExportPanel = ({
   backgroundOpacityPercent,
   showExportTitle,
   showExportStringLabels,
-  onExportFormatChange,
   onBackgroundOpacityPercentChange,
   onShowExportTitleChange,
   onShowExportStringLabelsChange,
@@ -214,6 +212,7 @@ export const ExportPanel = ({
         />
       </div>
 
+      {/* SVG export selector is temporarily hidden for monetization testing.
       <div className="mb-4">
         <div className={`mb-1 ${m3FieldLabelClass}`}>{t('export.format')}</div>
         <div className={`${m3SegmentedContainerClass} w-full`}>
@@ -232,6 +231,7 @@ export const ExportPanel = ({
           ))}
         </div>
       </div>
+      */}
 
       <button
         type="button"
