@@ -53,6 +53,7 @@ export const ControlPanel = () => {
     addScaleNotes,
     addAppliedChordNotes,
     clearHighlightedNotes,
+    clearHighlightedNotesOutsideFretRange,
   } = useFretboardStore(
     useShallow((state) => ({
       keyPc: state.keyPc,
@@ -71,22 +72,19 @@ export const ControlPanel = () => {
       addScaleNotes: state.addScaleNotes,
       addAppliedChordNotes: state.addAppliedChordNotes,
       clearHighlightedNotes: state.clearHighlightedNotes,
+      clearHighlightedNotesOutsideFretRange: state.clearHighlightedNotesOutsideFretRange,
     })),
   )
   const {
-    addScaleWithinExportRange,
     showExportRangeHighlight,
     exportFretStart,
     exportFretEnd,
-    setAddScaleWithinExportRange,
     setShowExportRangeHighlight,
   } = useSettingsStore(
     useShallow((state) => ({
-      addScaleWithinExportRange: state.addScaleWithinExportRange,
       showExportRangeHighlight: state.showExportRangeHighlight,
       exportFretStart: state.exportFretStart,
       exportFretEnd: state.exportFretEnd,
-      setAddScaleWithinExportRange: state.setAddScaleWithinExportRange,
       setShowExportRangeHighlight: state.setShowExportRangeHighlight,
     })),
   )
@@ -105,12 +103,10 @@ export const ControlPanel = () => {
   const canApplyChordInput =
     parsedChordInput !== undefined && 'symbol' in parsedChordInput && chordInputError === undefined
   const canAddChordTones = appliedChordSymbol !== undefined
-  const fretRange = addScaleWithinExportRange
-    ? {
-        start: exportFretStart,
-        end: exportFretEnd,
-      }
-    : undefined
+  const exportFretRange = {
+    start: exportFretStart,
+    end: exportFretEnd,
+  }
   const modeOptions: { value: NoteLabelMode; label: string }[] = [
     { value: 'scale', label: t('control.scale') },
     { value: 'chord', label: t('control.chord') },
@@ -167,7 +163,7 @@ export const ControlPanel = () => {
 
   return (
     <section className={`${m3CardClass} w-full max-w-[88rem] p-4`}>
-      <div className="grid gap-5 xl:grid-cols-[minmax(14rem,15rem)_minmax(0,1fr)_minmax(13rem,14rem)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(14rem,15rem)_minmax(0,52rem)_minmax(14rem,16rem)]">
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
             <span className={m3FieldLabelClass}>{t('control.key')}</span>
@@ -449,51 +445,74 @@ export const ControlPanel = () => {
         <div className="flex flex-col gap-4 xl:justify-between">
           <div className="flex flex-col gap-2">
             {noteLabelMode === 'scale' ? (
-              <button
-                type="button"
-                className={m3FilledButtonClass}
-                onClick={() => {
-                  addScaleNotes({ fretRange })
-                }}
-                disabled={selectedScale === undefined}
-              >
-                {t('control.addScaleNotes')}
-              </button>
+              <div className="flex flex-col items-stretch gap-2">
+                <button
+                  type="button"
+                  className={`${m3FilledButtonClass} min-w-0`}
+                  onClick={() => {
+                    addScaleNotes()
+                  }}
+                  disabled={selectedScale === undefined}
+                >
+                  {t('control.addScaleNotes')}
+                </button>
+                <button
+                  type="button"
+                  className={`${m3OutlinedButtonClass} min-h-8 self-end px-3 py-1.5 text-xs`}
+                  onClick={() => {
+                    addScaleNotes({ fretRange: exportFretRange })
+                  }}
+                  disabled={selectedScale === undefined}
+                >
+                  {t('control.addInExportRange')}
+                </button>
+              </div>
             ) : (
-              <button
-                type="button"
-                className={m3FilledButtonClass}
-                onClick={() => {
-                  if (canAddChordTones) {
-                    addAppliedChordNotes({ fretRange })
-                  }
-                }}
-                disabled={!canAddChordTones}
-              >
-                {t('control.addChordTones')}
-              </button>
+              <div className="flex flex-col items-stretch gap-2">
+                <button
+                  type="button"
+                  className={`${m3FilledButtonClass} min-w-0`}
+                  onClick={() => {
+                    if (canAddChordTones) {
+                      addAppliedChordNotes()
+                    }
+                  }}
+                  disabled={!canAddChordTones}
+                >
+                  {t('control.addChordTones')}
+                </button>
+                <button
+                  type="button"
+                  className={`${m3OutlinedButtonClass} min-h-8 self-end px-3 py-1.5 text-xs`}
+                  onClick={() => {
+                    if (canAddChordTones) {
+                      addAppliedChordNotes({ fretRange: exportFretRange })
+                    }
+                  }}
+                  disabled={!canAddChordTones}
+                >
+                  {t('control.addInExportRange')}
+                </button>
+              </div>
             )}
 
             <button type="button" className={m3OutlinedButtonClass} onClick={clearHighlightedNotes}>
               {t('common.clear')}
+            </button>
+            <button
+              type="button"
+              className={`${m3OutlinedButtonClass} min-h-8 self-end px-3 py-1.5 text-xs`}
+              onClick={() => {
+                clearHighlightedNotesOutsideFretRange(exportFretRange)
+              }}
+            >
+              {t('common.clearOutsideExportRange')}
             </button>
           </div>
         </div>
       </div>
 
       <div className="mt-4 flex flex-col gap-2 border-t border-[color:var(--md-sys-color-outline-variant)] pt-4">
-        <label className="flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
-          <input
-            type="checkbox"
-            className={m3CheckboxClass}
-            checked={addScaleWithinExportRange}
-            onChange={(event) => {
-              setAddScaleWithinExportRange(event.target.checked)
-            }}
-          />
-          {t('control.addNotesWithinExportRangeOnly')}
-        </label>
-
         <label className="flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
           <input
             type="checkbox"

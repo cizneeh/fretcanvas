@@ -13,6 +13,7 @@ import {
   type NoteLabelMode,
   type NoteTextMode,
   normalizePc,
+  parsePositionId,
   type PitchClass,
   type PositionId,
   type ScaleId,
@@ -76,6 +77,7 @@ export type FretboardStoreActions = {
   addScaleNotes: (options?: AddNotesOptions) => void
   addAppliedChordNotes: (options?: AddNotesOptions) => void
   clearHighlightedNotes: () => void
+  clearHighlightedNotesOutsideFretRange: (fretRange: { start: number; end: number }) => void
   togglePosition: (positionId: PositionId) => void
   toggleNoteDimmed: (positionId: PositionId) => void
   toggleNoteEmphasized: (positionId: PositionId) => void
@@ -489,6 +491,40 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
       pushHistoryBeforeChange()
       set({ displayedNotes: {}, connections: {}, bends: {} })
+    },
+
+    clearHighlightedNotesOutsideFretRange: (fretRange) => {
+      const current = get()
+      const minFret = Math.min(fretRange.start, fretRange.end)
+      const maxFret = Math.max(fretRange.start, fretRange.end)
+      const positionIdsToRemove = new Set<PositionId>()
+
+      for (const positionId of Object.keys(current.displayedNotes) as PositionId[]) {
+        const position = parsePositionId(positionId)
+        if (position === undefined) {
+          continue
+        }
+
+        if (position.fret < minFret || position.fret > maxFret) {
+          positionIdsToRemove.add(positionId)
+        }
+      }
+
+      if (positionIdsToRemove.size === 0) {
+        return
+      }
+
+      const nextDisplayedNotes = { ...current.displayedNotes }
+      for (const positionId of positionIdsToRemove) {
+        delete nextDisplayedNotes[positionId]
+      }
+
+      pushHistoryBeforeChange()
+      set({
+        displayedNotes: nextDisplayedNotes,
+        connections: getNextConnectionsWithoutPositions(current.connections, positionIdsToRemove),
+        bends: getNextBendsWithoutPositions(current.bends, positionIdsToRemove),
+      })
     },
 
     togglePosition: (positionId) => {
