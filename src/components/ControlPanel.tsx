@@ -166,6 +166,7 @@ export const ControlPanel = () => {
             <div className="relative">
               <select
                 className={m3SelectClass}
+                aria-label={t('control.key')}
                 value={keyPc}
                 onChange={(event) => {
                   setKeyPc(Number(event.target.value) as PitchClass)
@@ -241,6 +242,7 @@ export const ControlPanel = () => {
                 <div className="relative">
                   <select
                     className={m3SelectClass}
+                    aria-label={t('control.selectScale')}
                     value={selectedScale ?? ''}
                     onChange={(event) => {
                       const value = event.target.value as ScaleId | ''

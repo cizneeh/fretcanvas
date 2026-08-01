@@ -12,6 +12,8 @@ node_modules
 .wrangler
 dist
 dist-ssr
+playwright-report
+test-results
 *.local
 tmp
 
