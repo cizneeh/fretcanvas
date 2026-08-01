@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["pass", "fail"]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "fixApplied": {
+      "type": "boolean"
+    },
+    "blockingFindings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "completedChecks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "incompleteChecks": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": [
+    "verdict",
+    "summary",
+    "fixApplied",
+    "blockingFindings",
+    "warnings",
+    "completedChecks",
+    "incompleteChecks"
+  ],
+  "additionalProperties": false
+}

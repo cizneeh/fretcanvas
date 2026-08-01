@@ -1,0 +1,33 @@
+approval_policy = "never"
+default_permissions = "ui-audit-ci"
+
+[permissions.ui-audit-ci]
+description = "Edit Fret Canvas while limiting network access to its local preview."
+extends = ":workspace"
+
+[permissions.ui-audit-ci.filesystem.":workspace_roots"]
+".github" = "read"
+".agents" = "read"
+"package.json" = "read"
+"package-lock.json" = "read"
+
+[permissions.ui-audit-ci.network]
+enabled = true
+allow_local_binding = true
+
+[permissions.ui-audit-ci.network.domains]
+"127.0.0.1" = "allow"
+"localhost" = "allow"
+
+[mcp_servers.chrome_devtools]
+command = "chrome-devtools-mcp"
+args = [
+  "--headless",
+  "--isolated",
+  "--viewport=1440x900",
+  "--no-performance-crux",
+  "--no-usage-statistics",
+]
+required = true
+startup_timeout_sec = 30
+tool_timeout_sec = 120
