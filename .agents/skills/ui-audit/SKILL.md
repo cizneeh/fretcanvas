@@ -1,16 +1,19 @@
 ---
 name: ui-audit
-description: Fret Canvas の UI を Chrome で軽量に監査する。週次 GitHub Actions、手動の動作確認、見た目・主要操作・Undo/Redo・永続化・PNG export の確認、短い監査レポート、再現できる軽微な不具合の修正 PR が必要なときに使う。
+description: Fret Canvas の UI を Chrome で軽量に監査する。手動 AI 監査、見た目・主要操作・Undo/Redo・永続化・PNG export の確認、短い監査レポート、再現できる軽微な不具合の修正 PR が必要なときに使う。
 ---
 
 # UI Audit
 
 Fret Canvas の主要フローをブラウザで確認し、レポートを `tmp/report1` に保存する。
-週次監査では身軽さを優先し、複数 OS・複数ブラウザの網羅は行わない。
+主要フローの決定的な回帰確認は、PR ごとに `tests/e2e/ui-audit.spec.ts` の Playwright テストで
+自動実行する。このスキルによる AI 監査は GitHub Actions の手動実行、またはローカルで
+主観的な見た目や操作性も確認したい場合に使う。身軽さを優先し、複数 OS・複数ブラウザの
+網羅は行わない。
 
 ## 標準環境
 
-週次 GitHub Actions では次を標準にする。
+GitHub Actions の手動 AI 監査では次を標準にする。
 
 - GitHub-hosted Linux runner
 - Chrome headless
@@ -30,7 +33,7 @@ viewport の詳細監査は、ユーザーが明示的に求めた場合だけ�
 - Performance trace や詳細な速度計測は、性能監査を明示された場合だけ行う。
 - 日本語では言語切替、主要文言、レイアウトだけ確認し、主要操作を繰り返さない。
 - スクリーンショットは初期表示、主要操作後、PNG preview で撮る。問題があれば追加する。
-- 週次 GitHub Actions のスクリーンショットは `/tmp/fretcanvas-ui-audit/screenshots` に一時保存する。
+- GitHub Actions の手動 AI 監査のスクリーンショットは `/tmp/fretcanvas-ui-audit/screenshots` に一時保存する。
   成功時は破棄し、失敗時だけ workflow が Artifact へ収集する。
 
 ## 標準シナリオ
@@ -55,7 +58,7 @@ PNG download は次を確認する。
 - サイズが 0 ではない。
 - PNG signature を満たす。
 
-週次 GitHub Actions で headless Chrome の download 保存先を取得できない場合は、Export PNGを
+GitHub Actions の手動 AI 監査で headless Chrome の download 保存先を取得できない場合は、Export PNGを
 実行したうえで PNG preview の data URL を `evaluate_script` で一時ファイルへ保存し、
 `.github/scripts/verify-ui-audit-png.mjs` で同じ項目を検証してよい。
 
@@ -99,7 +102,7 @@ blocking failure が 1 件以上あれば verdict を `fail`、それ以外は `
 - dependencies、workflow、権限、secret、リリース設定を変更しない。
 - 関連フロー、`npm run lint`、`npm run test:e2e` で検証できる。
 
-修正後は、失敗したフローを再実行する。GitHub への write 権限がある週次 CI では、専用ブランチに
+修正後は、失敗したフローを再実行する。GitHub への write 権限がある手動 AI 監査では、専用ブランチに
 commit して Ready for review の PR を作成してよい。直接 `main` へ push または merge しない。
 権限がない、検証に失敗した、または修正方針に判断が必要な場合はコードを変更せず報告する。
 
@@ -109,7 +112,7 @@ commit して Ready for review の PR を作成してよい。直接 `main` へ 
 
 - `tmp/report1/report.md`
 - `tmp/report1/results.json`
-- 週次 GitHub Actions では `/tmp/fretcanvas-ui-audit/screenshots` 配下の主要スクリーンショット
+- GitHub Actions の手動 AI 監査では `/tmp/fretcanvas-ui-audit/screenshots` 配下の主要スクリーンショット
 - 手動監査では `tmp/report1` 配下の主要スクリーンショット
 
 必要なら download した PNG、Console や Network の証拠を追加する。

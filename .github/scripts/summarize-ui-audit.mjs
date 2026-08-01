@@ -59,7 +59,7 @@ fs.appendFileSync(process.env.GITHUB_OUTPUT, `verdict=${verdict}\n`)
 fs.appendFileSync(process.env.GITHUB_OUTPUT, `fix_applied=${fixApplied}\n`)
 
 const summary = [
-  '# Weekly UI Audit',
+  '# Manual AI UI Audit',
   '',
   `- Run: ${runUrl}`,
   `- Codex Action: ${codexOutcome}`,

@@ -38,7 +38,7 @@ jobs:
         run: npm run lint
 
   e2e:
-    name: E2E Smoke
+    name: E2E
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -58,7 +58,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E smoke tests
+      - name: Run E2E tests
         run: npm run test:e2e
 
       - name: Upload Playwright report
