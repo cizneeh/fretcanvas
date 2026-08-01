@@ -166,7 +166,7 @@ const ExpandedExportSettingsContent = () => {
       setPreviewUrl(undefined)
       setPreviewErrorKey('export.previewCreateFailed')
     }
-  }, [exportFormat, exportInput])
+  }, [exportInput])
 
   const previewError = previewErrorKey === undefined ? undefined : t(previewErrorKey)
 

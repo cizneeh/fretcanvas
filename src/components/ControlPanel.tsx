@@ -75,19 +75,15 @@ export const ControlPanel = () => {
       clearHighlightedNotesOutsideFretRange: state.clearHighlightedNotesOutsideFretRange,
     })),
   )
-  const {
-    showExportRangeHighlight,
-    exportFretStart,
-    exportFretEnd,
-    setShowExportRangeHighlight,
-  } = useSettingsStore(
-    useShallow((state) => ({
-      showExportRangeHighlight: state.showExportRangeHighlight,
-      exportFretStart: state.exportFretStart,
-      exportFretEnd: state.exportFretEnd,
-      setShowExportRangeHighlight: state.setShowExportRangeHighlight,
-    })),
-  )
+  const { showExportRangeHighlight, exportFretStart, exportFretEnd, setShowExportRangeHighlight } =
+    useSettingsStore(
+      useShallow((state) => ({
+        showExportRangeHighlight: state.showExportRangeHighlight,
+        exportFretStart: state.exportFretStart,
+        exportFretEnd: state.exportFretEnd,
+        setShowExportRangeHighlight: state.setShowExportRangeHighlight,
+      })),
+    )
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
   const diatonicSelectValue =
     appliedChordSymbol !== undefined &&
