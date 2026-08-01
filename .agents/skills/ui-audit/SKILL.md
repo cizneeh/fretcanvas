@@ -1,234 +1,130 @@
 ---
 name: ui-audit
-description: Use when the user wants broad UI and end-to-end verification for this app, including browser/profile coverage, visual checks, interaction flows, undo/redo, persistence, and export validation, with findings written to tmp/report1.
+description: Fret Canvas の UI を Chrome で軽量に監査する。週次 GitHub Actions、手動の動作確認、見た目・主要操作・Undo/Redo・永続化・PNG export の確認、短い監査レポート、再現できる軽微な不具合の修正 PR が必要なときに使う。
 ---
 
 # UI Audit
 
-このスキルは、このプロジェクトで広めの UI 監査と E2E 確認を行うときに使う。
+Fret Canvas の主要フローをブラウザで確認し、結果を `tmp/report1` に保存する。
+週次監査では身軽さを優先し、複数 OS・複数ブラウザの網羅は行わない。
 
-対象:
+## 標準環境
 
-- アプリ全体の見た目確認
-- 主要操作フローの動作確認
-- Undo / Redo の重点確認
-- reload 後の永続化確認
-- PNG / SVG の preview と実 export 確認
-- 結果を `tmp/report1` に Markdown レポートとして保存
+週次 GitHub Actions では次を標準にする。
 
-## 対象環境
+- GitHub-hosted Linux runner
+- Chrome headless
+- Chrome DevTools MCP
+- desktop viewport `1440x900`
+- CI 内で production build を起動した local URL
 
-監査開始時に、まず対象環境を 1 つ決める。
+手動監査では local または staging を対象にしてよい。レポートに実行環境と URL を書く。
+狭い viewport は必要と思われる場合に初期表示だけ確認する。Safari、Edge、OS 別確認、複数
+viewport の詳細監査は、ユーザーが明示的に求めた場合だけ行う。
 
-- `local`
-- `staging`
+## 監査方針
 
-`local`
+- 最初はブラウザだけを使い、ソースコード全体を読まない。
+- 問題を再現できた箇所だけ、原因調査のために関連コードを読む。
+- Console error、ページエラー、失敗した Network request を確認する。
+- Performance trace や詳細な速度計測は、性能監査を明示された場合だけ行う。
+- 日本語では言語切替、主要文言、レイアウトだけ確認し、主要操作を繰り返さない。
+- スクリーンショットは初期表示、主要操作後、PNG preview で撮る。問題があれば追加する。
 
-- 手元で起動したアプリを対象にする
-- 例: `http://127.0.0.1:4321`, `http://127.0.0.1:4173`
-- 開発中の差分確認、軽微修正後の再確認に向く
+## 標準シナリオ
 
-`staging`
+同じブラウザセッションで、次を一連のシナリオとして確認する。
 
-- ネットワーク越しに見えるステージング環境を対象にする
-- 検証環境が ブランチごとに作られるため、ステージングで確認する場合はユーザーにURLの確認を求めてください
-- 実デプロイ状態に近い確認に向く
+1. 初期表示と主要 UI のレイアウトを確認する。
+2. `Add Scale Notes` を実行し、Undo、Redo を確認する。
+3. chord mode へ切り替え、手動入力を `Enter` で適用する。
+4. `Add Chord Tones` を実行する。今回の複雑操作の代表として Undo、Redo を確認する。
+5. ノートの context menu を開き、代表的な操作が反映されることを確認する。
+6. tuning menu から preset を Apply する。
+7. reload 後に tuning、適用済み chord、export range、background opacity、language の永続化を確認する。
+8. Export Settings で PNG preview を確認し、実際に download する。
+9. 日本語へ切り替え、主要文言とレイアウトを確認する。
 
-レポートには必ず対象環境と対象 URL を明記する。
+PNG download は次を確認する。
 
-このスキルを使う場合、開発中のブランチでの変更内容を重点的に動作確認してください。
+- ファイルが保存される。
+- 拡張子が `.png` である。
+- サイズが 0 ではない。
+- PNG signature を満たす。
 
-## 使うとき
+SVG export は現在 UI で無効なため監査対象にしない。
 
-次のような依頼で使う。
+## 追加監査
 
-- 複数ブラウザや複数 OS 想定で動作確認してほしい
-- UI 崩れを見ながら修正してほしい
-- 履歴、context menu、export まで含めて広く監査してほしい
-- 画面スクリーンショット付きのレポートを `tmp/report1` に出してほしい
+次は標準シナリオに含めず、関連変更がある場合かユーザーが求めた場合だけ確認する。
 
-## 前提
+- selection context menu と一括操作
+- `Emphasize`、`Dim`、`Bend` の全パターン
+- connection の作成と削除
+- Export Range ハンドルの詳細な drag 操作
+- 全操作の Undo、Redo
+- custom tuning preset
+- 狭い viewport の詳細操作
+- 複数ブラウザ、複数 OS
+- performance trace
 
-- 実行対象は `local` または `staging`
-- スクリーンショットとレポートは必ずプロジェクト内の `tmp/report1` に保存する
-- 軽微な不具合はその場で修正してよい
-- 修正方針に判断が必要な不具合はレポートに残し、勝手に仕様変更しない
-- UI が激しく変わる時期は、一時的な監査スクリプトは `tmp/report1` に置いてよい。ユーザーが求めない限り永続化前提にしない
+## 判定
 
-## プロファイル
+次を blocking failure とする。
 
-可能なら以下の 4 プロファイルを対象にする。
+- アプリが開かない、blank screen、HTTP 5xx
+- 未処理の JavaScript error
+- 標準シナリオの主要操作を完了できない
+- 状態が明らかに破損する
+- PNG preview または download を生成できない
+- ブラウザや監査処理の異常で監査を完了できない
+- 必須レポートを生成できない
 
-1. `macOS + Chrome`
-2. `macOS + Safari`
-3. `Windows + Chrome`
-4. `Windows + Microsoft Edge`
+軽微なレイアウト差、文言、操作性の提案、確信のない視覚的な違和感は warning にする。
+blocking failure が 1 件以上あれば verdict を `fail`、それ以外は `pass` にする。
 
-ローカル環境で実機が無い場合は次の近似でよい。
+## 軽微な修正
 
-- `macOS + Chrome`: ローカルの Chrome 実バイナリ
-- `macOS + Safari`: Playwright `WebKit`
-- `Windows + Chrome`: Windows UA / viewport の近似
-- `Windows + Microsoft Edge`: Edge UA / viewport の近似
+次をすべて満たす問題は、その場で修正してよい。
 
-レポートには必ず制約を書く。
+- ブラウザで再現でき、期待動作が明確である。
+- 変更範囲が小さく、仕様・デザイン判断を必要としない。
+- dependencies、workflow、権限、secret、リリース設定を変更しない。
+- 関連フロー、`npm run lint`、`npm run test:e2e` で検証できる。
 
-- Windows 実機ではない場合は、その旨を書く
-- Safari.app 直ではなく WebKit 近似なら、その旨を書く
-- 実機フォント描画やネイティブスクロールバー差分は未確認と明記する
-
-## 基本フロー
-
-1. 対象環境を `local` か `staging` から決める
-2. `local` の場合だけ必要に応じてアプリを起動する
-3. 対象 URL を確定する
-4. `tmp/report1` を作る
-5. 各プロファイルで同じ主要フローを確認する
-6. コンソールエラーとページエラーを記録する
-7. 主要状態のスクリーンショットを保存する
-8. 軽微な不具合があれば修正し、必要なら再確認する
-9. `tmp/report1/report.md` に結果を書く
-
-## 環境ごとの扱い
-
-### local
-
-- 必要ならローカルサーバーを起動する
-- 問題を見つけたら、そのまま修正して再確認してよい
-- 修正した場合は、どの確認を再実施したかレポートに書く
-
-### staging
-
-- ステージング環境そのものは変更しない
-- 問題を見つけたら再現手順と観測結果をレポートに残す
-- 手元で修正まで進める場合は、ステージング監査とローカル修正確認を分けて記録する
-
-## 最低限確認する項目
-
-各プロファイルで最低限これを確認する。
-
-- アプリ初期表示
-- `Add Scale Notes`
-- chord mode での手動入力
-- 手動入力の `Enter` 適用
-- ノートのコンテキストメニュー表示
-- tuning menu の preset 適用
-- Export Settings 内の `PNG / SVG` preview
-
-## 詳細監査で確認する項目
-
-広めの監査では、以下を確認する。
-
-- `Add Scale Notes` の追加、Undo、Redo
-- chord 手動入力の `Enter` 適用
-- `Add Chord Tones` の追加、Undo、Redo
-- 単ノートの context menu 操作
-- `Emphasize`
-- `Dim`
-- `Bend`
-- 選択矩形からの selection context menu 操作
-- 一括 `Dim`
-- 一括 `Emphasize`
-- 一括削除
-- ノート間ドラッグによる connection 作成
-- Export Range ハンドルのドラッグ
-- `Background Opacity` の変更
-- tuning preset の Apply
-- reload 後の永続化確認
-- 実ファイルとしての `PNG` / `SVG` export
-
-## 履歴まわりの重点確認
-
-履歴は特に重点的に見る。
-
-- `Add Scale Notes` の Undo / Redo
-- `Add Chord Tones` の Undo / Redo
-- 単ノート `Emphasize / Dim / Bend` の Undo / Redo
-- 一括 `Dim / Emphasize / Delete` の Undo / Redo
-- connection 作成の Undo / Redo
-- Export Range ドラッグの Undo / Redo
-- `Background Opacity` 変更の Undo / Redo
-- tuning Apply の Undo / Redo
-
-tuning Apply 時は、現仕様どおり次を確認する。
-
-- `displayedNotes / connections / bends` がクリアされる
-- chord、export range、background opacity など保持対象が維持される
-
-## 永続化確認
-
-reload 後に次を確認する。
-
-- tuning の弦数と弦名
-- 適用済み chord
-- export range
-- background opacity
-- language 設定
-
-履歴復元と永続化が矛盾していないかも見る。
-
-## Export 検証
-
-preview だけで終わらせず、実際に download されたファイルも確認する。
-
-- PNG が実際に保存される
-- SVG が実際に保存される
-- 拡張子が選択形式と一致する
-- サイズ 0 ではない
-- PNG は PNG シグネチャを満たす
-- SVG は `<svg` を含む
-
-## 画面確認の観点
-
-目視では次を見る。
-
-- 初期表示のレイアウト崩れ
-- 言語切替後の表示崩れ
-- tuning menu や context menu の位置ズレ
-- 狭い画面幅での崩れ
-- preview modal や export settings の崩れ
-- ブラウザ差による文字詰まりや配置ズレ
+修正後は、失敗したフローを再実行する。GitHub への write 権限がある週次 CI では、専用ブランチに
+commit して Ready for review の PR を作成してよい。直接 `main` へ push または merge しない。
+権限がない、検証に失敗した、または修正方針に判断が必要な場合はコードを変更せず報告する。
 
 ## 成果物
 
-必須成果物:
+次を必ず作る。
 
 - `tmp/report1/report.md`
-- `tmp/report1` 配下のスクリーンショット
-
-必要に応じて追加してよいもの:
-
 - `tmp/report1/results.json`
-- `tmp/report1/ui-audit.mjs`
-- download した PNG / SVG の実ファイル
+- `tmp/report1` 配下の主要スクリーンショット
 
-レポートには最低限これを書く。
+必要なら download した PNG、Console や Network の証拠を追加する。
 
-- 実施日
-- 対象環境
-- 対象 URL
-- 実行プロファイル一覧
-- 各プロファイルの実行方式
-- 主要チェック項目と PASS / FAIL
-- コンソールエラー件数
-- ページエラー件数
-- 近似確認の制約
-- 見つかった不具合
-- その場で修正したかどうか
-- 残る確認事項
+`results.json` には最低限次を入れる。
 
-## 修正方針
+- `verdict`: `pass` または `fail`
+- `blockingFindings`: blocking failure の配列
+- `warnings`: warning の配列
+- `completedChecks`: 完了した確認項目の配列
+- `incompleteChecks`: 完了できなかった確認項目の配列
+- `pullRequestUrl`: 修正 PR を作った場合の URL。それ以外は省略する。
 
-- 軽微な不具合はその場で人間に確認せず、修正してよい
-- 仕様判断が必要なものはレポートに残す
-- 修正後は、該当フローを最低限再確認する
-- 不具合が無ければ「コード変更なし」と明記する
+`report.md` は日本語で簡潔に書く。
 
-## 実行メモ
+- 実施日、環境、対象 URL
+- verdict
+- 各チェックの PASS / FAIL
+- blocking findings
+- warnings
+- Console error と Network failure の件数
+- 修正内容と再確認結果
+- 修正 PR の URL
 
-- Playwright を優先して使う
-- 必要なら一時的な監査スクリプトを作ってよい
-- スクリーンショットは撮りすぎず、主要状態と問題箇所に絞る
-- レポートは日本語で書く
-- 複数 OS / 複数ブラウザと言っても、近似確認なら近似と明記する
+不具合がなければコード変更なしと明記する。GitHub Actions では `tmp/report1` を、監査が失敗した
+場合も Artifact として保存する。
