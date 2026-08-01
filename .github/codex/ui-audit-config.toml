@@ -21,6 +21,7 @@ allow_local_binding = true
 
 [mcp_servers.chrome_devtools]
 command = "chrome-devtools-mcp"
+default_tools_approval_mode = "approve"
 args = [
   "--headless",
   "--isolated",
