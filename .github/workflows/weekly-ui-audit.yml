@@ -85,6 +85,8 @@ jobs:
           output-schema-file: .github/codex/schemas/ui-audit-result.schema.json
           codex-home: ${{ runner.temp }}/codex-home
           codex-version: 0.146.0
+          model: gpt-5.6-luna
+          effort: low
           permission-profile: ui-audit-ci
           codex-args: '["--ephemeral"]'
           safety-strategy: drop-sudo
