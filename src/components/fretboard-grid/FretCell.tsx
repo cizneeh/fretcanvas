@@ -97,6 +97,7 @@ export const FretCell = memo(
       <button
         type="button"
         data-fret-cell="true"
+        data-note-highlighted={isHighlighted}
         className={`group relative flex h-12 items-center justify-center border-r focus-visible:outline-none ${
           isNut ? 'border-r-[3px] border-slate-200/85' : 'border-slate-400/55'
         }`}

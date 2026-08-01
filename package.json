@@ -8,6 +8,7 @@
     "build": "astro build",
     "lint": "astro check && tsc --noEmit && biome check .",
     "fix": "biome check . --write .",
+    "test:e2e": "npm run build && playwright test",
     "preview": "astro preview",
     "preview:worker": "npm run build && wrangler dev --config dist/server/wrangler.json",
     "deploy": "wrangler deploy"
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "@biomejs/biome": "^2.4.5",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
