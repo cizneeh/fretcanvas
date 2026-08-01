@@ -1,6 +1,6 @@
-Use `$ui-audit` to perform the scheduled Fret Canvas UI audit.
+Use `$ui-audit` to perform the manually triggered Fret Canvas AI UI audit.
 
-Execution contract:
+Manual execution contract:
 
 - Audit `http://127.0.0.1:4322/` using the `chrome_devtools` MCP server.
 - Use Chrome DevTools MCP for the audit. Do not use Playwright as the audit driver.

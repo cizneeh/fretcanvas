@@ -1,15 +1,13 @@
-name: Weekly UI Audit
+name: Manual AI UI Audit
 
 on:
-  schedule:
-    - cron: '0 0 * * 6'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: weekly-ui-audit
+  group: manual-ai-ui-audit
   cancel-in-progress: false
 
 jobs:
@@ -74,13 +72,13 @@ jobs:
           tail -n 100 tmp/report1/preview.log
           exit 1
 
-      - name: Run Codex UI audit
+      - name: Run Codex AI UI audit
         id: codex
         continue-on-error: true
         uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          prompt-file: .github/codex/prompts/weekly-ui-audit.md
+          prompt-file: .github/codex/prompts/manual-ui-audit.md
           output-file: tmp/report1/results.json
           output-schema-file: .github/codex/schemas/ui-audit-result.schema.json
           codex-home: ${{ runner.temp }}/codex-home
@@ -149,7 +147,7 @@ jobs:
           steps.result.outputs.verdict != 'pass') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: weekly-ui-audit-failure-${{ github.run_id }}
+          name: manual-ai-ui-audit-failure-${{ github.run_id }}
           path: tmp/report1
           if-no-files-found: warn
           retention-days: 7
@@ -158,7 +156,7 @@ jobs:
         if: ${{ steps.patch.outputs.has_patch == 'true' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: weekly-ui-audit-fix-${{ github.run_id }}
+          name: manual-ai-ui-audit-fix-${{ github.run_id }}
           path: ${{ runner.temp }}/codex.patch
           if-no-files-found: error
           retention-days: 7
@@ -211,7 +209,7 @@ jobs:
       - name: Download fix patch
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
-          name: weekly-ui-audit-fix-${{ github.run_id }}
+          name: manual-ai-ui-audit-fix-${{ github.run_id }}
           path: ${{ runner.temp }}
 
       - name: Apply fix and open pull request
@@ -221,18 +219,18 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          branch="codex/weekly-ui-audit-fix-${RUN_ID}-${RUN_ATTEMPT}"
+          branch="codex/manual-ai-ui-audit-fix-${RUN_ID}-${RUN_ATTEMPT}"
 
           git apply --index "$RUNNER_TEMP/codex.patch"
           git diff --cached --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$branch"
-          git commit -m "Fix weekly UI audit findings"
+          git commit -m "Fix manual AI UI audit findings"
           git push origin "$branch"
 
           {
-            echo "Codex generated and verified this fix during the weekly UI audit."
+            echo "Codex generated and verified this fix during the manual AI UI audit."
             echo
             echo "Audit run: $RUN_URL"
             echo
@@ -242,7 +240,7 @@ jobs:
           pr_url=$(gh pr create \
             --base main \
             --head "$branch" \
-            --title "Fix weekly UI audit findings" \
+            --title "Fix manual AI UI audit findings" \
             --body-file "$RUNNER_TEMP/pr-body.md")
 
           echo "### Fix PR" >> "$GITHUB_STEP_SUMMARY"
