@@ -1,0 +1,231 @@
+name: Weekly UI Audit
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-ui-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: AI UI Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      audited_sha: ${{ steps.revision.outputs.sha }}
+      has_patch: ${{ steps.patch.outputs.has_patch }}
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Record audited revision
+        id: revision
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Install browser tools
+        run: |
+          npx playwright install --with-deps chromium
+          npm install --global chrome-devtools-mcp@1.6.0
+          google-chrome --version
+
+      - name: Build application
+        run: npm run build
+
+      - name: Prepare audit directories
+        run: |
+          mkdir -p tmp/report1 "${{ runner.temp }}/codex-home"
+          cp .github/codex/ui-audit-config.toml "${{ runner.temp }}/codex-home/config.toml"
+
+      - name: Start local production preview
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4322 \
+            > tmp/report1/preview.log 2>&1 &
+          echo "$!" > tmp/report1/preview.pid
+
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4322/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          tail -n 100 tmp/report1/preview.log
+          exit 1
+
+      - name: Run Codex UI audit
+        id: codex
+        continue-on-error: true
+        uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/weekly-ui-audit.md
+          output-file: tmp/report1/results.json
+          output-schema-file: .github/codex/schemas/ui-audit-result.schema.json
+          codex-home: ${{ runner.temp }}/codex-home
+          codex-version: 0.146.0
+          permission-profile: ui-audit-ci
+          codex-args: '["--ephemeral"]'
+          safety-strategy: drop-sudo
+
+      - name: Summarize audit result
+        id: result
+        if: ${{ always() }}
+        env:
+          CODEX_OUTCOME: ${{ steps.codex.outcome }}
+          REPORT_PATH: tmp/report1/report.md
+          RESULT_PATH: tmp/report1/results.json
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node .github/scripts/summarize-ui-audit.mjs
+
+      - name: Capture verified fix patch
+        id: patch
+        if: ${{ always() }}
+        env:
+          CODEX_OUTCOME: ${{ steps.codex.outcome }}
+          FIX_APPLIED: ${{ steps.result.outputs.fix_applied }}
+          RESULT_VALID: ${{ steps.result.outputs.result_valid }}
+        run: |
+          patch_path="$RUNNER_TEMP/codex.patch"
+          has_patch=false
+          unexpected_patch=false
+
+          git add -N .
+          git diff --binary HEAD > "$patch_path"
+
+          if [ -s "$patch_path" ]; then
+            if [ "$CODEX_OUTCOME" = "success" ] && \
+               [ "$RESULT_VALID" = "true" ] && \
+               [ "$FIX_APPLIED" = "true" ]; then
+              has_patch=true
+            else
+              unexpected_patch=true
+            fi
+          fi
+
+          echo "has_patch=$has_patch" >> "$GITHUB_OUTPUT"
+          echo "unexpected_patch=$unexpected_patch" >> "$GITHUB_OUTPUT"
+
+      - name: Upload audit report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: weekly-ui-audit-${{ github.run_id }}
+          path: tmp/report1
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload fix patch
+        if: ${{ steps.patch.outputs.has_patch == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: weekly-ui-audit-fix-${{ github.run_id }}
+          path: ${{ runner.temp }}/codex.patch
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Set audit conclusion
+        if: ${{ always() }}
+        env:
+          CODEX_OUTCOME: ${{ steps.codex.outcome }}
+          RESULT_VALID: ${{ steps.result.outputs.result_valid }}
+          UNEXPECTED_PATCH: ${{ steps.patch.outputs.unexpected_patch }}
+          VERDICT: ${{ steps.result.outputs.verdict }}
+        run: |
+          if [ "$CODEX_OUTCOME" != "success" ]; then
+            echo "Codex did not complete successfully."
+            exit 1
+          fi
+
+          if [ "$RESULT_VALID" != "true" ]; then
+            echo "Codex did not produce a valid audit report."
+            exit 1
+          fi
+
+          if [ "$UNEXPECTED_PATCH" = "true" ]; then
+            echo "Codex changed files without reporting a verified fix."
+            exit 1
+          fi
+
+          if [ "$VERDICT" != "pass" ]; then
+            echo "The audit found at least one blocking failure."
+            exit 1
+          fi
+
+  open_fix_pr:
+    name: Open AI Fix PR
+    needs: audit
+    if: ${{ always() && needs.audit.outputs.has_patch == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Check out audited revision
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.audit.outputs.audited_sha }}
+          fetch-depth: 0
+
+      - name: Download fix patch
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: weekly-ui-audit-fix-${{ github.run_id }}
+          path: ${{ runner.temp }}
+
+      - name: Apply fix and open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          branch="codex/weekly-ui-audit-fix-${RUN_ID}-${RUN_ATTEMPT}"
+
+          git apply --index "$RUNNER_TEMP/codex.patch"
+          git diff --cached --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -m "Fix weekly UI audit findings"
+          git push origin "$branch"
+
+          {
+            echo "Codex generated and verified this fix during the weekly UI audit."
+            echo
+            echo "Audit run: $RUN_URL"
+            echo
+            echo "Review the changes and approve the PR workflows before merging."
+          } > "$RUNNER_TEMP/pr-body.md"
+
+          pr_url=$(gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "Fix weekly UI audit findings" \
+            --body-file "$RUNNER_TEMP/pr-body.md")
+
+          echo "### Fix PR" >> "$GITHUB_STEP_SUMMARY"
+          echo "$pr_url" >> "$GITHUB_STEP_SUMMARY"
