@@ -67,6 +67,10 @@ const summary = [
   `- Fix prepared: ${fixApplied}`,
 ]
 
+if (verdict !== 'pass') {
+  summary.push('- Failure evidence: available from this run as an Artifact for 7 days')
+}
+
 if (errors.length > 0) {
   summary.push('', '## Workflow errors', '', ...errors.map((error) => `- ${error}`))
 }
