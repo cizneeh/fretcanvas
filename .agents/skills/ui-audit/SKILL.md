@@ -5,7 +5,7 @@ description: Fret Canvas の UI を Chrome で軽量に監査する。週次 Git
 
 # UI Audit
 
-Fret Canvas の主要フローをブラウザで確認し、結果を `tmp/report1` に保存する。
+Fret Canvas の主要フローをブラウザで確認し、レポートを `tmp/report1` に保存する。
 週次監査では身軽さを優先し、複数 OS・複数ブラウザの網羅は行わない。
 
 ## 標準環境
@@ -30,6 +30,8 @@ viewport の詳細監査は、ユーザーが明示的に求めた場合だけ�
 - Performance trace や詳細な速度計測は、性能監査を明示された場合だけ行う。
 - 日本語では言語切替、主要文言、レイアウトだけ確認し、主要操作を繰り返さない。
 - スクリーンショットは初期表示、主要操作後、PNG preview で撮る。問題があれば追加する。
+- 週次 GitHub Actions のスクリーンショットは `/tmp/fretcanvas-ui-audit/screenshots` に一時保存する。
+  成功時は破棄し、失敗時だけ workflow が Artifact へ収集する。
 
 ## 標準シナリオ
 
@@ -39,7 +41,8 @@ viewport の詳細監査は、ユーザーが明示的に求めた場合だけ�
 2. `Add Scale Notes` を実行し、Undo、Redo を確認する。
 3. chord mode へ切り替え、手動入力を `Enter` で適用する。
 4. `Add Chord Tones` を実行する。今回の複雑操作の代表として Undo、Redo を確認する。
-5. ノートの context menu を開き、代表的な操作が反映されることを確認する。
+5. ノートの context menu を開き、代表的な操作が反映されることを確認する。Chrome
+   DevTools MCP に右クリック操作がない場合は、対象要素へ `contextmenu` イベントを送る。
 6. tuning menu から preset を Apply する。
 7. reload 後に tuning、適用済み chord、export range、background opacity、language の永続化を確認する。
 8. Export Settings で PNG preview を確認し、実際に download する。
@@ -51,6 +54,10 @@ PNG download は次を確認する。
 - 拡張子が `.png` である。
 - サイズが 0 ではない。
 - PNG signature を満たす。
+
+週次 GitHub Actions で headless Chrome の download 保存先を取得できない場合は、Export PNGを
+実行したうえで PNG preview の data URL を `evaluate_script` で一時ファイルへ保存し、
+`.github/scripts/verify-ui-audit-png.mjs` で同じ項目を検証してよい。
 
 SVG export は現在 UI で無効なため監査対象にしない。
 
@@ -102,7 +109,8 @@ commit して Ready for review の PR を作成してよい。直接 `main` へ 
 
 - `tmp/report1/report.md`
 - `tmp/report1/results.json`
-- `tmp/report1` 配下の主要スクリーンショット
+- 週次 GitHub Actions では `/tmp/fretcanvas-ui-audit/screenshots` 配下の主要スクリーンショット
+- 手動監査では `tmp/report1` 配下の主要スクリーンショット
 
 必要なら download した PNG、Console や Network の証拠を追加する。
 
@@ -126,5 +134,5 @@ commit して Ready for review の PR を作成してよい。直接 `main` へ 
 - 修正内容と再確認結果
 - 修正 PR の URL
 
-不具合がなければコード変更なしと明記する。GitHub Actions では `tmp/report1` を、監査が失敗した
-場合も Artifact として保存する。
+不具合がなければコード変更なしと明記する。GitHub Actions では成功時は Summary だけを残し、
+監査が失敗した場合だけレポート、結果、スクリーンショットを7日間 Artifact として保存する。

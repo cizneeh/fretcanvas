@@ -12,8 +12,25 @@ Execution contract:
   unrelated cleanup.
 - Never modify `.github`, `.agents`, `package.json`, `package-lock.json`, dependencies, workflows,
   permissions, secrets, or release configuration.
-- Save the Japanese Markdown report and all screenshots under `tmp/report1` as required by the
-  skill. Always create `tmp/report1/report.md`.
+- Always create the Japanese Markdown report at `tmp/report1/report.md`.
+- Before browser inspection, create `/tmp/fretcanvas-ui-audit/screenshots` and
+  `/tmp/fretcanvas-ui-audit/downloads`. Save every Chrome DevTools MCP screenshot under the former
+  by passing an absolute `filePath`. Do not save MCP screenshots directly under the workspace and
+  do not treat their temporary location as a failure. The workflow preserves them only on failure.
+- After clicking Export PNG, use `evaluate_script` with `filePath` set to
+  `/tmp/fretcanvas-ui-audit/export-preview.json` and the function
+  `() => Array.from(document.images, (image) => image.src).find((src) =>
+  src.startsWith('data:image/png;base64,'))` to save the PNG preview image data URL. Then run
+  `node .github/scripts/verify-ui-audit-png.mjs /tmp/fretcanvas-ui-audit/export-preview.json
+  /tmp/fretcanvas-ui-audit/downloads/fret-canvas-export.png` to verify non-empty PNG bytes and its
+  signature. This is the download-file verification when headless Chrome does not expose its
+  native download path.
+- Chrome DevTools MCP does not provide a right-click option. Open the representative note context
+  menu by passing its latest snapshot uid to `evaluate_script` and running
+  `(element) => element.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable:
+  true, button: 2, buttons: 2 }))`.
+- The workflow has already built and started the preview. Do not inspect its PID, rebuild, or start
+  another preview unless browser navigation to the target URL actually fails.
 - Do not run `git commit`, `git push`, `gh`, or create a pull request. The workflow handles a
   verified patch in a separate job without access to the OpenAI API key.
 
@@ -23,9 +40,8 @@ If you find a simple fix allowed by the skill:
 2. Make only the smallest relevant source change.
 3. Re-run the affected browser flow.
 4. Run `npm run lint` and `npm run test:e2e`.
-5. Rebuild and restart the audit preview on port 4322 if necessary, then verify the fix again with
-   Chrome DevTools MCP. The current preview PID is in `tmp/report1/preview.pid` and its log is in
-   `tmp/report1/preview.log`.
+5. Rebuild and restart the audit preview on port 4322 only when a source fix requires it, then
+   verify the fix again with Chrome DevTools MCP.
 
 Set `fixApplied` to true only when a source change was made and all required validation succeeded.
 The verdict describes the original audited `main` revision: if it had a blocking failure, keep the

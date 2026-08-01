@@ -129,14 +129,30 @@ jobs:
           echo "has_patch=$has_patch" >> "$GITHUB_OUTPUT"
           echo "unexpected_patch=$unexpected_patch" >> "$GITHUB_OUTPUT"
 
-      - name: Upload audit report
-        if: ${{ always() }}
+      - name: Collect failure evidence
+        if: >-
+          ${{ always() && (steps.codex.outcome != 'success' ||
+          steps.result.outputs.result_valid != 'true' ||
+          steps.patch.outputs.unexpected_patch == 'true' ||
+          steps.result.outputs.verdict != 'pass') }}
+        run: |
+          if [ -d /tmp/fretcanvas-ui-audit ]; then
+            mkdir -p tmp/report1/evidence
+            cp -R /tmp/fretcanvas-ui-audit/. tmp/report1/evidence/
+          fi
+
+      - name: Upload failure report
+        if: >-
+          ${{ always() && (steps.codex.outcome != 'success' ||
+          steps.result.outputs.result_valid != 'true' ||
+          steps.patch.outputs.unexpected_patch == 'true' ||
+          steps.result.outputs.verdict != 'pass') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: weekly-ui-audit-${{ github.run_id }}
+          name: weekly-ui-audit-failure-${{ github.run_id }}
           path: tmp/report1
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 7
 
       - name: Upload fix patch
         if: ${{ steps.patch.outputs.has_patch == 'true' }}
