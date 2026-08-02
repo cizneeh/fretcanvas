@@ -1,0 +1,96 @@
+name: Dependabot Auto-merge
+
+on:
+  push:
+    branches:
+      - main
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    name: Enable auto-merge
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.repository == 'cizneeh/fretcanvas'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Read Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Enable auto-merge for npm patch and minor updates
+        if: >-
+          steps.metadata.outputs.package-ecosystem == 'npm_and_yarn' &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash "$PR_URL"
+
+      - name: Leave major and GitHub Actions updates for manual review
+        if: >-
+          steps.metadata.outputs.package-ecosystem != 'npm_and_yarn' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
+        env:
+          PACKAGE_ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          echo "Auto-merge was not enabled." >> "$GITHUB_STEP_SUMMARY"
+          echo "Package ecosystem: $PACKAGE_ECOSYSTEM" >> "$GITHUB_STEP_SUMMARY"
+          echo "Update type: $UPDATE_TYPE" >> "$GITHUB_STEP_SUMMARY"
+
+  update-open-branches:
+    name: Update open Dependabot branches
+    if: >-
+      github.event_name == 'push' &&
+      github.repository == 'cizneeh/fretcanvas'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Rebase outdated Dependabot pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BASE_BRANCH: ${{ github.ref_name }}
+        run: |
+          outdated_prs=$(gh pr list \
+            --repo "$REPOSITORY" \
+            --author "app/dependabot" \
+            --base "$BASE_BRANCH" \
+            --state open \
+            --limit 100 \
+            --json number,mergeStateStatus \
+            --jq '.[] | select(.mergeStateStatus == "BEHIND" or .mergeStateStatus == "DIRTY") | [.number, .mergeStateStatus] | @tsv')
+
+          if [[ -z "$outdated_prs" ]]; then
+            echo "No outdated Dependabot pull requests found." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          while IFS=$'\t' read -r pr_number merge_state; do
+            if gh pr update-branch "$pr_number" --repo "$REPOSITORY" --rebase; then
+              echo "Rebased PR #$pr_number ($merge_state)." >> "$GITHUB_STEP_SUMMARY"
+            else
+              gh pr comment "$pr_number" \
+                --repo "$REPOSITORY" \
+                --body "@dependabot rebase"
+              echo "Requested a Dependabot-managed rebase for PR #$pr_number ($merge_state)." \
+                >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done <<< "$outdated_prs"
