@@ -11,6 +11,6 @@ if (rootElement === undefined) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <App initialLocale="en" />
   </StrictMode>,
 )
