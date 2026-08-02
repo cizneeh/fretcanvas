@@ -95,8 +95,7 @@ export type CustomTuningPreset = {
   strings: StringInfo[]
 }
 
-const createStringId = (stringIndex: number, note: TuningNoteName) =>
-  `string:${stringIndex}:${note}`
+const createStringId = (stringIndex: number, note: string) => `string:${stringIndex}:${note}`
 
 export const getPitchClassFromTuningName = (note: TuningNoteName): PitchClass =>
   TUNING_NOTE_TO_PITCH_CLASS[note]
