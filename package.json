@@ -14,9 +14,9 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.2.2",
-    "@astrojs/react": "^6.0.3",
-    "astro": "^7.2.3",
+    "@astrojs/cloudflare": "^14.2.5",
+    "@astrojs/react": "^6.0.4",
+    "astro": "^7.2.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tonal": "^6.4.3",
@@ -24,12 +24,12 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@biomejs/biome": "^2.5.9",
+    "@biomejs/biome": "^2.5.10",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.3.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.5",
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
