@@ -77,7 +77,10 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       const nextUndoStack =
         last !== undefined && historySnapshotsEqual(last, snapshot)
           ? state.undoStack
-          : [...state.undoStack, createHistorySnapshot(snapshot.fretboard, snapshot.settings)]
+          : [
+              ...state.undoStack,
+              createHistorySnapshot(snapshot.fretboard, snapshot.settings, snapshot.piano),
+            ]
 
       return {
         undoStack: nextUndoStack.slice(-state.historyLimit),
@@ -93,7 +96,11 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       }
 
       return {
-        bufferedSnapshot: createHistorySnapshot(snapshot.fretboard, snapshot.settings),
+        bufferedSnapshot: createHistorySnapshot(
+          snapshot.fretboard,
+          snapshot.settings,
+          snapshot.piano,
+        ),
       }
     })
   },
@@ -120,7 +127,10 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       const nextUndoStack =
         last !== undefined && historySnapshotsEqual(last, buffered)
           ? state.undoStack
-          : [...state.undoStack, createHistorySnapshot(buffered.fretboard, buffered.settings)]
+          : [
+              ...state.undoStack,
+              createHistorySnapshot(buffered.fretboard, buffered.settings, buffered.piano),
+            ]
 
       return {
         undoStack: nextUndoStack.slice(-state.historyLimit),
@@ -153,7 +163,11 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       undoStack: state.undoStack.slice(0, -1),
       redoStack: [
         ...state.redoStack,
-        createHistorySnapshot(currentSnapshot.fretboard, currentSnapshot.settings),
+        createHistorySnapshot(
+          currentSnapshot.fretboard,
+          currentSnapshot.settings,
+          currentSnapshot.piano,
+        ),
       ].slice(-state.historyLimit),
       bufferedSnapshot: undefined,
     }))
@@ -174,7 +188,11 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       redoStack: state.redoStack.slice(0, -1),
       undoStack: [
         ...state.undoStack,
-        createHistorySnapshot(currentSnapshot.fretboard, currentSnapshot.settings),
+        createHistorySnapshot(
+          currentSnapshot.fretboard,
+          currentSnapshot.settings,
+          currentSnapshot.piano,
+        ),
       ].slice(-state.historyLimit),
       bufferedSnapshot: undefined,
     }))

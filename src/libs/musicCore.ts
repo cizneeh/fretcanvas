@@ -56,6 +56,7 @@ export type StringInfo = {
   id: string
   name: string
   pitchClass: PitchClass
+  midi: number
 }
 
 export type TuningNoteName =
@@ -86,6 +87,7 @@ export type InstrumentPresetId =
 export type InstrumentPreset = {
   id: InstrumentPresetId
   strings: readonly TuningNoteName[]
+  midi: readonly number[]
 }
 
 export const FRET_COUNT = 24

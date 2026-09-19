@@ -115,3 +115,183 @@ body {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6);
   cursor: pointer;
 }
+
+.piano-workspace {
+  display: flex;
+  width: 100%;
+  max-width: 88rem;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.piano-panel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-shape-lg);
+  background: var(--md-sys-color-surface-container);
+}
+
+.piano-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.piano-toolbar > div:first-child {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.piano-range-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.piano-range-fields label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.piano-range-fields select {
+  width: 88px;
+}
+
+.piano-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 3px;
+}
+
+.piano-keyboard {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+.piano-key {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 10px;
+  border: 1px solid #a1a1aa;
+  border-radius: 4px;
+  cursor: pointer;
+  container-type: inline-size;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.piano-key--white {
+  z-index: 0;
+  background: #faf9f6;
+  box-shadow: inset 0 -3px 0 #d4d4d8;
+}
+
+.piano-key--black {
+  z-index: 1;
+  padding-bottom: 9px;
+  border: 1px solid #05070a;
+  background: #1b2027;
+  box-shadow:
+    inset 0 0 0 3px #101419,
+    inset 0 -7px 0 #080b0f,
+    0 2px 2px #0006;
+}
+
+.piano-key:focus-visible {
+  outline: 3px solid #22d3ee;
+  outline-offset: -4px;
+}
+
+.piano-key:active {
+  box-shadow: inset 0 2px 5px #0005;
+}
+
+.piano-note {
+  display: flex;
+  width: 72%;
+  height: 100cqw;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  border: 1.5px solid currentColor;
+  border-bottom-width: 6px;
+  border-radius: 5px;
+  background: inherit;
+  pointer-events: none;
+  line-height: 1.1;
+}
+
+.piano-key--black .piano-note {
+  height: 137cqw;
+  border-bottom-width: 5px;
+}
+
+.piano-note-primary {
+  font-size: clamp(13px, 28cqw, 24px);
+  font-weight: 650;
+}
+
+.piano-note-secondary {
+  font-size: clamp(11px, 22cqw, 18px);
+  font-weight: 550;
+}
+
+.piano-note--preview {
+  opacity: 0;
+}
+
+.piano-key:hover .piano-note--preview,
+.piano-key:focus-visible .piano-note--preview {
+  opacity: 0.35;
+}
+
+.piano-key[data-note-emphasized="true"] .piano-note {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  font-weight: 750;
+}
+
+.piano-octave-labels {
+  position: relative;
+  width: 100%;
+  height: 32px;
+  margin-top: 10px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 13px;
+}
+
+.piano-octave-labels span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+@media (min-width: 900px) {
+  .piano-controls > div:first-child {
+    grid-template-columns: minmax(180px, 1fr) minmax(320px, 1.7fr) minmax(190px, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .piano-panel {
+    padding: 12px;
+  }
+
+  .piano-toolbar {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+}

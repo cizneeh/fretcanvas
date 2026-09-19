@@ -56,6 +56,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
     appendDraftString,
     removeDraftString,
     setDraftStringNote,
+    setDraftStringOctave,
     resetDraftStrings,
     applyDraftStrings,
   } = useFretboardStore(
@@ -70,6 +71,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
       appendDraftString: state.appendDraftString,
       removeDraftString: state.removeDraftString,
       setDraftStringNote: state.setDraftStringNote,
+      setDraftStringOctave: state.setDraftStringOctave,
       resetDraftStrings: state.resetDraftStrings,
       applyDraftStrings: state.applyDraftStrings,
     })),
@@ -161,7 +163,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
 
     const updatePanelPosition = () => {
       const rect = anchorElement.getBoundingClientRect()
-      const width = 18.5 * 16
+      const width = Math.min(18.5 * 16, window.innerWidth - 32)
       const height = panelRef.current?.offsetHeight ?? 520
       const gap = 12
       const preferredLeft = rect.left - width - gap
@@ -202,11 +204,14 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
     }
 
     updatePanelPosition()
+    const resizeObserver = new ResizeObserver(updatePanelPosition)
+    if (panelRef.current !== null) resizeObserver.observe(panelRef.current)
     window.addEventListener('pointerdown', handlePointerDown)
     document.addEventListener('keydown', handleKeyDown, true)
     window.addEventListener('resize', updatePanelPosition)
     document.addEventListener('scroll', updatePanelPosition, true)
     return () => {
+      resizeObserver.disconnect()
       window.removeEventListener('pointerdown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown, true)
       window.removeEventListener('resize', updatePanelPosition)
@@ -229,7 +234,7 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
   return createPortal(
     <div
       ref={panelRef}
-      className={`${m3CardElevatedClass} fixed z-40 w-[18.5rem] p-3`}
+      className={`${m3CardElevatedClass} fixed z-40 max-h-[calc(100dvh-32px)] w-[18.5rem] max-w-[calc(100vw-32px)] overflow-y-auto p-3`}
       role="dialog"
       aria-label={t('tuning.title')}
       tabIndex={-1}
@@ -322,18 +327,21 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
         ) : undefined}
 
         <div className="space-y-2">
-          <div className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2 px-1">
+          <div className="grid grid-cols-[1.4rem_1.6rem_minmax(0,1fr)_3.5rem] items-center gap-2 px-1">
             <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
             <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]" />
             <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
               {t('tuning.note')}
+            </span>
+            <span className="text-[11px] text-[color:var(--md-sys-color-on-surface-variant)]">
+              {t('tuning.octave')}
             </span>
           </div>
 
           {draftStrings.map((stringInfo, stringIndex) => (
             <div
               key={stringInfo.id}
-              className="grid grid-cols-[1.9rem_1.6rem_minmax(0,1fr)] items-center gap-2"
+              className="grid grid-cols-[1.4rem_1.6rem_minmax(0,1fr)_3.5rem] items-center gap-2"
             >
               <div className="text-center text-xs text-[color:var(--md-sys-color-on-surface-variant)]">
                 {stringIndex + 1}
@@ -383,6 +391,18 @@ export const TuningMenu = ({ anchorElement, onClose }: TuningMenuProps) => {
                   />
                 </svg>
               </div>
+              <select
+                className={`${m3InputClass} px-1`}
+                aria-label={t('tuning.stringOctave', { string: stringIndex + 1 })}
+                value={Math.floor(stringInfo.midi / 12) - 1}
+                onChange={(event) => setDraftStringOctave(stringIndex, Number(event.target.value))}
+              >
+                {[-1, 0, 1, 2, 3, 4, 5, 6].map((octave) => (
+                  <option key={octave} value={octave}>
+                    {octave}
+                  </option>
+                ))}
+              </select>
             </div>
           ))}
 

@@ -69,6 +69,7 @@ export type FretboardStoreActions = {
   appendDraftString: () => void
   removeDraftString: (stringIndex: number) => void
   setDraftStringNote: (stringIndex: number, nextNote: TuningNoteName) => void
+  setDraftStringOctave: (stringIndex: number, octave: number) => void
   resetDraftStrings: () => void
   applyDraftStrings: () => void
   setAppliedChordSymbol: (nextChordSymbol: string | undefined) => void
@@ -113,14 +114,22 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
           stringInfo.pitchClass,
           stringInfo.id,
           stringInfo.name as TuningNoteName,
+          stringInfo.midi,
         ),
       )
 
     while (trimmedStrings.length < clampStringCount(nextCount)) {
       const previousPitchClass =
         trimmedStrings.at(-1)?.pitchClass ?? defaultStrings.at(-1)?.pitchClass ?? 4
+      const nextMidi = (trimmedStrings.at(-1)?.midi ?? 40) - 5
       trimmedStrings.push(
-        getStringInfoFromPitchClass(trimmedStrings.length, previousPitchClass - 5),
+        getStringInfoFromPitchClass(
+          trimmedStrings.length,
+          previousPitchClass - 5,
+          undefined,
+          undefined,
+          nextMidi < 0 ? nextMidi + 12 : nextMidi,
+        ),
       )
     }
 
@@ -268,6 +277,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
           stringInfo.pitchClass,
           stringInfo.id,
           stringInfo.name as TuningNoteName,
+          stringInfo.midi,
         ),
       )
       const nextPresetId = getMatchingInstrumentPresetId(normalizedStrings) ?? 'custom'
@@ -317,6 +327,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
             stringInfo.pitchClass,
             stringInfo.id,
             stringInfo.name as TuningNoteName,
+            stringInfo.midi,
           ),
         )
 
@@ -347,7 +358,13 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
 
       const nextDraftStrings = current.draftStrings.map((stringInfo, index) =>
         index === stringIndex
-          ? getStringInfoFromPitchClass(index, nextPitchClass, stringInfo.id, nextNote)
+          ? getStringInfoFromPitchClass(
+              index,
+              nextPitchClass,
+              stringInfo.id,
+              nextNote,
+              stringInfo.midi - stringInfo.pitchClass + nextPitchClass,
+            )
           : stringInfo,
       )
 
@@ -355,6 +372,16 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
         draftPresetId: getMatchingInstrumentPresetId(nextDraftStrings) ?? 'custom',
         draftStrings: nextDraftStrings,
       })
+    },
+
+    setDraftStringOctave: (stringIndex, octave) => {
+      if (!Number.isInteger(octave) || octave < -1 || octave > 6) return
+      const draftStrings = get().draftStrings.map((stringInfo, index) =>
+        index === stringIndex
+          ? { ...stringInfo, midi: (octave + 1) * 12 + stringInfo.pitchClass }
+          : stringInfo,
+      )
+      set({ draftStrings, draftPresetId: getMatchingInstrumentPresetId(draftStrings) ?? 'custom' })
     },
 
     resetDraftStrings: () => {
@@ -365,6 +392,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
           stringInfo.pitchClass,
           stringInfo.id,
           stringInfo.name as TuningNoteName,
+          stringInfo.midi,
         ),
       )
       const nextPresetId = getMatchingInstrumentPresetId(current.strings) ?? 'custom'
@@ -396,6 +424,7 @@ export const useFretboardStore = create<FretboardStore>((set, get) => {
             stringInfo.pitchClass,
             stringInfo.id,
             stringInfo.name as TuningNoteName,
+            stringInfo.midi,
           ),
         ),
         displayedNotes: {},

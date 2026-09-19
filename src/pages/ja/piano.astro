@@ -1,0 +1,11 @@
+---
+import App from '../../App'
+import { getRouteLocale } from '../../i18n/routing'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+const locale = getRouteLocale(Astro.currentLocale)
+---
+
+<BaseLayout title="ピアノ | Fret Canvas" description="ピアノ鍵盤上のスケールやコードトーンを可視化し、PNG / SVGで書き出せるツール。">
+  <App client:load initialLocale={locale} instrument="piano" />
+</BaseLayout>

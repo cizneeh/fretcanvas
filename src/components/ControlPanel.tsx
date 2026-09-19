@@ -34,7 +34,14 @@ import {
   m3SelectClass,
 } from './ui/materialClasses'
 
-export const ControlPanel = () => {
+export type ControlPanelNoteActions = {
+  addScale: (withinExportRange?: boolean) => void
+  addChord: (withinExportRange?: boolean) => void
+  clear: () => void
+  clearOutsideRange: () => void
+}
+
+export const ControlPanel = ({ noteActions }: { noteActions?: ControlPanelNoteActions }) => {
   const { locale, t } = useI18n()
   const {
     keyPc,
@@ -50,10 +57,10 @@ export const ControlPanel = () => {
     setAppliedChordSymbol,
     setChordInput,
     applyChordInput,
-    addScaleNotes,
-    addAppliedChordNotes,
-    clearHighlightedNotes,
-    clearHighlightedNotesOutsideFretRange,
+    addScaleNotes: addGuitarScaleNotes,
+    addAppliedChordNotes: addGuitarChordNotes,
+    clearHighlightedNotes: clearGuitarNotes,
+    clearHighlightedNotesOutsideFretRange: clearGuitarNotesOutsideRange,
   } = useFretboardStore(
     useShallow((state) => ({
       keyPc: state.keyPc,
@@ -84,6 +91,17 @@ export const ControlPanel = () => {
         setShowExportRangeHighlight: state.setShowExportRangeHighlight,
       })),
     )
+  const addScaleNotes = (options?: Parameters<typeof addGuitarScaleNotes>[0]) =>
+    noteActions
+      ? noteActions.addScale(options?.fretRange !== undefined)
+      : addGuitarScaleNotes(options)
+  const addAppliedChordNotes = (options?: Parameters<typeof addGuitarChordNotes>[0]) =>
+    noteActions
+      ? noteActions.addChord(options?.fretRange !== undefined)
+      : addGuitarChordNotes(options)
+  const clearHighlightedNotes = noteActions?.clear ?? clearGuitarNotes
+  const clearHighlightedNotesOutsideFretRange = (range: { start: number; end: number }) =>
+    noteActions ? noteActions.clearOutsideRange() : clearGuitarNotesOutsideRange(range)
   const diatonicChordOptions = getMajorDiatonicSeventhChordOptions(keyPc)
   const diatonicSelectValue =
     appliedChordSymbol !== undefined &&
@@ -158,7 +176,9 @@ export const ControlPanel = () => {
   const manualInputTooltip = t('control.manualInputTooltip')
 
   return (
-    <section className={`${m3CardClass} w-full max-w-[88rem] p-4`}>
+    <section
+      className={`${m3CardClass} w-full max-w-[88rem] p-4 ${noteActions ? 'piano-controls' : ''}`}
+    >
       <div className="grid gap-5 xl:grid-cols-[minmax(14rem,15rem)_minmax(0,52rem)_minmax(14rem,16rem)]">
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
@@ -510,19 +530,21 @@ export const ControlPanel = () => {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 border-t border-[color:var(--md-sys-color-outline-variant)] pt-4">
-        <label className="flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
-          <input
-            type="checkbox"
-            className={m3CheckboxClass}
-            checked={showExportRangeHighlight}
-            onChange={(event) => {
-              setShowExportRangeHighlight(event.target.checked)
-            }}
-          />
-          {t('control.showExportRangeHighlights')}
-        </label>
-      </div>
+      {noteActions === undefined ? (
+        <div className="mt-4 flex flex-col gap-2 border-t border-[color:var(--md-sys-color-outline-variant)] pt-4">
+          <label className="flex items-center gap-2 text-sm text-[color:var(--md-sys-color-on-surface-variant)]">
+            <input
+              type="checkbox"
+              className={m3CheckboxClass}
+              checked={showExportRangeHighlight}
+              onChange={(event) => {
+                setShowExportRangeHighlight(event.target.checked)
+              }}
+            />
+            {t('control.showExportRangeHighlights')}
+          </label>
+        </div>
+      ) : undefined}
     </section>
   )
 }

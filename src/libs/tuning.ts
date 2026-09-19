@@ -61,30 +61,37 @@ const DEFAULT_TUNING_NAME_BY_PITCH_CLASS: TuningNoteName[] = [
 export const INSTRUMENT_PRESETS: InstrumentPreset[] = [
   {
     id: 'guitarStandard6',
+    midi: [64, 59, 55, 50, 45, 40],
     strings: ['E', 'B', 'G', 'D', 'A', 'E'],
   },
   {
     id: 'guitarHalfStepDown6',
+    midi: [63, 58, 54, 49, 44, 39],
     strings: ['Eb', 'Bb', 'Gb', 'Db', 'Ab', 'Eb'],
   },
   {
     id: 'guitar7',
+    midi: [64, 59, 55, 50, 45, 40, 35],
     strings: ['E', 'B', 'G', 'D', 'A', 'E', 'B'],
   },
   {
     id: 'bass4',
+    midi: [43, 38, 33, 28],
     strings: ['G', 'D', 'A', 'E'],
   },
   {
     id: 'bass5',
+    midi: [43, 38, 33, 28, 23],
     strings: ['G', 'D', 'A', 'E', 'B'],
   },
   {
     id: 'bass6',
+    midi: [48, 43, 38, 33, 28, 23],
     strings: ['C', 'G', 'D', 'A', 'E', 'B'],
   },
   {
     id: 'ukuleleC',
+    midi: [69, 64, 60, 67],
     strings: ['A', 'E', 'C', 'G'],
   },
 ] as const
@@ -107,10 +114,12 @@ export const createStringInfo = (
   stringIndex: number,
   note: TuningNoteName,
   existingId: string = createStringId(stringIndex, note),
+  midi = getDefaultStringMidi(stringIndex, getPitchClassFromTuningName(note)),
 ): StringInfo => ({
   id: existingId,
   name: note,
   pitchClass: getPitchClassFromTuningName(note),
+  midi,
 })
 
 export const getStringInfoFromPitchClass = (
@@ -118,6 +127,7 @@ export const getStringInfoFromPitchClass = (
   pitchClass: number,
   existingId?: string,
   existingName?: TuningNoteName,
+  midi?: number,
 ): StringInfo => {
   const normalizedPitchClass = normalizePc(pitchClass)
   return createStringInfo(
@@ -126,14 +136,38 @@ export const getStringInfoFromPitchClass = (
       ? existingName
       : getTuningNameFromPitchClass(normalizedPitchClass),
     existingId,
+    midi,
   )
 }
 
+export const getDefaultStringMidi = (stringIndex: number, pitchClass: number): number => {
+  const reference = [64, 59, 55, 50, 45, 40, 35, 30, 25, 20][stringIndex] ?? 40
+  const distance = normalizePc(pitchClass - reference + 6) - 6
+  return reference + distance
+}
+
+export const normalizeStringPitches = (strings: StringInfo[]): StringInfo[] => {
+  const preset = INSTRUMENT_PRESETS.find(
+    (candidate) =>
+      candidate.strings.length === strings.length &&
+      candidate.strings.every((name, index) => name === strings[index].name),
+  )
+  return strings.map((stringInfo, index) => ({
+    ...stringInfo,
+    midi:
+      Number.isInteger(stringInfo.midi) &&
+      stringInfo.midi >= 0 &&
+      stringInfo.midi <= 103 &&
+      normalizePc(stringInfo.midi) === stringInfo.pitchClass
+        ? stringInfo.midi
+        : (preset?.midi[index] ?? getDefaultStringMidi(index, stringInfo.pitchClass)),
+  }))
+}
+
 export const cloneStrings = (strings: StringInfo[]): StringInfo[] =>
-  strings.map((stringInfo, stringIndex) => ({
+  normalizeStringPitches(strings).map((stringInfo, stringIndex) => ({
+    ...stringInfo,
     id: stringInfo.id || createStringId(stringIndex, stringInfo.name),
-    name: stringInfo.name,
-    pitchClass: stringInfo.pitchClass,
   }))
 
 const isTuningNoteName = (value: unknown): value is TuningNoteName =>
@@ -252,7 +286,9 @@ export const getInstrumentPresetStrings = (presetId: InstrumentPresetId): String
     return []
   }
 
-  return preset.strings.map((note, stringIndex) => createStringInfo(stringIndex, note))
+  return preset.strings.map((note, stringIndex) =>
+    createStringInfo(stringIndex, note, undefined, preset.midi[stringIndex]),
+  )
 }
 
 export const getDefaultStrings = (): StringInfo[] => getInstrumentPresetStrings('guitarStandard6')
@@ -271,7 +307,8 @@ export const getMatchingInstrumentPresetId = (
       return (
         stringInfo !== undefined &&
         stringInfo.name === presetString.name &&
-        stringInfo.pitchClass === presetString.pitchClass
+        stringInfo.pitchClass === presetString.pitchClass &&
+        stringInfo.midi === presetString.midi
       )
     })
   })
@@ -286,6 +323,7 @@ export const stringInfoArraysEqual = (left: StringInfo[], right: StringInfo[]): 
     return (
       rightString !== undefined &&
       leftString.name === rightString.name &&
-      leftString.pitchClass === rightString.pitchClass
+      leftString.pitchClass === rightString.pitchClass &&
+      leftString.midi === rightString.midi
     )
   })

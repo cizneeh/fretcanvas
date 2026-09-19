@@ -2,8 +2,10 @@ import { useEffect } from 'react'
 import { ControlPanel } from './components/ControlPanel'
 import { ExportSettingsSection } from './components/ExportSettingsSection'
 import { FretboardView } from './components/FretboardView'
+import { PianoWorkspace } from './components/piano/PianoWorkspace'
 import type { AppLocale } from './i18n/config'
 import { LocaleOverrideContext, useI18n } from './i18n/useI18n'
+import type { Instrument } from './libs/piano'
 import { isEditableTarget, isRedoShortcutPressed, isUndoShortcutPressed } from './libs/shortcut'
 import { initializeHistoryBindings } from './stores/historyBindings'
 import { useHistoryStore } from './stores/historyStore'
@@ -12,22 +14,23 @@ import { useHistoryStore } from './stores/historyStore'
 // そのため、サーバーサイドで言語情報を渡す必要があるため、propsになっている
 type AppProps = {
   initialLocale: AppLocale
+  instrument?: Instrument
 }
 
-function App({ initialLocale }: AppProps) {
+function App({ initialLocale, instrument = 'guitar' }: AppProps) {
   return (
     <LocaleOverrideContext.Provider value={initialLocale}>
-      <AppBody />
+      <AppBody instrument={instrument} />
     </LocaleOverrideContext.Provider>
   )
 }
 
-function AppBody() {
+function AppBody({ instrument }: { instrument: Instrument }) {
   const { locale } = useI18n()
 
   useEffect(() => {
-    initializeHistoryBindings()
-  }, [])
+    initializeHistoryBindings(instrument)
+  }, [instrument])
 
   const undo = useHistoryStore((state) => state.undo)
   const redo = useHistoryStore((state) => state.redo)
@@ -62,11 +65,15 @@ function AppBody() {
 
   return (
     <div className="mx-auto flex w-full min-w-0 max-w-[106rem] flex-1 flex-col gap-6 pt-10">
-      <ControlPanel />
-
-      <FretboardView />
-
-      <ExportSettingsSection />
+      {instrument === 'piano' ? (
+        <PianoWorkspace />
+      ) : (
+        <>
+          <ControlPanel />
+          <FretboardView />
+          <ExportSettingsSection />
+        </>
+      )}
     </div>
   )
 }

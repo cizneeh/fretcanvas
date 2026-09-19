@@ -8,6 +8,20 @@ export const LOCALE_COOKIE_KEY = 'fretcanvas_locale'
 
 const messages = {
   en: {
+    'nav.guitar': 'Guitar',
+    'nav.piano': 'Piano',
+    'tuning.octave': 'Octave',
+    'tuning.stringOctave': 'String {string} octave',
+    'piano.keyboard': 'Piano keyboard',
+    'piano.startNote': 'Start note',
+    'piano.octaves': 'Octaves',
+    'piano.noteMenu': 'Note {note}',
+    'piano.addNote': 'Add note',
+    'piano.exportStart': 'First key',
+    'piano.exportEnd': 'Last key',
+    'piano.showOctaveLabels': 'Include octave labels',
+    'piano.exportError': 'Could not export the image. Please try again.',
+
     'app.language': 'Language',
     'app.switchToEnglish': 'Switch language to English',
     'app.switchToJapanese': 'Switch language to Japanese',
@@ -129,6 +143,20 @@ const messages = {
     'tuning.preset.ukuleleC': 'Ukulele C Tuning',
   },
   ja: {
+    'nav.guitar': 'ギター',
+    'nav.piano': 'ピアノ',
+    'tuning.octave': 'オクターブ',
+    'tuning.stringOctave': '{string}弦のオクターブ',
+    'piano.keyboard': 'ピアノ鍵盤',
+    'piano.startNote': '開始音',
+    'piano.octaves': 'オクターブ数',
+    'piano.noteMenu': '{note} の操作',
+    'piano.addNote': 'ノートを追加',
+    'piano.exportStart': '開始鍵盤',
+    'piano.exportEnd': '終了鍵盤',
+    'piano.showOctaveLabels': 'オクターブの音名を含める',
+    'piano.exportError': '画像を書き出せませんでした。もう一度お試しください。',
+
     'app.language': '言語',
     'app.switchToEnglish': '言語を英語に切り替え',
     'app.switchToJapanese': '言語を日本語に切り替え',
