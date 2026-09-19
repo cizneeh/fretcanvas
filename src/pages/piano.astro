@@ -1,0 +1,11 @@
+---
+import App from '../App'
+import { getRouteLocale } from '../i18n/routing'
+import BaseLayout from '../layouts/BaseLayout.astro'
+
+const locale = getRouteLocale(Astro.currentLocale)
+---
+
+<BaseLayout title="Piano | Fret Canvas" description="Map scales and chord tones on a piano keyboard. Export your piano diagrams as PNG or SVG images.">
+  <App client:load initialLocale={locale} instrument="piano" />
+</BaseLayout>

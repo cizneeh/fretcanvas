@@ -1,5 +1,6 @@
 import { getMatchingInstrumentPresetId } from '../libs/tuning'
 import type { FretboardStoreState } from './fretboardStore'
+import type { PianoStoreState } from './pianoStore'
 import type { SettingsStoreState } from './settingsStore'
 
 type HistorySettingsState = SettingsStoreState
@@ -12,6 +13,7 @@ type HistoryFretboardState = Omit<FretboardStoreState, 'draftPresetId' | 'draftS
 export type HistorySnapshot = {
   fretboard: HistoryFretboardState
   settings: HistorySettingsState
+  piano: PianoStoreState
 }
 
 /**
@@ -21,7 +23,20 @@ export type HistorySnapshot = {
 export const createHistorySnapshot = (
   fretboard: FretboardStoreState | HistoryFretboardState,
   settings: SettingsStoreState | HistorySettingsState,
+  piano: PianoStoreState,
 ): HistorySnapshot => ({
+  piano: {
+    startMidi: piano.startMidi,
+    octaves: piano.octaves,
+    exportStartMidi: piano.exportStartMidi,
+    exportEndMidi: piano.exportEndMidi,
+    showOctaveLabels: piano.showOctaveLabels,
+    exportFormat: piano.exportFormat,
+    activeInstrument: piano.activeInstrument,
+    notes: Object.fromEntries(
+      Object.entries(piano.notes).map(([midi, note]) => [midi, { ...note }]),
+    ),
+  },
   fretboard: {
     keyPc: fretboard.keyPc,
     noteLabelMode: fretboard.noteLabelMode,
@@ -110,13 +125,16 @@ const bendsEqual = (
 
 export const historySnapshotsEqual = (left: HistorySnapshot, right: HistorySnapshot): boolean => {
   return (
+    JSON.stringify(left.piano) === JSON.stringify(right.piano) &&
     left.fretboard.keyPc === right.fretboard.keyPc &&
     left.fretboard.noteLabelMode === right.fretboard.noteLabelMode &&
     left.fretboard.noteTextMode === right.fretboard.noteTextMode &&
     left.fretboard.selectedScale === right.fretboard.selectedScale &&
     arraysEqual(left.fretboard.strings, right.fretboard.strings, (leftString, rightString) => {
       return (
-        leftString.name === rightString.name && leftString.pitchClass === rightString.pitchClass
+        leftString.name === rightString.name &&
+        leftString.pitchClass === rightString.pitchClass &&
+        leftString.midi === rightString.midi
       )
     }) &&
     left.fretboard.appliedChordSymbol === right.fretboard.appliedChordSymbol &&
@@ -138,16 +156,19 @@ export const applyHistorySnapshotToActualStores = ({
   snapshot,
   setFretboardState,
   setSettingsState,
+  setPianoState,
 }: {
   snapshot: HistorySnapshot
   setFretboardState: (next: Partial<FretboardStoreState>) => void
   setSettingsState: (next: Partial<SettingsStoreState>) => void
+  setPianoState: (next: PianoStoreState) => void
 }) => {
-  const cloned = createHistorySnapshot(snapshot.fretboard, snapshot.settings)
+  const cloned = createHistorySnapshot(snapshot.fretboard, snapshot.settings, snapshot.piano)
   setFretboardState({
     ...cloned.fretboard,
     draftStrings: cloned.fretboard.strings.map((stringInfo) => ({ ...stringInfo })),
     draftPresetId: getMatchingInstrumentPresetId(cloned.fretboard.strings) ?? 'custom',
   })
   setSettingsState(cloned.settings)
+  setPianoState(cloned.piano)
 }

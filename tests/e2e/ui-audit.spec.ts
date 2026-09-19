@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
+import { getHistoryShortcuts } from './shortcuts'
 
 type PageHealth = {
   consoleErrors: string[]
@@ -58,20 +59,6 @@ test.afterEach(async ({ page }, testInfo) => {
   expect(health.requestFailures, 'failed network requests').toEqual([])
   expect(health.serverErrors, 'HTTP 5xx responses').toEqual([])
 })
-
-const getHistoryShortcuts = async (page: Page) => {
-  const isMacLikePlatform = await page.evaluate(() => {
-    const navigatorWithUserAgentData = navigator as Navigator & {
-      userAgentData?: { platform?: string }
-    }
-    const platform = navigatorWithUserAgentData.userAgentData?.platform ?? navigator.platform
-    return platform.toLowerCase().includes('mac')
-  })
-
-  return isMacLikePlatform
-    ? { redo: 'Meta+Shift+z', undo: 'Meta+z' }
-    : { redo: 'Control+y', undo: 'Control+z' }
-}
 
 test('renders the English app and fretboard', async ({ page }) => {
   await page.goto('/')

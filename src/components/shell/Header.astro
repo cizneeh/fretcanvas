@@ -1,20 +1,41 @@
 ---
 import { translate } from '../../i18n/config'
-import { getAboutPath, getAlternatePath, getAppPath, getRouteLocale } from '../../i18n/routing'
+import { getAlternatePath, getAppPath, getPianoPath, getRouteLocale } from '../../i18n/routing'
 import { SITE_NAME } from '../../libs/site'
 import LanguageSwitch from './LanguageSwitch.astro'
 
 const locale = getRouteLocale(Astro.currentLocale)
-const currentPath = Astro.url.pathname
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/'
 const appPath = getAppPath(locale)
+const pianoPath = getPianoPath(locale)
+const isGuitarPage = currentPath === appPath
+const isPianoPage = currentPath === pianoPath
 const alternatePath = getAlternatePath(locale, currentPath)
 ---
 
 <header class="fixed inset-x-0 top-0 z-30 bg-[color:var(--md-sys-color-surface-container-low)]/42 backdrop-blur-md">
   <div class="mx-auto flex w-full max-w-[106rem] items-center justify-between gap-4 px-4 py-2 md:px-8">
-    <a href={appPath} class="text-xl font-medium tracking-tight text-zinc-100/92 no-underline">
-      {SITE_NAME}
-    </a>
+    <div class="flex min-w-0 items-center gap-4 md:gap-8">
+      <a href={appPath} class="text-xl font-medium tracking-tight text-zinc-100/92 no-underline">
+        {SITE_NAME}
+      </a>
+      <nav class="flex items-center gap-3 text-sm md:gap-5">
+        <a
+          href={appPath}
+          aria-current={isGuitarPage ? 'page' : undefined}
+          class:list={['py-2 no-underline', isGuitarPage ? 'border-b-2 border-cyan-400 text-slate-100' : 'text-slate-400 hover:text-slate-100']}
+        >
+          {translate(locale, 'nav.guitar')}
+        </a>
+        <a
+          href={pianoPath}
+          aria-current={isPianoPage ? 'page' : undefined}
+          class:list={['py-2 no-underline', isPianoPage ? 'border-b-2 border-cyan-400 text-slate-100' : 'text-slate-400 hover:text-slate-100']}
+        >
+          {translate(locale, 'nav.piano')}
+        </a>
+      </nav>
+    </div>
 
     <div class="flex items-center gap-3">
       <LanguageSwitch

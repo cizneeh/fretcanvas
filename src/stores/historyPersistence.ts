@@ -1,11 +1,14 @@
+import { normalizePianoRange, type PianoNotes } from '../libs/piano'
 import {
   getDefaultStrings,
   getMatchingInstrumentPresetId,
   getPitchClassFromTuningName,
   getStringInfoFromPitchClass,
+  normalizeStringPitches,
 } from '../libs/tuning'
 import type { FretboardStoreState } from './fretboardStore'
 import { createHistorySnapshot, type HistorySnapshot } from './historySnapshot'
+import { DEFAULT_PIANO_STATE, type PianoStoreState } from './pianoStore'
 import type { SettingsStoreState } from './settingsStore'
 
 const HISTORY_STORAGE_KEY = 'fretmap:history:v1'
@@ -40,7 +43,7 @@ const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
     return getDefaultStrings()
   }
 
-  return strings.map((stringInfo, stringIndex) => {
+  const normalized = strings.map((stringInfo, stringIndex) => {
     const candidate = stringInfo as
       | {
           id?: string
@@ -59,7 +62,7 @@ const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
                 candidate.name as Parameters<typeof getPitchClassFromTuningName>[0],
               )
             : (getDefaultStrings()[stringIndex]?.pitchClass ?? 4)
-    return getStringInfoFromPitchClass(
+    const string = getStringInfoFromPitchClass(
       stringIndex,
       pitchClass,
       typeof candidate?.id === 'string' ? candidate.id : undefined,
@@ -67,10 +70,55 @@ const normalizeStrings = (strings: unknown): FretboardStoreState['strings'] => {
         ? (candidate.name as Parameters<typeof getPitchClassFromTuningName>[0])
         : undefined,
     )
+    return { ...string, midi: Number.isInteger(candidate?.midi) ? candidate?.midi : undefined }
   })
+  return normalizeStringPitches(normalized as FretboardStoreState['strings'])
 }
 
-const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined => {
+const normalizePianoState = (value: Partial<PianoStoreState> | undefined): PianoStoreState => {
+  const range = normalizePianoRange(value?.startMidi ?? 48, value?.octaves ?? 2)
+  const notes: PianoNotes = {}
+  for (const [pitch, note] of Object.entries(value?.notes ?? {})) {
+    const midi = Number(pitch)
+    if (!Number.isInteger(midi) || midi < 0 || midi > 127 || !note) continue
+    notes[midi] = {
+      isDimmed: note.isDimmed === true,
+      isEmphasized: note.isEmphasized === true,
+      colorVariant: note.colorVariant ?? 'default',
+    }
+  }
+  const exportStartMidi = Math.max(
+    range.startMidi,
+    Math.min(
+      range.endMidi,
+      Number.isInteger(value?.exportStartMidi)
+        ? (value?.exportStartMidi ?? range.startMidi)
+        : range.startMidi,
+    ),
+  )
+  const exportEndMidi = Math.max(
+    exportStartMidi,
+    Math.min(
+      range.endMidi,
+      Number.isInteger(value?.exportEndMidi)
+        ? (value?.exportEndMidi ?? range.endMidi)
+        : range.endMidi,
+    ),
+  )
+  return {
+    ...DEFAULT_PIANO_STATE,
+    notes,
+    startMidi: range.startMidi,
+    octaves: range.octaves,
+    exportStartMidi,
+    exportEndMidi,
+    showOctaveLabels: value?.showOctaveLabels ?? true,
+    exportFormat: value?.exportFormat === 'svg' ? 'svg' : 'png',
+    activeInstrument: value?.activeInstrument === 'piano' ? 'piano' : 'guitar',
+  }
+}
+
+export const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined => {
   if (typeof value !== 'object' || value === null) {
     return undefined
   }
@@ -116,6 +164,7 @@ const normalizePersistedHistory = (value: unknown): PersistedHistory | undefined
         showExportTitle: rawSettings.showExportTitle ?? false,
         showExportStringLabels: rawSettings.showExportStringLabels ?? true,
       },
+      normalizePianoState(candidate.current.piano),
     ),
   }
 }

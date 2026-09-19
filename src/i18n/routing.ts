@@ -42,3 +42,5 @@ export const getLocalizedCurrentPath = (locale: AppLocale, pathname: string): st
 
 export const getAlternatePath = (locale: AppLocale, pathname: string): string =>
   getLocalizedPath(getAlternateLocale(locale), toLocalizedPathArg(pathname))
+
+export const getPianoPath = (locale: AppLocale): string => getLocalizedPath(locale, 'piano')

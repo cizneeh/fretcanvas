@@ -6,7 +6,7 @@ const getPathLocale = (pathname: string): AppLocale | undefined => {
     return 'ja'
   }
 
-  if (pathname === '/' || pathname === '/about') {
+  if (pathname === '/' || pathname === '/about' || pathname === '/piano') {
     return 'en'
   }
 
@@ -17,6 +17,8 @@ const getJapaneseRedirectPath = (pathname: string): string | undefined => {
   if (pathname === '/') {
     return '/ja'
   }
+
+  if (pathname === '/piano') return '/ja/piano'
 
   if (pathname === '/about') {
     return '/ja/about'
@@ -47,7 +49,7 @@ const isPreferredJapanese = (acceptLanguageHeader: string | null): boolean => {
 // あんま好きじゃないなこれ
 export const onRequest = defineMiddleware(async (context, next) => {
   const { cookies, request, url } = context
-  const { pathname } = url
+  const pathname = url.pathname.replace(/\/$/, '') || '/'
 
   const pathLocale = getPathLocale(pathname)
   const localeCookie = cookies.get(LOCALE_COOKIE_KEY)?.value
