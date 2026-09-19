@@ -1,6 +1,21 @@
 import { readFile } from 'node:fs/promises'
-import { expect, test } from '@playwright/test'
+import { type CDPSession, expect, test } from '@playwright/test'
 import { getHistoryShortcuts } from './shortcuts'
+
+async function swipe(
+  cdp: CDPSession,
+  start: { x: number; y: number },
+  delta: { x: number; y: number },
+) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+  for (let step = 1; step <= 8; step += 1) {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x: start.x + (delta.x * step) / 8, y: start.y + (delta.y * step) / 8 }],
+    })
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+}
 
 test('piano black-key editing, context menus, history and persistence', async ({ page }) => {
   const errors: string[] = []
@@ -176,22 +191,16 @@ test.describe('piano touch interactions', () => {
     if (box === null) throw new Error('Missing C3 key')
     const cdp = await page.context().newCDPSession(page)
     const scrollBefore = await page.evaluate(() => window.scrollY)
-    await cdp.send('Input.synthesizeScrollGesture', {
-      x: box.x + box.width / 2,
-      y: box.y + box.height - 70,
-      yDistance: 120,
-      gestureSourceType: 'touch',
-    })
+    await swipe(cdp, { x: box.x + box.width / 2, y: box.y + box.height - 70 }, { x: 0, y: 120 })
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(scrollBefore - 40)
     await key.scrollIntoViewIfNeeded()
     const currentBox = await key.boundingBox()
     if (currentBox === null) throw new Error('Missing C3 key')
-    await cdp.send('Input.synthesizeScrollGesture', {
-      x: currentBox.x + 200,
-      y: currentBox.y + currentBox.height - 70,
-      xDistance: -140,
-      gestureSourceType: 'touch',
-    })
+    await swipe(
+      cdp,
+      { x: currentBox.x + 200, y: currentBox.y + currentBox.height - 70 },
+      { x: -140, y: 0 },
+    )
     await expect
       .poll(() => page.locator('.piano-scroll').evaluate((element) => element.scrollLeft))
       .toBeGreaterThan(40)

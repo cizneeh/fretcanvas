@@ -70,4 +70,5 @@ No blocking visual follow-up. Future chord-aware enharmonic spelling should be c
 - Reproduced two touch failures before fixing them: vertical swipes on keys did not scroll the page, and a 3 px finger movement cancelled the long-press menu. Keys now allow page scrolling, keyboard scrolling, and pinch zoom; a long press tolerates movement up to 8 px. New gesture tests verify both behaviors and that scrolling does not add notes.
 - Extended export coverage to a C#4–G4 crop, verifying its width and exclusion of the neighboring C note.
 - Reused one platform-aware history-shortcut test helper for guitar and piano.
+- Touch scrolling tests send the finger's press, moves, and release explicitly. The browser's synthesized scroll gesture did not scroll in Linux CI; the explicit sequence passed five consecutive local runs and still fails when the former `touch-action: pan-x` restriction is restored in the test.
 - Reviewed route localization, tuning migration, pitch conversion, history snapshots, persistence, context menus, and SVG escaping. No unresolved blocking finding remains.
