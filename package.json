@@ -14,26 +14,26 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.4.1",
+    "@astrojs/cloudflare": "^14.4.2",
     "@astrojs/react": "^6.0.6",
-    "astro": "^7.3.4",
+    "astro": "^7.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tonal": "^6.5.1",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.11",
-    "@biomejs/biome": "^2.5.15",
+    "@astrojs/check": "^0.9.12",
+    "@biomejs/biome": "^2.6.3",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "autoprefixer": "^10.6.1",
-    "postcss": "^8.5.28",
+    "autoprefixer": "^10.6.2",
+    "postcss": "^8.5.32",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
-    "wrangler": "^4.136.3"
+    "wrangler": "^4.154.0"
   }
 }
